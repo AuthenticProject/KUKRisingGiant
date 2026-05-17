@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+<!-- ygygy -->
 
 <head>
   <meta charset="UTF-8">
@@ -626,9 +627,9 @@
         <select id="filterYear" onchange="renderAll()"></select>
         <button class="btn btn-outline" onclick="exportToImage()" style="margin-right: 8px;" id="btnExportImage">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
           </svg>
           Export Gambar
         </button>
@@ -1245,7 +1246,7 @@
     function exportToImage() {
       const ganttGrid = document.getElementById('ganttGrid');
       if (!ganttGrid) return showToast('Gantt view tidak ditemukan.', 'error');
-      
+
       const btn = document.getElementById('btnExportImage');
       const originalText = btn.innerHTML;
       btn.innerHTML = '<span class="loader" style="width:14px; height:14px; border-width:2px; vertical-align: middle;"></span> <span style="vertical-align: middle;">Memproses...</span>';
@@ -1267,7 +1268,7 @@
       exportContainer.style.position = 'absolute';
       exportContainer.style.left = '-9999px';
       exportContainer.style.top = '0';
-      
+
       // Add Header
       const header = document.createElement('div');
       header.innerHTML = `
@@ -1328,16 +1329,16 @@
         document.body.removeChild(exportContainer);
         btn.innerHTML = originalText;
         btn.disabled = false;
-        
+
         const filename = `Jadwal_Cuti_${monthName}_${fY}.png`;
         const link = document.createElement('a');
         link.download = filename;
         link.href = canvas.toDataURL('image/png');
         link.click();
-        
+
         showToast('Gambar jadwal berhasil diunduh.', 'success');
       }).catch(err => {
-        if(document.body.contains(exportContainer)) document.body.removeChild(exportContainer);
+        if (document.body.contains(exportContainer)) document.body.removeChild(exportContainer);
         btn.innerHTML = originalText;
         btn.disabled = false;
         showToast('Gagal mengexport gambar.', 'error');
