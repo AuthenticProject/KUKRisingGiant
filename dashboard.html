@@ -655,6 +655,7 @@
       <div class="nav-tab active" onclick="switchTab('ringkasan', this)">Ringkasan Cuti</div>
       <div class="nav-tab" onclick="switchTab('karyawan', this)">Database Karyawan</div>
       <div class="nav-tab" onclick="switchTab('setup', this)">⚙ Setup Sistem</div>
+      <div class="nav-tab" onclick="switchTab('absen', this)">Rekap Absen Pagi</div>
     </div>
 
     <!-- TAB 1: RINGKASAN CUTI -->
@@ -759,6 +760,56 @@
         </div>
       </div>
     </div>
+
+    <!-- TAB 4: REKAP ABSEN -->
+    <div id="tab-absen" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Rekap Absensi Briefing Pagi</div>
+          <div>
+            <button class="btn btn-outline" onclick="exportAbsenImage()" style="margin-right: 8px;" id="btnExportAbsenImage">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              Export Gambar
+            </button>
+            <button class="btn btn-outline" onclick="exportAbsenCSV()" style="margin-right: 8px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export CSV
+            </button>
+            <button class="btn btn-primary" onclick="loadAbsen()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <div class="table-responsive" id="absenTableContainer">
+          <table id="tableAbsen">
+            <thead>
+              <tr>
+                <th>Waktu & Tanggal</th>
+                <th>Nama Karyawan</th>
+                <th>Bagian / Divisi</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="absenTableBody">
+              <tr><td colspan="4" style="text-align:center;">Memuat data absensi...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- Modal Edit Karyawan -->
@@ -1392,7 +1443,183 @@
 
     // Trigger loadSetup when user opens Setup tab
     const _origSwitchTab = switchTab;
-    window.switchTab = function (id, el) { _origSwitchTab(id, el); if (id === 'setup') loadSetup(); };
+    window.switchTab = function (id, el) { 
+      _origSwitchTab(id, el); 
+      if (id === 'setup') loadSetup(); 
+      if (id === 'absen') loadAbsen();
+    };
+
+    let rawAbsenData = [];
+
+    function loadAbsen() {
+      const tbody = document.getElementById('absenTableBody');
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;"><span class="loader" style="border-top-color:var(--primary)"></span> Memuat data...</td></tr>';
+      
+      fetch(`${SCRIPT_URL}?action=rekapAbsen`)
+        .then(r => r.json())
+        .then(res => {
+          rawAbsenData = res.data || [];
+          renderAbsen();
+        }).catch(e => {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;">Gagal memuat data absen.</td></tr>';
+        });
+    }
+
+    function renderAbsen() {
+      const tbody = document.getElementById('absenTableBody');
+      if (rawAbsenData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">Belum ada data absen.</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = rawAbsenData.map(row => {
+        const d = new Date(row.waktu);
+        const timeStr = d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).replace(/\./g, ':');
+        
+        let badgeClass = 'badge-success';
+        if (row.status === 'Ghoib') badgeClass = 'badge-danger';
+        else if (row.status === 'Sakit') badgeClass = 'badge-warning';
+        else if (row.status === 'Izin') badgeClass = 'badge-primary'; // Using primary for info
+
+        return `
+          <tr>
+            <td>${timeStr}</td>
+            <td style="font-weight:600; color:var(--text);">${row.nama}</td>
+            <td>${row.bagian || '-'}</td>
+            <td><span class="badge ${badgeClass}">${row.status || 'Hadir'}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function exportAbsenCSV() {
+      if (rawAbsenData.length === 0) return showToast('Tidak ada data absen untuk di-export.', 'error');
+      const headers = ['Waktu', 'Nama Karyawan', 'Bagian / Divisi', 'Status'];
+      let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n";
+
+      rawAbsenData.forEach(row => {
+        const d = new Date(row.waktu);
+        const timeStr = d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).replace(/\./g, ':');
+        const statusStr = row.status || 'Hadir';
+        const line = [\`"\${timeStr}"\`, \`"\${row.nama}"\`, \`"\${row.bagian || '-'}"\`, \`"\${statusStr}"\`].join(",");
+        csvContent += line + "\n";
+      });
+
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", \`Rekap_Absen_\${new Date().toISOString().slice(0, 10)}.csv\`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      showToast('File CSV absen berhasil diunduh.', 'success');
+    }
+
+    function exportAbsenImage() {
+      const container = document.getElementById('absenTableContainer');
+      if (!container) return;
+
+      const btn = document.getElementById('btnExportAbsenImage');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span class="loader" style="width:14px; height:14px; border-width:2px; vertical-align: middle;"></span> <span style="vertical-align: middle;">Memproses...</span>';
+      btn.disabled = true;
+
+      const exportContainer = document.createElement('div');
+      exportContainer.style.padding = '40px';
+      exportContainer.style.background = '#ffffff';
+      exportContainer.style.width = '1000px';
+      exportContainer.style.fontFamily = "'Outfit', sans-serif";
+      exportContainer.style.position = 'absolute';
+      exportContainer.style.left = '-9999px';
+      exportContainer.style.top = '0';
+
+      const header = document.createElement('div');
+      header.innerHTML = \`
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 24px;">
+          <div>
+            <h2 style="margin: 0 0 4px 0; color: #0f172a; font-size: 28px; font-weight: 700;">Rekap Absensi Briefing Pagi</h2>
+          </div>
+          <div style="text-align: right;">
+            <p style="margin: 0; color: #0f172a; font-size: 18px; font-weight: 700;">HR Cuti PRO</p>
+            <p style="margin: 0; color: #64748b; font-size: 13px;">Generated on: \${new Date().toLocaleDateString('id-ID')}</p>
+          </div>
+        </div>
+      \`;
+      exportContainer.appendChild(header);
+
+      const tableClone = document.getElementById('tableAbsen').cloneNode(true);
+      tableClone.style.width = '100%';
+      tableClone.style.borderCollapse = 'collapse';
+      
+      const ths = tableClone.querySelectorAll('th');
+      ths.forEach(th => {
+        th.style.padding = '14px 20px';
+        th.style.fontSize = '12px';
+        th.style.fontWeight = '600';
+        th.style.color = '#64748b';
+        th.style.textTransform = 'uppercase';
+        th.style.background = '#f8fafc';
+        th.style.borderBottom = '1px solid #e2e8f0';
+        th.style.textAlign = 'left';
+      });
+
+      const tds = tableClone.querySelectorAll('td');
+      tds.forEach(td => {
+        td.style.padding = '16px 20px';
+        td.style.fontSize = '14px';
+        td.style.fontWeight = '500';
+        td.style.borderBottom = '1px solid #e2e8f0';
+        td.style.verticalAlign = 'middle';
+        
+        // Fix badge style in exported image
+        const badge = td.querySelector('.badge');
+        if (badge) {
+          badge.style.padding = '4px 10px';
+          badge.style.borderRadius = '6px';
+          badge.style.fontSize = '12px';
+          badge.style.fontWeight = '600';
+          badge.style.display = 'inline-block';
+          
+          if (badge.classList.contains('badge-danger')) {
+            badge.style.background = '#fef2f2';
+            badge.style.color = '#ef4444';
+          } else if (badge.classList.contains('badge-warning')) {
+            badge.style.background = '#fffbeb';
+            badge.style.color = '#f59e0b';
+          } else if (badge.classList.contains('badge-primary')) {
+            badge.style.background = '#e0f2fe';
+            badge.style.color = '#0ea5e9';
+          } else { // success
+            badge.style.background = '#ecfdf5';
+            badge.style.color = '#10b981';
+          }
+        }
+      });
+
+      exportContainer.appendChild(tableClone);
+      document.body.appendChild(exportContainer);
+
+      html2canvas(exportContainer, {
+        backgroundColor: '#ffffff',
+        scale: 2
+      }).then(canvas => {
+        document.body.removeChild(exportContainer);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+
+        const link = document.createElement('a');
+        link.download = \`Rekap_Absen_\${new Date().toISOString().slice(0, 10)}.png\`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        showToast('Gambar absen berhasil diunduh.', 'success');
+      }).catch(err => {
+        if (document.body.contains(exportContainer)) document.body.removeChild(exportContainer);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showToast('Gagal mengexport gambar absen.', 'error');
+      });
+    }
 
     // Init
     initFilters();

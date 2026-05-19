@@ -35,6 +35,9 @@ function doGet(e) {
   if (action === 'dashboard_data') {
     return jsonResponse(getDashboardData(ss));
   }
+  if (action === 'rekapAbsen') {
+    return getRekapAbsen(ss);
+  }
 
   return jsonResponse({ error: 'Action tidak valid.' });
 }
@@ -87,6 +90,8 @@ function doPost(e) {
       return handleDeleteKaryawan(ss, payload);
     } else if (action === 'save_setup') {
       return handleSaveSetup(ss, payload);
+    } else if (action === 'absen_bulk') {
+      return handleAbsenBulk(ss, payload);
     }
 
     return jsonResponse({ result: 'error', message: 'Unknown Action' });
@@ -554,4 +559,110 @@ function setupSheet() {
   
   buildRekap(ss);
   Logger.log('Setup v6 PRO berhasil! Dashboard dilengkapi CRUD.');
+}
+
+// ================================================================
+// ABSENSI BRIEFING PAGI
+// ================================================================
+function getOrCreateAbsenSheet(ss) {
+  let sheet = ss.getSheetByName("Absen Briefing");
+  
+  // Jika sheet belum ada, buat baru dan setel header
+  if (!sheet) {
+    sheet = ss.insertSheet("Absen Briefing");
+    sheet.appendRow(["Waktu (Timestamp)", "ID Karyawan", "Nama Karyawan", "Bagian/Divisi", "Status"]);
+    // Mempercantik header
+    const headerRange = sheet.getRange("A1:E1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f3f4f6");
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, 5);
+  }
+  
+  return sheet;
+}
+
+function handleAbsenBulk(ss, payload) {
+  try {
+    const sheet = getOrCreateAbsenSheet(ss);
+    const records = payload.records; // Array dari data absensi massal
+    
+    if (!records || !Array.isArray(records)) {
+      throw new Error("Data records tidak valid");
+    }
+
+    // Persiapkan data array 2D untuk insert sekaligus agar lebih efisien
+    const rows = [];
+    records.forEach(function(rec) {
+      rows.push([
+        rec.waktu,
+        rec.idKaryawan,
+        rec.nama,
+        rec.bagian,
+        rec.status
+      ]);
+    });
+
+    if (rows.length > 0) {
+      // Dapatkan range baris baru yang akan ditambahkan
+      const startRow = sheet.getLastRow() + 1;
+      const targetRange = sheet.getRange(startRow, 1, rows.length, rows[0].length);
+      // Set values sekaligus
+      targetRange.setValues(rows);
+    }
+    
+    return jsonResponse({
+      result: 'success', 
+      message: 'Berhasil merekam rekap absen massal'
+    });
+    
+  } catch (error) {
+    return jsonResponse({
+      result: 'error', 
+      message: error.toString()
+    });
+  }
+}
+
+function getRekapAbsen(ss) {
+  try {
+    const sheet = getOrCreateAbsenSheet(ss);
+    const lastRow = sheet.getLastRow();
+    
+    // Jika belum ada data absensi
+    if (lastRow <= 1) {
+      return jsonResponse({
+        result: 'success',
+        data: []
+      });
+    }
+    
+    // Ambil semua data (kecuali header)
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 5);
+    const values = dataRange.getValues();
+    
+    const rekapData = [];
+    
+    // Urutkan dari yang terbaru (reverse loop)
+    for (let i = values.length - 1; i >= 0; i--) {
+      rekapData.push({
+        waktu: values[i][0],
+        idKaryawan: values[i][1],
+        nama: values[i][2],
+        bagian: values[i][3],
+        status: values[i][4]
+      });
+    }
+    
+    return jsonResponse({
+      result: 'success',
+      data: rekapData
+    });
+    
+  } catch (error) {
+    return jsonResponse({
+      result: 'error', 
+      message: error.toString()
+    });
+  }
 }
