@@ -522,9 +522,9 @@ function buildRekap(ss) {
     const range = rekSheet.getRange(2, 1, rows.length, headers.length);
     range.setValues(rows);
     // Paksa kolom Tanggal Cuti (kolom 4) sebagai teks agar Google Sheets tidak auto-convert ke Date
-    rekSheet.getRange(2, 4, rows.length, 1).setNumberFormat('@STRING@');
+    rekSheet.getRange(2, 4, rows.length, 1).setNumberFormat('@');
     // Paksa kolom Bulan dan Tahun (kolom 5 & 6) tetap angka/teks
-    rekSheet.getRange(2, 5, rows.length, 2).setNumberFormat('@STRING@');
+    rekSheet.getRange(2, 5, rows.length, 2).setNumberFormat('@');
   }
 }
 
