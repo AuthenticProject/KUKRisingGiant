@@ -200,6 +200,61 @@
       border-color: var(--info);
     }
 
+    /* Cuti Section */
+    .cuti-section {
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .cuti-section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cuti-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .cuti-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fcd34d;
+      border-radius: 100px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .cuti-badge svg {
+      flex-shrink: 0;
+    }
+
+    .info-banner {
+      background: var(--warning-light);
+      border: 1px solid var(--warning);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #78350f;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
     .bottom-bar {
       position: fixed;
       bottom: 0;
@@ -356,6 +411,8 @@
           </tbody>
         </table>
       </div>
+      <!-- Cuti section: rendered by JS, shows employees on leave today -->
+      <div id="cutiSection" style="display:none; padding: 0 24px 24px;"></div>
     </div>
 
     <div style="text-align: center; margin-top: 10px;">
@@ -398,57 +455,135 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
-    function init() {
-      fetch(`${SCRIPT_URL}?action=init`)
-        .then(r => r.json())
-        .then(res => {
-          dbKaryawan = res.karyawan || [];
-          renderKaryawanList();
-        }).catch(e => {
-          document.getElementById('karyawanList').innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat data server.</td></tr>';
-          showToast('Gagal memuat data server.', 'error');
-        });
+    // Format date as YYYY-MM-DD using local timezone
+    function getTodayStr() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
     }
 
-    function renderKaryawanList() {
+    function init() {
+      const loadingRow = '<tr><td colspan="2" style="text-align:center; padding:40px;"><div style="color:var(--text-muted);">Memuat daftar karyawan...</div></td></tr>';
+      document.getElementById('karyawanList').innerHTML = loadingRow;
+
+      // Fetch karyawan list AND leave data in parallel
+      Promise.all([
+        fetch(`${SCRIPT_URL}?action=init`).then(r => r.json()),
+        fetch(`${SCRIPT_URL}?action=dashboard_data`).then(r => r.json())
+      ])
+      .then(([initRes, dashRes]) => {
+        dbKaryawan = (initRes.karyawan || []).filter(k =>
+          String(k.status || 'Aktif').toLowerCase() !== 'nonaktif'
+        );
+
+        // Build set of employee IDs who are on leave today
+        const today = getTodayStr();
+        const cutiHariIni = new Set();
+        if (dashRes.result === 'success' && Array.isArray(dashRes.data)) {
+          dashRes.data.forEach(entry => {
+            if (entry.tanggal === today) {
+              cutiHariIni.add(String(entry.idKaryawan));
+            }
+          });
+        }
+
+        renderKaryawanList(cutiHariIni);
+      })
+      .catch(e => {
+        document.getElementById('karyawanList').innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat data server.</td></tr>';
+        showToast('Gagal memuat data server.', 'error');
+      });
+    }
+
+    function renderKaryawanList(cutiHariIni = new Set()) {
       const tbody = document.getElementById('karyawanList');
       if (dbKaryawan.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Data karyawan kosong.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = dbKaryawan.map(k => `
-        <tr>
-          <td>
-            <span class="employee-name">${k.nama}</span>
-            <span class="employee-div">${k.bagian || '-'}</span>
-          </td>
-          <td>
-            <div class="status-group">
-              <label class="status-option">
-                <input type="radio" name="status_${k.id}" value="Hadir" checked>
-                <span class="status-label">Hadir</span>
-              </label>
-              <label class="status-option">
-                <input type="radio" name="status_${k.id}" value="Ghoib">
-                <span class="status-label">Ghoib</span>
-              </label>
-              <label class="status-option">
-                <input type="radio" name="status_${k.id}" value="Sakit">
-                <span class="status-label">Sakit</span>
-              </label>
-              <label class="status-option">
-                <input type="radio" name="status_${k.id}" value="Izin">
-                <span class="status-label">Izin</span>
-              </label>
+      // Separate karyawan into active attendees and those on leave
+      const hadir = dbKaryawan.filter(k => !cutiHariIni.has(String(k.id)));
+      const cuti  = dbKaryawan.filter(k =>  cutiHariIni.has(String(k.id)));
+
+      if (hadir.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:var(--text-muted);">Semua karyawan sedang cuti hari ini.</td></tr>';
+      } else {
+        tbody.innerHTML = hadir.map(k => `
+          <tr>
+            <td>
+              <span class="employee-name">${k.nama}</span>
+              <span class="employee-div">${k.bagian || '-'}</span>
+            </td>
+            <td>
+              <div class="status-group">
+                <label class="status-option">
+                  <input type="radio" name="status_${k.id}" value="Hadir" checked>
+                  <span class="status-label">Hadir</span>
+                </label>
+                <label class="status-option">
+                  <input type="radio" name="status_${k.id}" value="Ghoib">
+                  <span class="status-label">Ghoib</span>
+                </label>
+                <label class="status-option">
+                  <input type="radio" name="status_${k.id}" value="Sakit">
+                  <span class="status-label">Sakit</span>
+                </label>
+                <label class="status-option">
+                  <input type="radio" name="status_${k.id}" value="Izin">
+                  <span class="status-label">Izin</span>
+                </label>
+              </div>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      // Render cuti section below the table
+      const cutiSection = document.getElementById('cutiSection');
+      if (cuti.length > 0) {
+        cutiSection.innerHTML = `
+          <div class="cuti-section">
+            <div class="cuti-section-title">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                <line x1="16" y1="2" x2="16" y2="6"/>
+                <line x1="8" y1="2" x2="8" y2="6"/>
+                <line x1="3" y1="10" x2="21" y2="10"/>
+              </svg>
+              Sedang Cuti Hari Ini — tidak termasuk dalam absen
             </div>
-          </td>
-        </tr>
-      `).join('');
+            <div class="cuti-list">
+              ${cuti.map(k => `
+                <span class="cuti-badge">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                  ${k.nama}
+                  <span style="font-weight:400; opacity:0.7;">${k.bagian || ''}</span>
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        `;
+        cutiSection.style.display = 'block';
+      } else {
+        cutiSection.style.display = 'none';
+      }
+
+      // Store cuti employees globally so handleAbsen can include them
+      window._cutiKaryawan = cuti;
+      window._hadirKaryawan = hadir;
     }
 
     function handleAbsen() {
-      if (dbKaryawan.length === 0) {
+      const hadirList = window._hadirKaryawan || [];
+      const cutiList  = window._cutiKaryawan  || [];
+
+      if (hadirList.length === 0 && cutiList.length === 0) {
         showToast('Tidak ada data karyawan untuk disimpan.', 'error');
         return;
       }
@@ -457,13 +592,26 @@
       const records = [];
       const waktu = new Date().toISOString();
 
-      dbKaryawan.forEach(k => {
-        const selectedStatus = document.querySelector(`input[name="status_${k.id}"]:checked`).value;
+      // Records for employees present today (status from radio buttons)
+      hadirList.forEach(k => {
+        const radioEl = document.querySelector(`input[name="status_${k.id}"]:checked`);
+        const selectedStatus = radioEl ? radioEl.value : 'Hadir';
         records.push({
           idKaryawan: k.id,
           nama: k.nama,
           bagian: k.bagian,
           status: selectedStatus,
+          waktu: waktu
+        });
+      });
+
+      // Employees on leave are automatically recorded as "Cuti"
+      cutiList.forEach(k => {
+        records.push({
+          idKaryawan: k.id,
+          nama: k.nama,
+          bagian: k.bagian,
+          status: 'Cuti',
           waktu: waktu
         });
       });
