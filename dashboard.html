@@ -629,6 +629,7 @@
       border-bottom: 1px solid var(--border);
       background: #fdfdfd;
     }
+
     .sub-tab {
       padding: 8px 18px;
       font-size: 13px;
@@ -640,27 +641,112 @@
       transition: 0.2s;
       border-radius: 6px 6px 0 0;
     }
-    .sub-tab:hover { color: var(--text); }
-    .sub-tab.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--primary-light); }
-    .sub-tab-content { display: none; }
-    .sub-tab-content.active { display: block; }
+
+    .sub-tab:hover {
+      color: var(--text);
+    }
+
+    .sub-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .sub-tab-content {
+      display: none;
+    }
+
+    .sub-tab-content.active {
+      display: block;
+    }
 
     /* Pivot table rekap bulanan */
-    .pivot-wrapper { overflow-x: auto; padding: 20px; }
-    .pivot-table { border-collapse: collapse; font-size: 12px; min-width: 900px; }
-    .pivot-table th, .pivot-table td { border: 1px solid var(--border); padding: 6px 8px; white-space: nowrap; }
-    .pivot-table thead th { background: #f8fafc; font-weight: 700; color: var(--text-muted); text-transform: uppercase; font-size: 10px; text-align: center; }
-    .pivot-table thead th.name-col { text-align: left; min-width: 150px; }
-    .pivot-table tbody td.name-col { font-weight: 600; color: var(--text); min-width: 150px; }
-    .pivot-table tbody td.day-col { text-align: center; }
-    .pivot-table tbody td.summary-col { text-align: center; font-weight: 700; }
-    .pivot-cell-hadir { background: #ecfdf5; color: #059669; font-weight: 700; }
-    .pivot-cell-ghoib { background: #fef2f2; color: #dc2626; font-weight: 700; }
-    .pivot-cell-sakit { background: #fffbeb; color: #d97706; font-weight: 700; }
-    .pivot-cell-izin  { background: #e0f2fe; color: #0284c7; font-weight: 700; }
-    .pivot-cell-cuti  { background: #eff6ff; color: #2563eb; font-weight: 700; }
-    .pivot-cell-empty { background: #f8fafc; color: #cbd5e1; }
-    .pivot-cell-weekend { background: #f1f5f9; color: #94a3b8; }
+    .pivot-wrapper {
+      overflow-x: auto;
+      padding: 20px;
+    }
+
+    .pivot-table {
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 900px;
+    }
+
+    .pivot-table th,
+    .pivot-table td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      white-space: nowrap;
+    }
+
+    .pivot-table thead th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 10px;
+      text-align: center;
+    }
+
+    .pivot-table thead th.name-col {
+      text-align: left;
+      min-width: 150px;
+    }
+
+    .pivot-table tbody td.name-col {
+      font-weight: 600;
+      color: var(--text);
+      min-width: 150px;
+    }
+
+    .pivot-table tbody td.day-col {
+      text-align: center;
+    }
+
+    .pivot-table tbody td.summary-col {
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .pivot-cell-hadir {
+      background: #ecfdf5;
+      color: #059669;
+      font-weight: 700;
+    }
+
+    .pivot-cell-ghoib {
+      background: #fef2f2;
+      color: #dc2626;
+      font-weight: 700;
+    }
+
+    .pivot-cell-sakit {
+      background: #fffbeb;
+      color: #d97706;
+      font-weight: 700;
+    }
+
+    .pivot-cell-izin {
+      background: #e0f2fe;
+      color: #0284c7;
+      font-weight: 700;
+    }
+
+    .pivot-cell-cuti {
+      background: #eff6ff;
+      color: #2563eb;
+      font-weight: 700;
+    }
+
+    .pivot-cell-empty {
+      background: #f8fafc;
+      color: #cbd5e1;
+    }
+
+    .pivot-cell-weekend {
+      background: #f1f5f9;
+      color: #94a3b8;
+    }
 
     /* Rekap Bulanan filter bar */
     .rekap-controls {
@@ -671,20 +757,85 @@
       border-bottom: 1px solid var(--border);
       flex-wrap: wrap;
     }
-    .rekap-controls label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
+
+    .rekap-controls label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
     .summary-stat-row {
-      display: flex; gap: 16px; padding: 16px 20px; flex-wrap: wrap;
+      display: flex;
+      gap: 16px;
+      padding: 16px 20px;
+      flex-wrap: wrap;
     }
+
     .summary-chip {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 14px; border-radius: 20px;
-      font-size: 12px; font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
     }
-    .chip-hadir { background:#ecfdf5; color:#059669; }
-    .chip-ghoib { background:#fef2f2; color:#dc2626; }
-    .chip-sakit { background:#fffbeb; color:#d97706; }
-    .chip-izin  { background:#e0f2fe; color:#0284c7; }
-    .chip-cuti  { background:#eff6ff; color:#2563eb; }
+
+    .chip-hadir {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .chip-ghoib {
+      background: #fef2f2;
+      color: #dc2626;
+    }
+
+    .chip-sakit {
+      background: #fffbeb;
+      color: #d97706;
+    }
+
+    .chip-izin {
+      background: #e0f2fe;
+      color: #0284c7;
+    }
+
+    .chip-cuti {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    /* Style additions for violations */
+    .tab-pelanggaran-sub {
+      padding: 8px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: 0.2s;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .tab-pelanggaran-sub:hover {
+      color: var(--text);
+    }
+
+    .tab-pelanggaran-sub.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+      background: var(--primary-light);
+    }
+
+    .sub-tab-pelanggaran-content {
+      display: none;
+    }
+
+    .sub-tab-pelanggaran-content.active {
+      display: block;
+    }
   </style>
 </head>
 
@@ -732,6 +883,7 @@
       <div class="nav-tab" onclick="switchTab('karyawan', this)">Database Karyawan</div>
       <div class="nav-tab" onclick="switchTab('setup', this)">⚙ Setup Sistem</div>
       <div class="nav-tab" onclick="switchTab('absen', this)">Rekap Absen Pagi</div>
+      <div class="nav-tab" onclick="switchTab('pelanggaran', this)">⚠ Pelanggaran Karyawan</div>
     </div>
 
     <!-- TAB 1: RINGKASAN CUTI -->
@@ -851,16 +1003,28 @@
           <div class="card-header" style="border-top:none; border-radius:0;">
             <div class="card-title">Rekap Absensi Briefing Pagi</div>
             <div>
-              <button class="btn btn-outline" onclick="exportAbsenImage()" style="margin-right: 8px;" id="btnExportAbsenImage">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" /></svg>
+              <button class="btn btn-outline" onclick="exportAbsenImage()" style="margin-right: 8px;"
+                id="btnExportAbsenImage">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
                 Export Gambar
               </button>
               <button class="btn btn-outline" onclick="exportAbsenCSV()" style="margin-right: 8px;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" y1="15" x2="12" y2="3" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
                 Export CSV
               </button>
               <button class="btn btn-primary" onclick="loadAbsen()">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
                 Refresh
               </button>
             </div>
@@ -877,7 +1041,9 @@
                 </tr>
               </thead>
               <tbody id="absenTableBody">
-                <tr><td colspan="5" style="text-align:center;">Memuat data absensi...</td></tr>
+                <tr>
+                  <td colspan="5" style="text-align:center;">Memuat data absensi...</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -892,17 +1058,27 @@
               <label>Tahun:</label>
               <select id="rekapYear" onchange="renderRekapBulanan()"></select>
               <button class="btn btn-primary" onclick="renderRekapBulanan()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
                 Tampilkan
               </button>
             </div>
             <div style="flex:1;"></div>
             <button class="btn btn-outline" onclick="exportRekapImage()" id="btnExportRekapImg">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="3" width="18" height="18" rx="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
               Unduh Gambar
             </button>
             <button class="btn btn-outline" onclick="exportRekapExcel()" id="btnExportRekapXlsx">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg>
               Unduh Excel
             </button>
           </div>
@@ -911,6 +1087,108 @@
             <div style="padding:40px; text-align:center; color:gray;">Pilih bulan dan tahun lalu klik Tampilkan.</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: PELANGGARAN KARYAWAN -->
+    <div id="tab-pelanggaran" class="tab-content">
+      <div class="stats-grid">
+        <div class="stat-card" style="border-left-color: var(--danger);">
+          <div class="stat-title">Total Pelanggaran</div>
+          <div class="stat-val" id="statTotalPelanggaran">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--warning);">
+          <div class="stat-title">Akumulasi Poin</div>
+          <div class="stat-val" id="statTotalPoinPelanggaran">0</div>
+        </div>
+        <div class="stat-card" style="border-left-color: var(--primary);">
+          <div class="stat-title">Pelanggar Terbanyak</div>
+          <div class="stat-val" id="statTopPelanggar"
+            style="font-size:20px; font-weight:700; height:38px; display:flex; align-items:center;">-</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <!-- Sub-tab navigation -->
+        <div class="sub-tabs">
+          <div class="sub-tab tab-pelanggaran-sub active" id="subTabLogPelanggaran"
+            onclick="switchPelanggaranSubTab('log')">📋 Daftar Pelanggaran</div>
+          <div class="sub-tab tab-pelanggaran-sub" id="subTabRekapPelanggaran"
+            onclick="switchPelanggaranSubTab('rekap')">📊 Rekap Poin Karyawan</div>
+        </div>
+
+        <!-- SUB-TAB: DAFTAR PELANGGARAN LOG -->
+        <div class="sub-tab-pelanggaran-content active" id="subContent-pelanggaran-log">
+          <div class="card-header" style="border-top:none; border-radius:0;">
+            <div class="filters" style="align-items: center; width: 100%; justify-content: space-between;">
+              <div style="display:flex; gap:12px;">
+                <input type="text" id="searchPelanggaran" placeholder="Cari nama / pelanggaran / tempat..."
+                  style="width: 280px;" onkeyup="renderPelanggaran()">
+                <select id="filterPelanggaranPoin" onchange="renderPelanggaran()">
+                  <option value="">Semua Poin</option>
+                  <option value="10">10 Poin</option>
+                  <option value="20">20 Poin</option>
+                  <option value="50">50 Poin</option>
+                </select>
+              </div>
+              <a class="btn btn-primary" href="pelanggaran.html" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 9v6m-3-3h6" />
+                  <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Catat Pelanggaran
+              </a>
+            </div>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu &amp; Tanggal</th>
+                  <th>Nama Karyawan</th>
+                  <th>Jenis Pelanggaran</th>
+                  <th>Poin</th>
+                  <th>Tempat Kejadian</th>
+                  <th>Staf Penginput</th>
+                  <th style="text-align:right;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="pelanggaranLogTableBody">
+                <tr>
+                  <td colspan="7" style="text-align:center;">Memuat data pelanggaran...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- SUB-TAB: REKAP POIN KARYAWAN -->
+        <div class="sub-tab-pelanggaran-content" id="subContent-pelanggaran-rekap">
+          <div class="card-header" style="border-top:none; border-radius:0;">
+            <div class="card-title">Rekapitulasi Akumulasi Poin Karyawan</div>
+            <p style="font-size: 13px; color: var(--text-muted);">Akumulasi seluruh poin pelanggaran yang dicatat untuk
+              setiap karyawan.</p>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID Karyawan</th>
+                  <th>Nama Karyawan</th>
+                  <th>Divisi / Bagian</th>
+                  <th>Total Kejadian</th>
+                  <th>Total Poin Pelanggaran</th>
+                </tr>
+              </thead>
+              <tbody id="pelanggaranRekapTableBody">
+                <tr>
+                  <td colspan="5" style="text-align:center;">Memuat rekapitulasi...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -1042,12 +1320,15 @@
     </div>
   </div>
 
+
+
   <script>
     // --- KONFIGURASI API ---
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
 
     let dbKaryawan = [];
     let rawCutiData = [];
+    let rawViolationsData = [];
 
     // State Modal Cuti
     let mcSelected = []; // Dates for the active edited user
@@ -1091,6 +1372,7 @@
         .then(res => {
           rawCutiData = res.data || [];
           dbKaryawan = res.karyawan || []; // Array object lengkap
+          rawViolationsData = res.violations || []; // Data Pelanggaran
           renderAll();
         })
         .catch(e => showToast('Gagal memuat data.', 'error'));
@@ -1099,6 +1381,7 @@
     function renderAll() {
       renderGantt();
       renderKaryawan();
+      renderPelanggaran();
     }
 
     // --- TAB 1: GANTT & STATS (Grouped by Bagian) ---
@@ -1586,6 +1869,7 @@
       _origSwitchTab(id, el);
       if (id === 'setup') loadSetup();
       if (id === 'absen') loadAbsen();
+      if (id === 'pelanggaran') renderPelanggaran();
     };
 
     let rawAbsenData = [];
@@ -1611,7 +1895,7 @@
     function switchSubTab(subId) {
       document.querySelectorAll('.sub-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.sub-tab-content').forEach(c => c.classList.remove('active'));
-      
+
       if (subId === 'harian') {
         document.getElementById('subTabHarian').classList.add('active');
         document.getElementById('subContent-harian').classList.add('active');
@@ -1628,7 +1912,7 @@
       const mSel = document.getElementById('rekapMonth');
       const ySel = document.getElementById('rekapYear');
       if (mSel.children.length > 0) return; // already initialized
-      
+
       const d = new Date();
       mSel.innerHTML = mNames.map((m, i) => `<option value="${String(i + 1).padStart(2, '0')}" ${i === d.getMonth() ? 'selected' : ''}>${m}</option>`).join('');
       const y = d.getFullYear();
@@ -1645,7 +1929,7 @@
       const fM = document.getElementById('rekapMonth').value;
       const fY = parseInt(document.getElementById('rekapYear').value);
       const totalDays = new Date(fY, parseInt(fM), 0).getDate();
-      
+
       // Filter rawAbsenData based on month and year
       const filteredAbsen = rawAbsenData.filter(row => {
         if (!row.waktu) return false;
@@ -1669,7 +1953,7 @@
 
       // Get active employees
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() !== 'nonaktif');
-      
+
       if (activeKaryawan.length === 0) {
         wrapper.innerHTML = '<div style="padding:40px; text-align:center; color:gray;">Tidak ada karyawan aktif di database.</div>';
         return;
@@ -1677,7 +1961,7 @@
 
       // Build Pivot Table HTML
       let html = `<table class="pivot-table" id="tablePivotAbsen">`;
-      
+
       // Table Header
       html += `<thead><tr>`;
       html += `<th class="name-col" rowspan="2">Nama Karyawan</th>`;
@@ -1685,7 +1969,7 @@
       html += `<th colspan="${totalDays}">Tanggal</th>`;
       html += `<th colspan="5">Ringkasan</th>`;
       html += `</tr><tr>`;
-      
+
       // Day numbers header
       for (let d = 1; d <= totalDays; d++) {
         const isWknd = new Date(fY, parseInt(fM) - 1, d).getDay() % 6 === 0;
@@ -1716,17 +2000,17 @@
         html += `<tr>`;
         html += `<td class="name-col">${k.nama}</td>`;
         html += `<td><span class="badge badge-primary" style="font-size:10px; padding:2px 6px;">${k.bagian}</span></td>`;
-        
+
         let hadir = 0, sakit = 0, izin = 0, cuti = 0, ghoib = 0;
         const employeeData = pivotData[k.id] || {};
-        
+
         for (let d = 1; d <= totalDays; d++) {
           const isWknd = new Date(fY, parseInt(fM) - 1, d).getDay() % 6 === 0;
           const status = employeeData[d];
-          
+
           let cellClass = 'pivot-cell-empty';
           let displayChar = '-';
-          
+
           if (status) {
             if (status === 'Hadir') { cellClass = 'pivot-cell-hadir'; displayChar = 'H'; hadir++; totalHadirCount++; }
             else if (status === 'Sakit') { cellClass = 'pivot-cell-sakit'; displayChar = 'S'; sakit++; totalSakitCount++; }
@@ -1737,10 +2021,10 @@
             cellClass = 'pivot-cell-weekend';
             displayChar = 'Libur';
           }
-          
+
           html += `<td class="day-col ${cellClass}" title="${status ? status : (isWknd ? 'Akhir Pekan' : 'Belum Absen')}">${displayChar === 'Libur' ? '' : displayChar}</td>`;
         }
-        
+
         // Render employee summaries
         html += `<td class="summary-col pivot-cell-hadir">${hadir || ''}</td>`;
         html += `<td class="summary-col pivot-cell-sakit">${sakit || ''}</td>`;
@@ -1749,7 +2033,7 @@
         html += `<td class="summary-col pivot-cell-ghoib">${ghoib || ''}</td>`;
         html += `</tr>`;
       });
-      
+
       html += `</tbody></table>`;
       wrapper.innerHTML = html;
 
@@ -1766,7 +2050,7 @@
     function exportRekapImage() {
       const table = document.getElementById('tablePivotAbsen');
       if (!table) return showToast('Tidak ada data rekap untuk diexport.', 'error');
-      
+
       const btn = document.getElementById('btnExportRekapImg');
       const originalText = btn.innerHTML;
       btn.innerHTML = '<span class="loader" style="width:14px; height:14px; border-width:2px; vertical-align: middle;"></span> <span style="vertical-align: middle;">Memproses...</span>';
@@ -1805,7 +2089,7 @@
       tableClone.style.borderCollapse = 'collapse';
       tableClone.style.fontSize = '12px';
       tableClone.style.width = '100%';
-      
+
       const ths = tableClone.querySelectorAll('th');
       ths.forEach(th => {
         th.style.border = '1px solid #e2e8f0';
@@ -1818,7 +2102,7 @@
       tds.forEach(td => {
         td.style.border = '1px solid #e2e8f0';
         td.style.padding = '8px 10px';
-        
+
         // Inline cell styles based on class
         if (td.classList.contains('pivot-cell-hadir')) {
           td.style.background = '#ecfdf5';
@@ -1882,7 +2166,7 @@
 
       // Convert table element to sheet
       const wb = XLSX.utils.table_to_book(table, { raw: true });
-      
+
       // Write file
       XLSX.writeFile(wb, `Rekap_Absen_Bulanan_${monthName}_${fY}.xlsx`);
       showToast('File Excel rekap bulanan berhasil diunduh.', 'success');
@@ -2093,6 +2377,186 @@
         btn.disabled = false;
         showToast('Gagal mengexport gambar absen.', 'error');
       });
+    }
+
+    // --- SISTEM PELANGGARAN KARYAWAN ---
+    function switchPelanggaranSubTab(subId) {
+      document.querySelectorAll('.tab-pelanggaran-sub').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sub-tab-pelanggaran-content').forEach(c => c.classList.remove('active'));
+
+      if (subId === 'log') {
+        document.getElementById('subTabLogPelanggaran').classList.add('active');
+        document.getElementById('subContent-pelanggaran-log').classList.add('active');
+      } else {
+        document.getElementById('subTabRekapPelanggaran').classList.add('active');
+        document.getElementById('subContent-pelanggaran-rekap').classList.add('active');
+      }
+      renderPelanggaran();
+    }
+
+
+    function deletePelanggaran(idKaryawan, waktu, nama) {
+      if (!confirm(`Apakah Anda yakin ingin menghapus catatan pelanggaran untuk ${nama}?`)) return;
+
+      showToast(`Menghapus catatan pelanggaran ${nama}...`, 'info');
+
+      const payload = {
+        action: 'delete_pelanggaran',
+        idKaryawan,
+        waktu
+      };
+
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+        .then(r => r.json())
+        .then(res => {
+          if (res.result === 'success') {
+            showToast('Catatan pelanggaran berhasil dihapus.', 'success');
+            loadData();
+          } else {
+            showToast(res.message || 'Gagal menghapus catatan.', 'error');
+          }
+        })
+        .catch(e => {
+          showToast('Gagal terhubung ke server.', 'error');
+        });
+    }
+
+    function renderPelanggaran() {
+      const totalViolations = rawViolationsData.length;
+      const totalPoints = rawViolationsData.reduce((sum, v) => sum + (Number(v.poin) || 0), 0);
+
+      const pointsByEmployee = {};
+      rawViolationsData.forEach(v => {
+        pointsByEmployee[v.nama] = (pointsByEmployee[v.nama] || 0) + (Number(v.poin) || 0);
+      });
+
+      let topViolatorName = '-';
+      let topViolatorPoints = 0;
+      Object.keys(pointsByEmployee).forEach(name => {
+        if (pointsByEmployee[name] > topViolatorPoints) {
+          topViolatorPoints = pointsByEmployee[name];
+          topViolatorName = name;
+        }
+      });
+
+      const topViolatorText = topViolatorPoints > 0 ? `${topViolatorName} (${topViolatorPoints} Poin)` : '-';
+
+      const statTotalPelanggaran = document.getElementById('statTotalPelanggaran');
+      const statTotalPoinPelanggaran = document.getElementById('statTotalPoinPelanggaran');
+      const statTopPelanggar = document.getElementById('statTopPelanggar');
+
+      if (statTotalPelanggaran) statTotalPelanggaran.textContent = totalViolations;
+      if (statTotalPoinPelanggaran) statTotalPoinPelanggaran.textContent = totalPoints;
+      if (statTopPelanggar) statTopPelanggar.textContent = topViolatorText;
+
+      // Log Table Search & Filter
+      const searchVal = document.getElementById('searchPelanggaran')?.value.toLowerCase() || '';
+      const filterPoinVal = document.getElementById('filterPelanggaranPoin')?.value || '';
+
+      const logBody = document.getElementById('pelanggaranLogTableBody');
+      if (logBody) {
+        let filtered = rawViolationsData.filter(v => {
+          const matchesSearch = v.nama.toLowerCase().includes(searchVal) ||
+            v.jenis.toLowerCase().includes(searchVal) ||
+            v.tempat.toLowerCase().includes(searchVal) ||
+            v.staf.toLowerCase().includes(searchVal);
+
+          let matchesPoin = true;
+          if (filterPoinVal) {
+            matchesPoin = Number(v.poin) === Number(filterPoinVal);
+          }
+
+          return matchesSearch && matchesPoin;
+        });
+
+        if (filtered.length === 0) {
+          logBody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px; color: gray;">Tidak ada data pelanggaran ditemukan.</td></tr>`;
+        } else {
+          logBody.innerHTML = filtered.map(v => {
+            const d = new Date(v.waktu);
+            const timeStr = d.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).replace(/\./g, ':');
+
+            let badgeClass = 'badge-success';
+            if (v.poin >= 50) badgeClass = 'badge-danger';
+            else if (v.poin >= 20) badgeClass = 'badge-warning';
+            else badgeClass = 'badge-info';
+
+            return `
+              <tr>
+                <td>${timeStr}</td>
+                <td style="font-weight:600; color:var(--text);">${v.nama}</td>
+                <td>${v.jenis}</td>
+                <td><span class="badge ${badgeClass}">${v.poin} Poin</span></td>
+                <td>${v.tempat || '-'}</td>
+                <td><span class="badge badge-primary">${v.staf}</span></td>
+                <td style="text-align: right; white-space: nowrap;">
+                  <button class="btn btn-danger btn-icon" title="Hapus Catatan" onclick="deletePelanggaran('${v.idKaryawan}', '${v.waktu}', '${v.nama}')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M3 6h18"/>
+                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
+
+      // Leaderboard
+      const rekapBody = document.getElementById('pelanggaranRekapTableBody');
+      if (rekapBody) {
+        const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() !== 'nonaktif');
+        const employeeStats = activeKaryawan.map(k => {
+          const empViolations = rawViolationsData.filter(v => v.idKaryawan === k.id);
+          const pts = empViolations.reduce((sum, v) => sum + (Number(v.poin) || 0), 0);
+          return {
+            id: k.id,
+            nama: k.nama,
+            bagian: k.bagian,
+            count: empViolations.length,
+            points: pts
+          };
+        });
+
+        employeeStats.sort((a, b) => {
+          if (b.points !== a.points) return b.points - a.points;
+          return a.nama.localeCompare(b.nama);
+        });
+
+        rekapBody.innerHTML = employeeStats.map(stat => {
+          let warningStyle = '';
+          let textIcon = '';
+          if (stat.points >= 100) {
+            warningStyle = 'style="background: #fef2f2; color: var(--danger);"';
+            textIcon = ' 🚨 <span style="font-size:10px; font-weight:700; color:var(--danger);">[SP-3 / Tindakan Tegas]</span>';
+          } else if (stat.points >= 50) {
+            warningStyle = 'style="background: #fffbeb; color: var(--warning);"';
+            textIcon = ' ⚠️ <span style="font-size:10px; font-weight:700; color:var(--warning);">[SP-2 / Peringatan Keras]</span>';
+          } else if (stat.points >= 20) {
+            warningStyle = 'style="background: #eff6ff;"';
+            textIcon = ' ℹ️ <span style="font-size:10px; font-weight:700; color:var(--primary);">[SP-1 / Teguran Tertulis]</span>';
+          }
+
+          let pointsBadgeClass = 'badge-success';
+          if (stat.points >= 50) pointsBadgeClass = 'badge-danger';
+          else if (stat.points >= 20) pointsBadgeClass = 'badge-warning';
+          else if (stat.points > 0) pointsBadgeClass = 'badge-info';
+
+          return `
+            <tr ${warningStyle}>
+              <td style="font-family:monospace; color:var(--text-muted);">${stat.id}</td>
+              <td style="font-weight:600;">${stat.nama}${textIcon}</td>
+              <td><span class="badge badge-primary">${stat.bagian}</span></td>
+              <td style="font-weight:600;">${stat.count}x</td>
+              <td><span class="badge ${pointsBadgeClass}" style="font-size: 13px; padding: 6px 12px;">${stat.points} Poin</span></td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
     // Init

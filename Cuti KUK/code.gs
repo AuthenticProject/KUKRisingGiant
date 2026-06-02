@@ -92,6 +92,10 @@ function doPost(e) {
       return handleSaveSetup(ss, payload);
     } else if (action === 'absen_bulk') {
       return handleAbsenBulk(ss, payload);
+    } else if (action === 'save_pelanggaran') {
+      return handleSavePelanggaran(ss, payload);
+    } else if (action === 'delete_pelanggaran') {
+      return handleDeletePelanggaran(ss, payload);
     }
 
     return jsonResponse({ result: 'error', message: 'Unknown Action' });
@@ -470,7 +474,10 @@ function getDashboardData(ss) {
     });
   }
   
-  return { result: 'success', data: result, karyawan: allKaryawan };
+  // Ambil data pelanggaran
+  const violations = getViolationsData(ss);
+  
+  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations };
 }
 
 function jsonResponse(obj) {
@@ -664,5 +671,139 @@ function getRekapAbsen(ss) {
       result: 'error', 
       message: error.toString()
     });
+  }
+}
+
+// ================================================================
+// SISTEM PELANGGARAN KARYAWAN
+// ================================================================
+function getOrCreatePelanggaranSheet(ss) {
+  let sheet = ss.getSheetByName("Pelanggaran");
+  if (!sheet) {
+    sheet = ss.insertSheet("Pelanggaran");
+    sheet.appendRow(["Waktu (Timestamp)", "ID Karyawan", "Nama Karyawan", "Jenis Pelanggaran", "Poin", "Tempat", "Nama Staf Penginput"]);
+    // Beautify header
+    const headerRange = sheet.getRange("A1:G1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f3f4f6");
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, 7);
+  }
+  return sheet;
+}
+
+function getViolationsData(ss) {
+  try {
+    const sheet = getOrCreatePelanggaranSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+    
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 7);
+    const values = dataRange.getValues();
+    const violations = [];
+    const tz = Session.getScriptTimeZone();
+    
+    // Reverse loop to get newest first
+    for (let i = values.length - 1; i >= 0; i--) {
+      let waktuStr = '';
+      const rawWaktu = values[i][0];
+      if (rawWaktu instanceof Date) {
+        waktuStr = Utilities.formatDate(rawWaktu, tz, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      } else {
+        waktuStr = String(rawWaktu || '').trim();
+      }
+      
+      violations.push({
+        waktu: waktuStr,
+        idKaryawan: String(values[i][1]),
+        nama: String(values[i][2]),
+        jenis: String(values[i][3]),
+        poin: Number(values[i][4]) || 0,
+        tempat: String(values[i][5]),
+        staf: String(values[i][6])
+      });
+    }
+    return violations;
+  } catch (e) {
+    Logger.log("Error getViolationsData: " + e.toString());
+    return [];
+  }
+}
+
+function handleSavePelanggaran(ss, payload) {
+  try {
+    const { idKaryawan, nama, jenis, poin, tempat, staf, waktu } = payload;
+    
+    if (!idKaryawan || !nama || !jenis || poin === undefined || !tempat || !staf) {
+      return jsonResponse({ result: 'error', message: 'Data pelanggaran tidak lengkap.' });
+    }
+    
+    const sheet = getOrCreatePelanggaranSheet(ss);
+    
+    // Waktu can be provided by client, else use current server time
+    let timestamp = waktu ? new Date(waktu) : new Date();
+    
+    sheet.appendRow([
+      timestamp,
+      idKaryawan,
+      nama,
+      jenis,
+      poin,
+      tempat,
+      staf
+    ]);
+    
+    // Force ID Karyawan to be text format
+    sheet.getRange(sheet.getLastRow(), 2).setNumberFormat('@');
+    
+    return jsonResponse({ result: 'success', message: 'Pelanggaran berhasil dicatat.' });
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
+}
+
+function handleDeletePelanggaran(ss, payload) {
+  try {
+    const { idKaryawan, waktu } = payload;
+    if (!idKaryawan || !waktu) {
+      return jsonResponse({ result: 'error', message: 'Parameter tidak lengkap: idKaryawan dan waktu diperlukan.' });
+    }
+    
+    const sheet = getOrCreatePelanggaranSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return jsonResponse({ result: 'error', message: 'Tidak ada data untuk dihapus.' });
+    }
+    
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 7);
+    const values = dataRange.getValues();
+    const tz = Session.getScriptTimeZone();
+    
+    let found = false;
+    for (let i = values.length - 1; i >= 0; i--) {
+      const rowId = String(values[i][1]);
+      
+      let rowWaktu = '';
+      const rawWaktu = values[i][0];
+      if (rawWaktu instanceof Date) {
+        rowWaktu = Utilities.formatDate(rawWaktu, tz, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      } else {
+        rowWaktu = String(rawWaktu || '').trim();
+      }
+      
+      if (rowId === String(idKaryawan) && (rowWaktu === String(waktu) || rowWaktu.substring(0, 19) === String(waktu).substring(0, 19))) {
+        sheet.deleteRow(i + 2);
+        found = true;
+        break;
+      }
+    }
+    
+    if (found) {
+      return jsonResponse({ result: 'success', message: 'Pelanggaran berhasil dihapus.' });
+    } else {
+      return jsonResponse({ result: 'error', message: 'Data pelanggaran tidak ditemukan.' });
+    }
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
   }
 }
