@@ -703,6 +703,7 @@
     let dbKaryawan = [];
     let selectedDates = []; // Format YYYY-MM-DD
     let bookedDates = [];
+    let leavesMap = {};
     let activeUser = null;
     let isLocked = false;
 
@@ -778,6 +779,7 @@
         fetch(`${SCRIPT_URL}?action=riwayat&idKaryawan=${encodeURIComponent(activeUser.id)}`).then(r => r.json())
       ]).then(([bRes, rRes]) => {
         bookedDates = bRes.booked || [];
+        leavesMap = bRes.leavesMap || {};
         selectedDates = (rRes.riwayat && rRes.riwayat.tanggal) ? rRes.riwayat.tanggal : [];
         renderCalendar();
         updateUI();
@@ -794,6 +796,43 @@
       if (viewMonth > 11) { viewMonth = 0; viewYear++; }
       else if (viewMonth < 0) { viewMonth = 11; viewYear--; }
       renderCalendar();
+    }
+
+    function checkDateRestriction(key) {
+      if (!activeUser || !leavesMap || !leavesMap[key]) return null;
+      const others = leavesMap[key];
+      const bgLower = String(activeUser.bagian || '').trim().toLowerCase();
+      
+      // 1. Max 2 orang per hari
+      if (others.length >= 2) {
+        const names = others.map(o => o.nama).join(', ');
+        return { type: 'max_limit', message: `Batas 2 orang/hari tercapai (${names})` };
+      }
+      
+      // 2. Kepala Toko & Admin
+      const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
+      if (isMgrRole) {
+        const conflictMgr = others.find(o => {
+          const oBg = String(o.bagian || '').trim().toLowerCase();
+          return (oBg === 'kepala toko' || oBg === 'admin');
+        });
+        if (conflictMgr) {
+          return { type: 'role_conflict', message: `Bentrok: ${conflictMgr.nama} (${conflictMgr.bagian}) sudah cuti` };
+        }
+      }
+      
+      // 3. Pengiriman & Kepala Pengiriman
+      const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
+      if (isDeliveryRole) {
+        const conflictDel = others.find(o => {
+          const oBg = String(o.bagian || '').trim().toLowerCase();
+          return (oBg === 'pengiriman' || oBg === 'kepala pengiriman');
+        });
+        if (conflictDel) {
+          return { type: 'role_conflict', message: `Bentrok: ${conflictDel.nama} (${conflictDel.bagian}) sudah cuti` };
+        }
+      }
+      return null;
     }
 
     function renderCalendar() {
@@ -830,22 +869,29 @@
           el.classList.add('booked');
           el.onclick = () => showToast(`Diambil rekan di divisi ${activeUser?.bagian}`, 'error');
         } else {
-          if (dateObj.getTime() === today.getTime()) el.classList.add('today');
-          if (selectedDates.includes(key)) el.classList.add('selected');
+          // Check new restrictions
+          const restriction = checkDateRestriction(key);
+          if (restriction) {
+            el.classList.add('booked');
+            el.onclick = () => showToast(restriction.message, 'error');
+          } else {
+            if (dateObj.getTime() === today.getTime()) el.classList.add('today');
+            if (selectedDates.includes(key)) el.classList.add('selected');
 
-          el.onclick = () => {
-            if (selectedDates.includes(key)) {
-              selectedDates = selectedDates.filter(k => k !== key);
-            } else {
-              if (selectedThisMonth >= 3) {
-                showToast(`Kuota bulan ${MONTHS[viewMonth]} sudah habis (Maks 3).`, 'error');
-                return;
+            el.onclick = () => {
+              if (selectedDates.includes(key)) {
+                selectedDates = selectedDates.filter(k => k !== key);
+              } else {
+                if (selectedThisMonth >= 3) {
+                  showToast(`Kuota bulan ${MONTHS[viewMonth]} sudah habis (Maks 3).`, 'error');
+                  return;
+                }
+                selectedDates.push(key);
               }
-              selectedDates.push(key);
-            }
-            renderCalendar();
-            updateUI();
-          };
+              renderCalendar();
+              updateUI();
+            };
+          }
         }
         grid.appendChild(el);
       }

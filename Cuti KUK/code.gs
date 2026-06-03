@@ -27,7 +27,11 @@ function doGet(e) {
     return jsonResponse(getInitData(ss));
   }
   if (action === 'booked') {
-    return jsonResponse({ booked: getBookedDates(ss, e.parameter.bagian || '', e.parameter.idKaryawan || '') });
+    const idKaryawan = e.parameter.idKaryawan || '';
+    const bagian = e.parameter.bagian || '';
+    const booked = getBookedDates(ss, bagian, idKaryawan);
+    const leavesMap = getLeavesPerDate(ss, idKaryawan);
+    return jsonResponse({ booked: booked, leavesMap: leavesMap });
   }
   if (action === 'riwayat') {
     return jsonResponse({ riwayat: getRiwayat(ss, e.parameter.idKaryawan || '') });
@@ -162,6 +166,12 @@ function handleSimpanCuti(ss, payload) {
     return jsonResponse({ result: 'error', message: `Tanggal ${conflicts.join(', ')} sudah diambil rekan di divisi ${bagian}.` });
   }
 
+  // Validasi Batasan Cuti Tambahan (Maks 2 orang per hari, Kepala Toko & Admin, Pengiriman & Kepala Pengiriman)
+  const restrictionError = checkLeaveRestrictions(ss, idKaryawan, bagian, tanggal);
+  if (restrictionError) {
+    return jsonResponse({ result: 'error', message: restrictionError });
+  }
+
   const data = sheet.getDataRange().getValues();
   let rowIdx = -1;
   for (let i = 1; i < data.length; i++) {
@@ -247,6 +257,12 @@ function handleToggleCuti(ss, payload) {
     const booked = getBookedDates(ss, bagian, idKaryawan);
     if (booked.includes(tanggalToggle)) {
       return jsonResponse({ result: 'error', message: 'Tanggal sudah diambil rekan di divisi yang sama.' });
+    }
+
+    // Check new restrictions (Maks 2 orang per hari, Kepala Toko & Admin, Pengiriman & Kepala Pengiriman)
+    const restrictionError = checkLeaveRestrictions(ss, idKaryawan, bagian, [tanggalToggle]);
+    if (restrictionError) {
+      return jsonResponse({ result: 'error', message: restrictionError });
     }
 
     arr.push(tanggalToggle);
@@ -806,4 +822,72 @@ function handleDeletePelanggaran(ss, payload) {
   } catch (error) {
     return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
   }
+}
+
+// ================================================================
+// ASYNC LEAVE RESTRICTION HELPER FUNCTIONS
+// ================================================================
+function getLeavesPerDate(ss, excludeId) {
+  const sheet = ss.getSheetByName(SHEET_DATA);
+  const map = getColMap(sheet);
+  const data = sheet.getDataRange().getValues();
+  const leavesMap = {};
+  if (map['ID Karyawan'] === undefined) return leavesMap;
+  
+  for (let i = 1; i < data.length; i++) {
+    const id = String(data[i][map['ID Karyawan']]);
+    if (excludeId && id === String(excludeId)) continue;
+    
+    const nama = data[i][map['Nama Karyawan']];
+    const bagian = String(data[i][map['Bagian']] || '').trim();
+    const tRaw = String(data[i][map['Tanggal (raw)']] || '');
+    
+    const dates = tRaw.split(',').map(d => d.trim()).filter(Boolean);
+    dates.forEach(d => {
+      if (!leavesMap[d]) leavesMap[d] = [];
+      leavesMap[d].push({ id: id, nama: nama, bagian: bagian });
+    });
+  }
+  return leavesMap;
+}
+
+function checkLeaveRestrictions(ss, idKaryawan, bagian, datesToCheck) {
+  const leavesMap = getLeavesPerDate(ss, idKaryawan);
+  const bgLower = String(bagian || '').trim().toLowerCase();
+  
+  for (let i = 0; i < datesToCheck.length; i++) {
+    const d = datesToCheck[i];
+    const others = leavesMap[d] || [];
+    
+    // 1. Maksimal 2 orang sehari
+    if (others.length >= 2) {
+      const names = others.map(o => o.nama).join(', ');
+      return `Tanggal ${d} sudah diisi oleh 2 orang (${names}). Maksimal 2 orang per hari.`;
+    }
+    
+    // 2. Kepala Toko & Admin tidak boleh bareng
+    const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
+    if (isMgrRole) {
+      const conflictMgr = others.find(o => {
+        const oBg = String(o.bagian || '').trim().toLowerCase();
+        return (oBg === 'kepala toko' || oBg === 'admin');
+      });
+      if (conflictMgr) {
+        return `Kepala Toko dan Admin tidak boleh cuti bersamaan. Tanggal ${d} sudah diambil oleh ${conflictMgr.nama} (${conflictMgr.bagian}).`;
+      }
+    }
+    
+    // 3. Pengiriman & Kepala Pengiriman tidak boleh bareng
+    const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
+    if (isDeliveryRole) {
+      const conflictDel = others.find(o => {
+        const oBg = String(o.bagian || '').trim().toLowerCase();
+        return (oBg === 'pengiriman' || oBg === 'kepala pengiriman');
+      });
+      if (conflictDel) {
+        return `Bagian Pengiriman dan Kepala Pengiriman tidak boleh cuti bersamaan. Tanggal ${d} sudah diambil oleh ${conflictDel.nama} (${conflictDel.bagian}).`;
+      }
+    }
+  }
+  return null;
 }

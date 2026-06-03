@@ -1136,7 +1136,8 @@
                   <option value="50">50 Poin</option>
                 </select>
               </div>
-              <a class="btn btn-primary" href="pelanggaran.html" target="_blank" style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
+              <a class="btn btn-primary" href="pelanggaran.html" target="_blank"
+                style="text-decoration:none; display:inline-flex; align-items:center; gap:8px;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 9v6m-3-3h6" />
                   <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1338,6 +1339,7 @@
     // State Modal Cuti
     let mcSelected = []; // Dates for the active edited user
     let mcBooked = []; // Dates taken by their division
+    let mcLeavesMap = {}; // Global leaves map for admin modal
 
     const mNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
@@ -1405,13 +1407,13 @@
 
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() !== 'nonaktif');
 
-      // bagianDayMap: { bagian: { dayNum: count } } for conflict detection
-      const bagianDayMap = {};
+      // dailyLeavesMap: { dayNum: [ { idKaryawan, nama, bagian } ] } for conflict detection
+      const dailyLeavesMap = {};
       activeKaryawan.forEach(k => {
         const dates = userCutiMap[k.id] || [];
         dates.forEach(d => {
-          if (!bagianDayMap[k.bagian]) bagianDayMap[k.bagian] = {};
-          bagianDayMap[k.bagian][d] = (bagianDayMap[k.bagian][d] || 0) + 1;
+          if (!dailyLeavesMap[d]) dailyLeavesMap[d] = [];
+          dailyLeavesMap[d].push({ id: k.id, nama: k.nama, bagian: k.bagian });
         });
       });
 
@@ -1453,15 +1455,83 @@
           for (let d = 1; d <= totalDays; d++) {
             const isWknd = new Date(fY, parseInt(fM) - 1, d).getDay() % 6 === 0;
             const fullDate = `${fY}-${fM}-${String(d).padStart(2, '0')}`;
-            const countBagianDay = (bagianDayMap[bagian] || {})[d] || 0;
+            const others = (dailyLeavesMap[d] || []).filter(o => o.id !== k.id);
+            const bgLower = String(k.bagian || '').trim().toLowerCase();
 
             if (dates.includes(d)) {
-              const isConflict = countBagianDay > 1;
-              html += `<div class="g-day leave${isConflict ? ' conflict' : ''}" data-tooltip="${isConflict ? '⚠ KONFLIK bagian!' : bagian}" onclick="toggleGanttCuti('${k.id}','${k.nama}','${k.bagian}','${fullDate}')"></div>`;
+              let conflictMsg = "";
+
+              // 1. Division conflict (same division)
+              if (others.some(o => String(o.bagian).toLowerCase() === bgLower)) {
+                conflictMsg = `⚠ KONFLIK bagian ${k.bagian}!`;
+              }
+
+              // 2. Max 2 people limit conflict
+              if ((dailyLeavesMap[d] || []).length > 2) {
+                conflictMsg = `⚠ MELEBIHI batas 2 orang/hari!`;
+              }
+
+              // 3. Kepala Toko & Admin conflict
+              if (bgLower === 'kepala toko' || bgLower === 'admin') {
+                const mgrConflict = others.find(o => {
+                  const oBg = String(o.bagian).toLowerCase();
+                  return oBg === 'kepala toko' || oBg === 'admin';
+                });
+                if (mgrConflict) {
+                  conflictMsg = `⚠ BENTROK: Kepala Toko & Admin cuti bareng!`;
+                }
+              }
+
+              // 4. Pengiriman & Kepala Pengiriman conflict
+              if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
+                const delConflict = others.find(o => {
+                  const oBg = String(o.bagian).toLowerCase();
+                  return oBg === 'pengiriman' || oBg === 'kepala pengiriman';
+                });
+                if (delConflict) {
+                  conflictMsg = `⚠ BENTROK: Pengiriman & Kepala Pengiriman cuti bareng!`;
+                }
+              }
+
+              const isConflict = conflictMsg !== "";
+              html += `<div class="g-day leave${isConflict ? ' conflict' : ''}" data-tooltip="${isConflict ? conflictMsg : k.bagian}" onclick="toggleGanttCuti('${k.id}','${k.nama}','${k.bagian}','${fullDate}')"></div>`;
             } else {
-              const divBooked = countBagianDay >= 1;
-              if (divBooked) {
-                html += `<div class="g-day div-booked ${isWknd ? 'weekend' : ''}" title="Slot ${bagian} hari ini terisi" onclick="showToast('Bagian ${bagian} sudah ada yang cuti hari ini.','error')"></div>`;
+              let blockMsg = "";
+
+              // 1. Division booked
+              if (others.some(o => String(o.bagian).toLowerCase() === bgLower)) {
+                blockMsg = `Bagian ${k.bagian} sudah ada yang cuti hari ini.`;
+              }
+
+              // 2. Max 2 people
+              if (others.length >= 2) {
+                blockMsg = `Batas 2 orang yang cuti hari ini sudah tercapai.`;
+              }
+
+              // 3. Kepala Toko & Admin
+              if (bgLower === 'kepala toko' || bgLower === 'admin') {
+                const mgrConflict = others.find(o => {
+                  const oBg = String(o.bagian).toLowerCase();
+                  return oBg === 'kepala toko' || oBg === 'admin';
+                });
+                if (mgrConflict) {
+                  blockMsg = `Kepala Toko & Admin tidak boleh cuti bersamaan. Hari ini ${mgrConflict.nama} (${mgrConflict.bagian}) sudah cuti.`;
+                }
+              }
+
+              // 4. Pengiriman & Kepala Pengiriman
+              if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
+                const delConflict = others.find(o => {
+                  const oBg = String(o.bagian).toLowerCase();
+                  return oBg === 'pengiriman' || oBg === 'kepala pengiriman';
+                });
+                if (delConflict) {
+                  blockMsg = `Pengiriman & Kepala Pengiriman tidak boleh cuti bersamaan. Hari ini ${delConflict.nama} (${delConflict.bagian}) sudah cuti.`;
+                }
+              }
+
+              if (blockMsg !== "") {
+                html += `<div class="g-day div-booked ${isWknd ? 'weekend' : ''}" title="${blockMsg}" onclick="showToast('${blockMsg}','error')"></div>`;
               } else {
                 html += `<div class="g-day ${isWknd ? 'weekend' : ''}" style="cursor:pointer;" onclick="toggleGanttCuti('${k.id}','${k.nama}','${k.bagian}','${fullDate}')" title="Klik untuk tambah cuti"></div>`;
               }
@@ -1611,6 +1681,7 @@
         fetch(`${SCRIPT_URL}?action=riwayat&idKaryawan=${encodeURIComponent(k.id)}`).then(r => r.json())
       ]).then(([bRes, rRes]) => {
         mcBooked = bRes.booked || [];
+        mcLeavesMap = bRes.leavesMap || {};
         // Extract ONLY dates for this specific month from their full riwayat
         const prefix = `${fY}-${fM}`;
         const fullRiwayat = (rRes.riwayat && rRes.riwayat.tanggal) ? rRes.riwayat.tanggal : [];
@@ -1639,6 +1710,45 @@
       const selectedThisMonth = mcFullRiwayat.filter(d => d.startsWith(prefix));
       document.getElementById('mcQuota').textContent = `Terpilih: ${selectedThisMonth.length}/3`;
 
+      const kBagian = document.getElementById('mcBagian').value;
+
+      function checkAdminDateRestriction(key) {
+        if (!mcLeavesMap || !mcLeavesMap[key]) return null;
+        const others = mcLeavesMap[key];
+        const bgLower = String(kBagian || '').trim().toLowerCase();
+
+        // 1. Max 2 orang per hari
+        if (others.length >= 2) {
+          const names = others.map(o => o.nama).join(', ');
+          return { type: 'max_limit', message: `Batas 2 orang/hari tercapai (${names})` };
+        }
+
+        // 2. Kepala Toko & Admin
+        const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
+        if (isMgrRole) {
+          const conflictMgr = others.find(o => {
+            const oBg = String(o.bagian || '').trim().toLowerCase();
+            return (oBg === 'kepala toko' || oBg === 'admin');
+          });
+          if (conflictMgr) {
+            return { type: 'role_conflict', message: `Bentrok: ${conflictMgr.nama} (${conflictMgr.bagian}) sudah cuti` };
+          }
+        }
+
+        // 3. Pengiriman & Kepala Pengiriman
+        const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
+        if (isDeliveryRole) {
+          const conflictDel = others.find(o => {
+            const oBg = String(o.bagian || '').trim().toLowerCase();
+            return (oBg === 'pengiriman' || oBg === 'kepala pengiriman');
+          });
+          if (conflictDel) {
+            return { type: 'role_conflict', message: `Bentrok: ${conflictDel.nama} (${conflictDel.bagian}) sudah cuti` };
+          }
+        }
+        return null;
+      }
+
       for (let i = 0; i < firstDay; i++) {
         const d = document.createElement('div'); d.className = 'edit-cal-day empty'; grid.appendChild(d);
       }
@@ -1653,18 +1763,25 @@
           el.classList.add('booked');
           el.title = "Diambil rekan divisi";
         } else {
-          if (mcFullRiwayat.includes(key)) el.classList.add('selected');
-          el.onclick = () => {
-            if (mcFullRiwayat.includes(key)) {
-              mcFullRiwayat = mcFullRiwayat.filter(k => k !== key);
-            } else {
-              if (mcFullRiwayat.filter(d => d.startsWith(prefix)).length >= 3) {
-                return showToast('Kuota 3 hari tercapai!', 'error');
+          const restriction = checkAdminDateRestriction(key);
+          if (restriction && !mcFullRiwayat.includes(key)) {
+            el.classList.add('booked');
+            el.title = restriction.message;
+            el.onclick = () => showToast(restriction.message, 'error');
+          } else {
+            if (mcFullRiwayat.includes(key)) el.classList.add('selected');
+            el.onclick = () => {
+              if (mcFullRiwayat.includes(key)) {
+                mcFullRiwayat = mcFullRiwayat.filter(k => k !== key);
+              } else {
+                if (mcFullRiwayat.filter(d => d.startsWith(prefix)).length >= 3) {
+                  return showToast('Kuota 3 hari tercapai!', 'error');
+                }
+                mcFullRiwayat.push(key);
               }
-              mcFullRiwayat.push(key);
-            }
-            renderEditCal();
-          };
+              renderEditCal();
+            };
+          }
         }
         grid.appendChild(el);
       }
