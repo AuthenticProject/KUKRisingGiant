@@ -7,6 +7,7 @@ const SHEET_DATA      = "Data Cuti";
 const SHEET_REKAP     = "Rekap Harian";
 const SHEET_KARYAWAN  = "Karyawan";
 const SHEET_SETUP     = "Setup";
+const SHEET_AKUN      = "Akun";
 
 function getColMap(sheet) {
   if (!sheet || sheet.getLastColumn() === 0) return {};
@@ -100,6 +101,10 @@ function doPost(e) {
       return handleSavePelanggaran(ss, payload);
     } else if (action === 'delete_pelanggaran') {
       return handleDeletePelanggaran(ss, payload);
+    } else if (action === 'login') {
+      return handleLogin(ss, payload);
+    } else if (action === 'change_password') {
+      return handleChangePassword(ss, payload);
     }
 
     return jsonResponse({ result: 'error', message: 'Unknown Action' });
@@ -900,4 +905,56 @@ function checkLeaveRestrictions(ss, idKaryawan, bagian, datesToCheck) {
     }
   }
   return null;
+}
+
+// ================================================================
+// AUTHENTICATION & ACCOUNT FUNCTIONS
+// ================================================================
+function checkAndInitAkun(ss) {
+  let sheet = ss.getSheetByName(SHEET_AKUN);
+  if (!sheet) {
+    sheet = ss.insertSheet(SHEET_AKUN);
+    sheet.getRange(1, 1, 1, 2).setValues([['Username', 'Password']]).setFontWeight('bold');
+    const defaultUsernames = ['fariz', 'andika', 'irsyadil', 'ari', 'aria', 'zain'];
+    const rows = defaultUsernames.map(u => [u, '12345']);
+    sheet.getRange(2, 1, rows.length, 2).setValues(rows);
+  }
+  return sheet;
+}
+
+function handleLogin(ss, payload) {
+  const username = String(payload.username || '').trim().toLowerCase();
+  const password = String(payload.password || '').trim();
+  
+  const sheet = checkAndInitAkun(ss);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const dbUser = String(data[i][0] || '').trim().toLowerCase();
+    const dbPass = String(data[i][1] || '').trim();
+    if (dbUser === username && dbPass === password) {
+      return jsonResponse({ result: 'success', username: data[i][0] });
+    }
+  }
+  return jsonResponse({ result: 'error', message: 'Username atau Password salah.' });
+}
+
+function handleChangePassword(ss, payload) {
+  const username = String(payload.username || '').trim().toLowerCase();
+  const oldPassword = String(payload.oldPassword || '').trim();
+  const newPassword = String(payload.newPassword || '').trim();
+  
+  const sheet = checkAndInitAkun(ss);
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const dbUser = String(data[i][0] || '').trim().toLowerCase();
+    const dbPass = String(data[i][1] || '').trim();
+    if (dbUser === username) {
+      if (dbPass !== oldPassword) {
+        return jsonResponse({ result: 'error', message: 'Password lama salah.' });
+      }
+      sheet.getRange(i + 1, 2).setValue(newPassword);
+      return jsonResponse({ result: 'success', message: 'Password berhasil diubah.' });
+    }
+  }
+  return jsonResponse({ result: 'error', message: 'Username tidak ditemukan.' });
 }
