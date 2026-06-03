@@ -2,9 +2,6 @@ const CACHE_NAME = 'kuk-hr-cache-v1';
 const STATIC_ASSETS = [
   './',
   './index.html',
-  './absen.html',
-  './pelanggaran.html',
-  './dashboard.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
