@@ -803,13 +803,7 @@
       const others = leavesMap[key];
       const bgLower = String(activeUser.bagian || '').trim().toLowerCase();
       
-      // 1. Max 2 orang per hari
-      if (others.length >= 2) {
-        const names = others.map(o => o.nama).join(', ');
-        return { type: 'max_limit', message: `Batas 2 orang/hari tercapai (${names})` };
-      }
-      
-      // 2. Kepala Toko & Admin
+      // 1. Kepala Toko & Admin
       const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
       if (isMgrRole) {
         const conflictMgr = others.find(o => {

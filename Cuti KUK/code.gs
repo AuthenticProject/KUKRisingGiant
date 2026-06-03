@@ -399,9 +399,17 @@ function getBookedDates(ss, bagian, excludeId) {
   const data = sheet.getDataRange().getValues();
   const booked = [];
   if (map['Bagian'] === undefined) return booked;
+  const tz = Session.getScriptTimeZone();
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][map['Bagian']]).toLowerCase() === String(bagian).toLowerCase() && String(data[i][map['ID Karyawan']]) !== String(excludeId)) {
-      const dates = String(data[i][map['Tanggal (raw)']] || '').split(',').map(d => d.trim()).filter(Boolean);
+      const val = data[i][map['Tanggal (raw)']];
+      let tRaw = '';
+      if (val instanceof Date) {
+        tRaw = Utilities.formatDate(val, tz, 'yyyy-MM-dd');
+      } else {
+        tRaw = String(val || '');
+      }
+      const dates = tRaw.split(',').map(d => d.trim()).filter(Boolean);
       dates.forEach(d => { if (!booked.includes(d)) booked.push(d); });
     }
   }
@@ -834,13 +842,21 @@ function getLeavesPerDate(ss, excludeId) {
   const leavesMap = {};
   if (map['ID Karyawan'] === undefined) return leavesMap;
   
+  const tz = Session.getScriptTimeZone();
   for (let i = 1; i < data.length; i++) {
     const id = String(data[i][map['ID Karyawan']]);
     if (excludeId && id === String(excludeId)) continue;
     
     const nama = data[i][map['Nama Karyawan']];
     const bagian = String(data[i][map['Bagian']] || '').trim();
-    const tRaw = String(data[i][map['Tanggal (raw)']] || '');
+    
+    const val = data[i][map['Tanggal (raw)']];
+    let tRaw = '';
+    if (val instanceof Date) {
+      tRaw = Utilities.formatDate(val, tz, 'yyyy-MM-dd');
+    } else {
+      tRaw = String(val || '');
+    }
     
     const dates = tRaw.split(',').map(d => d.trim()).filter(Boolean);
     dates.forEach(d => {
@@ -859,13 +875,7 @@ function checkLeaveRestrictions(ss, idKaryawan, bagian, datesToCheck) {
     const d = datesToCheck[i];
     const others = leavesMap[d] || [];
     
-    // 1. Maksimal 2 orang sehari
-    if (others.length >= 2) {
-      const names = others.map(o => o.nama).join(', ');
-      return `Tanggal ${d} sudah diisi oleh 2 orang (${names}). Maksimal 2 orang per hari.`;
-    }
-    
-    // 2. Kepala Toko & Admin tidak boleh bareng
+    // 1. Kepala Toko & Admin tidak boleh bareng
     const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
     if (isMgrRole) {
       const conflictMgr = others.find(o => {
@@ -877,7 +887,7 @@ function checkLeaveRestrictions(ss, idKaryawan, bagian, datesToCheck) {
       }
     }
     
-    // 3. Pengiriman & Kepala Pengiriman tidak boleh bareng
+    // 2. Pengiriman & Kepala Pengiriman tidak boleh bareng
     const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
     if (isDeliveryRole) {
       const conflictDel = others.find(o => {

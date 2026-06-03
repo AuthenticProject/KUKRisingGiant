@@ -1466,12 +1466,7 @@
                 conflictMsg = `⚠ KONFLIK bagian ${k.bagian}!`;
               }
 
-              // 2. Max 2 people limit conflict
-              if ((dailyLeavesMap[d] || []).length > 2) {
-                conflictMsg = `⚠ MELEBIHI batas 2 orang/hari!`;
-              }
-
-              // 3. Kepala Toko & Admin conflict
+              // 2. Kepala Toko & Admin conflict
               if (bgLower === 'kepala toko' || bgLower === 'admin') {
                 const mgrConflict = others.find(o => {
                   const oBg = String(o.bagian).toLowerCase();
@@ -1482,7 +1477,7 @@
                 }
               }
 
-              // 4. Pengiriman & Kepala Pengiriman conflict
+              // 3. Pengiriman & Kepala Pengiriman conflict
               if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
                 const delConflict = others.find(o => {
                   const oBg = String(o.bagian).toLowerCase();
@@ -1503,12 +1498,7 @@
                 blockMsg = `Bagian ${k.bagian} sudah ada yang cuti hari ini.`;
               }
 
-              // 2. Max 2 people
-              if (others.length >= 2) {
-                blockMsg = `Batas 2 orang yang cuti hari ini sudah tercapai.`;
-              }
-
-              // 3. Kepala Toko & Admin
+              // 2. Kepala Toko & Admin
               if (bgLower === 'kepala toko' || bgLower === 'admin') {
                 const mgrConflict = others.find(o => {
                   const oBg = String(o.bagian).toLowerCase();
@@ -1519,7 +1509,7 @@
                 }
               }
 
-              // 4. Pengiriman & Kepala Pengiriman
+              // 3. Pengiriman & Kepala Pengiriman
               if (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman') {
                 const delConflict = others.find(o => {
                   const oBg = String(o.bagian).toLowerCase();
@@ -1717,13 +1707,7 @@
         const others = mcLeavesMap[key];
         const bgLower = String(kBagian || '').trim().toLowerCase();
 
-        // 1. Max 2 orang per hari
-        if (others.length >= 2) {
-          const names = others.map(o => o.nama).join(', ');
-          return { type: 'max_limit', message: `Batas 2 orang/hari tercapai (${names})` };
-        }
-
-        // 2. Kepala Toko & Admin
+        // 1. Kepala Toko & Admin
         const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
         if (isMgrRole) {
           const conflictMgr = others.find(o => {
@@ -1735,7 +1719,7 @@
           }
         }
 
-        // 3. Pengiriman & Kepala Pengiriman
+        // 2. Pengiriman & Kepala Pengiriman
         const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
         if (isDeliveryRole) {
           const conflictDel = others.find(o => {
