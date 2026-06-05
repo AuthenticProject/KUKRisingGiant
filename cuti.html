@@ -580,8 +580,11 @@
 
   <div class="app-container">
     <div style="margin-bottom: -8px;">
-      <a href="index.html" style="display:inline-flex; align-items:center; gap:6px; color:#64748b; font-size:14px; font-weight:600; text-decoration:none;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 18-6-6 6-6"/></svg>
+      <a href="index.html"
+        style="display:inline-flex; align-items:center; gap:6px; color:#64748b; font-size:14px; font-weight:600; text-decoration:none;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="m15 18-6-6 6-6" />
+        </svg>
         Kembali ke Portal
       </a>
     </div>
@@ -738,7 +741,7 @@
 
         const sel = document.createElement('select');
         sel.id = 'nama';
-        sel.innerHTML = `<option value="">ΓÇö Ketuk untuk memilih ΓÇö</option>` +
+        sel.innerHTML = `<option value="">Ketuk untuk memilih</option>` +
           dbKaryawan.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
         sel.onchange = onUserChange;
 
@@ -808,7 +811,7 @@
       if (!activeUser || !leavesMap || !leavesMap[key]) return null;
       const others = leavesMap[key];
       const bgLower = String(activeUser.bagian || '').trim().toLowerCase();
-      
+
       // 1. Kepala Toko & Admin
       const isMgrRole = (bgLower === 'kepala toko' || bgLower === 'admin');
       if (isMgrRole) {
@@ -820,7 +823,7 @@
           return { type: 'role_conflict', message: `Bentrok: ${conflictMgr.nama} (${conflictMgr.bagian}) sudah cuti` };
         }
       }
-      
+
       // 3. Pengiriman & Kepala Pengiriman
       const isDeliveryRole = (bgLower === 'pengiriman' || bgLower === 'kepala pengiriman');
       if (isDeliveryRole) {
