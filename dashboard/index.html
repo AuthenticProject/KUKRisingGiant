@@ -962,13 +962,17 @@
 
       <!-- TAB: GAJI -->
       <section id="tab-gaji" class="content-section">
+        <!-- Info Banner -->
+        <div style="background:var(--primary-light); border:1px solid var(--primary); border-radius:12px; padding:14px 20px; margin-bottom:20px; font-size:13px; color:var(--primary); display:flex; align-items:center; gap:12px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × poin pelanggaran) + Gaji Bagian + Hadiah Pondok + Tip</span>
+        </div>
         <div class="card">
           <div class="card-header">
-            <div class="card-title">Kalkulasi Gaji Karyawan & Slip</div>
+            <div class="card-title">💰 Kalkulasi Gaji Karyawan</div>
             <div style="display:flex; gap:10px;">
               <select id="payrollMonth" style="width:140px;" onchange="calculatePayroll()"></select>
               <select id="payrollYear" style="width:100px;" onchange="calculatePayroll()"></select>
-              <button class="btn btn-outline" onclick="openSalarySettingsModal()">⚙ Seting Gaji Pokok</button>
             </div>
           </div>
           <div class="table-responsive">
@@ -976,12 +980,13 @@
               <thead>
                 <tr>
                   <th>Nama Karyawan</th>
-                  <th>Bagian / Divisi</th>
-                  <th>Gaji Pokok</th>
-                  <th style="text-align:center;">Hadir Briefing (Hari)</th>
-                  <th>Tunjangan Kehadiran</th>
-                  <th>Potongan Pelanggaran</th>
-                  <th>Gaji Bersih</th>
+                  <th>Bagian</th>
+                  <th style="text-align:center;">Tdk Masuk (Hari)</th>
+                  <th>Gaji Bagian</th>
+                  <th>Hadiah Pondok</th>
+                  <th>Tip</th>
+                  <th>Pot. Pelanggaran</th>
+                  <th style="font-weight:700;">Total Gaji</th>
                   <th style="text-align:right;">Aksi</th>
                 </tr>
               </thead>
@@ -1110,21 +1115,96 @@
     </div>
   </div>
 
-  <!-- MODAL: SLIP GAJI -->
-  <div class="modal-overlay" id="slipModal">
-    <div class="modal-container" style="max-width:640px;">
+  <!-- MODAL: INPUT GAJI MANUAL -->
+  <div class="modal-overlay" id="gajiInputModal">
+    <div class="modal-container" style="max-width:480px;">
       <div class="modal-header">
-        <h3>Pratinjau Slip Gaji Karyawan</h3>
-        <button class="btn-link" onclick="closeModal('slipModal')">✕</button>
+        <h3>✏️ Input Data Gaji</h3>
+        <button class="btn-link" onclick="closeModal('gajiInputModal')">✕</button>
       </div>
-      <div class="modal-body" style="background:#e2e8f0; padding:20px; max-height:450px; overflow-y:auto;">
-        <div class="slip-container" id="printableSlip">
-          <!-- Text receipt generated -->
+      <div class="modal-body">
+        <div style="background:#f1f5f9; padding:12px; border-radius:8px; font-size:13px; margin-bottom:16px;">
+          <strong id="gajiInputNama">Nama Karyawan</strong><br>
+          <span style="color:var(--text-muted)" id="gajiInputBagian">Bagian</span>
+          <input type="hidden" id="gajiInputId">
+        </div>
+        <!-- Gaji Pokok (readonly) -->
+        <div class="form-group">
+          <label>Gaji Pokok (tetap)</label>
+          <input type="text" value="Rp 850.000" readonly style="background:#f1f5f9; color:#94a3b8;">
+        </div>
+        <!-- Tidak masuk -->
+        <div class="form-group">
+          <label>Tidak Masuk (hari) <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="gajiAbsen" min="0" max="31" placeholder="0" oninput="updateGajiPreview()">
+          <small style="color:var(--text-muted); font-size:12px;">Potongan: Rp 28.500 × hari tidak masuk</small>
+        </div>
+        <!-- Gaji Bagian -->
+        <div class="form-group">
+          <label>Gaji Bagian (Rp)</label>
+          <input type="number" id="gajiBagian" min="0" placeholder="0" oninput="updateGajiPreview()">
+        </div>
+        <!-- Hadiah Pondok -->
+        <div class="form-group">
+          <label>Hadiah dari Pondok (Rp)</label>
+          <select id="gajiHadiah" onchange="updateGajiPreview()">
+            <option value="150000">Rp 150.000</option>
+            <option value="200000">Rp 200.000</option>
+            <option value="0">Tidak Ada</option>
+            <option value="custom">Lainnya...</option>
+          </select>
+        </div>
+        <div class="form-group" id="gajiHadiahCustomWrap" style="display:none;">
+          <label>Nominal Hadiah Pondok (Rp)</label>
+          <input type="number" id="gajiHadiahCustom" min="0" placeholder="0" oninput="updateGajiPreview()">
+        </div>
+        <!-- Tip -->
+        <div class="form-group">
+          <label>Tip (Rp)</label>
+          <input type="number" id="gajiTip" min="0" placeholder="0" oninput="updateGajiPreview()">
+        </div>
+        <!-- Pengurangan lain -->
+        <div class="form-group">
+          <label>Pengurangan Lain (Rp)</label>
+          <input type="number" id="gajiPengurangan" min="0" placeholder="0" oninput="updateGajiPreview()">
+        </div>
+        <!-- Preview perhitungan -->
+        <div id="gajiPreviewBox" style="background:var(--primary-light); border:1px solid var(--primary); border-radius:10px; padding:14px; font-size:13px; line-height:1.8;">
+          <div style="display:flex; justify-content:space-between;"><span>Gaji Pokok</span><span>Rp 850.000</span></div>
+          <div style="display:flex; justify-content:space-between; color:var(--danger);" id="prevPotAbsen"><span>− Potongan Absen (0 hari)</span><span>Rp 0</span></div>
+          <div style="display:flex; justify-content:space-between; color:var(--danger);" id="prevPotPoin"><span>− Potongan Pelanggaran (0 poin)</span><span>Rp 0</span></div>
+          <div style="display:flex; justify-content:space-between;" id="prevGajiBulanIni"><span>= Gaji Bulan Ini</span><span style="font-weight:700;">Rp 850.000</span></div>
+          <hr style="border-color:var(--primary); opacity:0.3; margin:6px 0;">
+          <div style="display:flex; justify-content:space-between;" id="prevBagian"><span>+ Gaji Bagian</span><span>Rp 0</span></div>
+          <div style="display:flex; justify-content:space-between;" id="prevHadiah"><span>+ Hadiah Pondok</span><span>Rp 150.000</span></div>
+          <div style="display:flex; justify-content:space-between;" id="prevTip"><span>+ Tip</span><span>Rp 0</span></div>
+          <div style="display:flex; justify-content:space-between; color:var(--danger);" id="prevPengurangan"><span>− Pengurangan Lain</span><span>Rp 0</span></div>
+          <hr style="border-color:var(--primary); opacity:0.5; margin:6px 0;">
+          <div style="display:flex; justify-content:space-between; font-size:15px;" id="prevTotal"><span><strong>TOTAL GAJI</strong></span><span style="font-weight:700; color:var(--primary);">Rp 1.000.000</span></div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeModal('slipModal')">Batal</button>
-        <button class="btn btn-primary" onclick="printSlip()">Cetak Slip Gaji</button>
+        <button class="btn btn-outline" onclick="closeModal('gajiInputModal')">Batal</button>
+        <button class="btn btn-primary" onclick="openSlipFromInput()">📄 Lihat &amp; Cetak Slip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: SLIP GAJI (Surat Keterangan Gaji KUK La Tansa) -->
+  <div class="modal-overlay" id="slipModal">
+    <div class="modal-container" style="max-width:680px;">
+      <div class="modal-header">
+        <h3>Pratinjau Surat Keterangan Gaji</h3>
+        <button class="btn-link" onclick="closeModal('slipModal')">✕</button>
+      </div>
+      <div class="modal-body" style="background:#e2e8f0; padding:20px; max-height:520px; overflow-y:auto;">
+        <div class="slip-container" id="printableSlip" style="font-family: 'Times New Roman', serif;">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('slipModal')">Kembali</button>
+        <button class="btn btn-primary" onclick="printSlip()">🖨️ Cetak</button>
       </div>
     </div>
   </div>
@@ -1921,81 +2001,145 @@
     }
 
     // --- TAB: GAJI (PAYROLL SYSTEM) ---
+    const GAPOK = 850000;
+    const POT_ABSEN_PER_HARI = 28500;
+    const POT_POIN_PER_POIN = 2500;
+
+    function gajiKey(id, fM, fY) { return 'kuk_gaji_' + id + '_' + fY + '_' + fM; }
+    function getGajiData(id, fM, fY) {
+      const raw = localStorage.getItem(gajiKey(id, fM, fY));
+      return raw ? JSON.parse(raw) : { absen: 0, bagian: 0, hadiah: 150000, tip: 0, pengurangan: 0 };
+    }
+    function saveGajiData(id, fM, fY, data) {
+      localStorage.setItem(gajiKey(id, fM, fY), JSON.stringify(data));
+    }
+
     function calculatePayroll() {
       const fM = document.getElementById('payrollMonth').value;
       const fY = parseInt(document.getElementById('payrollYear').value);
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
-      
-      const salaryConfig = getSalaryConfig();
-
-      // Count attendance briefing days for selected month
-      const attendanceCount = {};
-      activeKaryawan.forEach(k => { attendanceCount[k.id] = 0; });
-
-      rawAbsenData.forEach(a => {
-        try {
-          const tgl = new Date(a.waktu);
-          const y = tgl.getFullYear();
-          const m = String(tgl.getMonth() + 1).padStart(2, '0');
-          if (m === fM && String(y) === String(fY) && a.status.toLowerCase() === 'hadir') {
-            if (attendanceCount[a.idKaryawan] !== undefined) {
-              attendanceCount[a.idKaryawan]++;
-            }
-          }
-        } catch {}
-      });
 
       // Count violation points for selected month
       const violationPoints = {};
-      activeKaryawan.forEach(k => { violationPoints[k.nama] = 0; });
-
+      activeKaryawan.forEach(k => { violationPoints[k.id] = 0; });
       rawViolationsData.forEach(v => {
         try {
           const tgl = new Date(v.waktu);
           const y = tgl.getFullYear();
           const m = String(tgl.getMonth() + 1).padStart(2, '0');
           if (m === fM && String(y) === String(fY)) {
-            if (violationPoints[v.nama] !== undefined) {
-              violationPoints[v.nama] += Number(v.poin || 0);
-            }
+            const emp = activeKaryawan.find(e => e.nama === v.nama);
+            if (emp) violationPoints[emp.id] = (violationPoints[emp.id] || 0) + Number(v.poin || 0);
           }
         } catch {}
       });
 
       let html = '';
       activeKaryawan.forEach(k => {
-        const roleConfig = salaryConfig[k.bagian] || { gapok: 2500000, tunjangan: 25000 };
-        const gapok = roleConfig.gapok;
-        const tunjanganHarian = roleConfig.tunjangan;
-        
-        const hariHadir = attendanceCount[k.id] || 0;
-        const totalTunjangan = hariHadir * tunjanganHarian;
-        
-        const poinPelanggaran = violationPoints[k.nama] || 0;
-        // Deduct 2,000 IDR per 1 Violation Point
-        const potonganPelanggaran = poinPelanggaran * 2000;
-        
-        const gajiBersih = gapok + totalTunjangan - potonganPelanggaran;
+        const d = getGajiData(k.id, fM, fY);
+        const poin = violationPoints[k.id] || 0;
+        const potAbsen = d.absen * POT_ABSEN_PER_HARI;
+        const potPoin  = poin * POT_POIN_PER_POIN;
+        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+        const total = gajiBulanIni + d.bagian + d.hadiah + d.tip - d.pengurangan;
 
         html += `
           <tr>
             <td><strong>${k.nama}</strong></td>
-            <td><span style="font-size:12px; background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-weight:600;">${k.bagian}</span></td>
-            <td>${formatRupiah(gapok)}</td>
-            <td style="text-align:center; font-weight:700;">${hariHadir} Hari</td>
-            <td>${formatRupiah(totalTunjangan)}</td>
-            <td style="color:var(--danger)">${formatRupiah(potonganPelanggaran)} <span style="font-size:11px; color:var(--text-muted)">(${poinPelanggaran} pts)</span></td>
-            <td style="font-weight:700; color:var(--success);">${formatRupiah(gajiBersih)}</td>
+            <td><span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:4px 8px;border-radius:6px;font-weight:600;">${k.bagian}</span></td>
+            <td style="text-align:center;">
+              <input type="number" min="0" max="31" value="${d.absen}"
+                style="width:60px;text-align:center;padding:6px;border-radius:6px;border:1px solid var(--border);font-size:13px;"
+                onchange="quickSaveAbsen('${k.id}','${fM}','${fY}',this.value);calculatePayroll()">
+            </td>
+            <td style="color:var(--text-muted);font-size:13px;">${d.bagian > 0 ? formatRupiah(d.bagian) : '-'}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
+            <td style="color:var(--danger);font-size:13px;">${poin > 0 ? formatRupiah(potPoin)+' ('+poin+' pts)' : '-'}</td>
+            <td style="font-weight:700;color:${total >= GAPOK ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
             <td style="text-align:right;">
-              <button class="btn btn-outline" style="padding:6px 12px; font-size:12px;" onclick="openSlipModal('${k.nama}', '${k.bagian}', ${gapok}, ${hariHadir}, ${totalTunjangan}, ${poinPelanggaran}, ${potonganPelanggaran}, ${gajiBersih})">
-                👁 Lihat Slip
-              </button>
+              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}','${k.nama}','${k.bagian}','${fM}','${fY}',${poin})">✏️ Input</button>
             </td>
           </tr>
         `;
       });
+      document.getElementById('payrollTableBody').innerHTML = html || '<tr><td colspan="9" style="text-align:center;">Tidak ada data karyawan.</td></tr>';
+    }
 
-      document.getElementById('payrollTableBody').innerHTML = html || '<tr><td colspan="8" style="text-align:center;">Tidak ada data karyawan.</td></tr>';
+    function quickSaveAbsen(id, fM, fY, val) {
+      const d = getGajiData(id, fM, fY);
+      d.absen = Number(val) || 0;
+      saveGajiData(id, fM, fY, d);
+    }
+
+    let _gajiCtx = {};
+    function openGajiInput(id, nama, bagian, fM, fY, poin) {
+      _gajiCtx = { id, nama, bagian, fM, fY, poin: Number(poin) };
+      const d = getGajiData(id, fM, fY);
+      document.getElementById('gajiInputNama').textContent = nama;
+      document.getElementById('gajiInputBagian').textContent = bagian;
+      document.getElementById('gajiInputId').value = id;
+      document.getElementById('gajiAbsen').value = d.absen || 0;
+      document.getElementById('gajiBagian').value = d.bagian || 0;
+      const hadiahOpts = [0, 150000, 200000];
+      document.getElementById('gajiHadiah').value = hadiahOpts.includes(d.hadiah) ? d.hadiah : 'custom';
+      if (!hadiahOpts.includes(d.hadiah)) {
+        document.getElementById('gajiHadiahCustomWrap').style.display = 'block';
+        document.getElementById('gajiHadiahCustom').value = d.hadiah;
+      } else {
+        document.getElementById('gajiHadiahCustomWrap').style.display = 'none';
+      }
+      document.getElementById('gajiTip').value = d.tip || 0;
+      document.getElementById('gajiPengurangan').value = d.pengurangan || 0;
+      updateGajiPreview();
+      openModal('gajiInputModal');
+    }
+
+    document.addEventListener('change', function(e) {
+      if (e.target.id === 'gajiHadiah') {
+        document.getElementById('gajiHadiahCustomWrap').style.display = e.target.value === 'custom' ? 'block' : 'none';
+        updateGajiPreview();
+      }
+    });
+
+    function updateGajiPreview() {
+      const absen = Number(document.getElementById('gajiAbsen').value) || 0;
+      const bagian = Number(document.getElementById('gajiBagian').value) || 0;
+      const hadiahSel = document.getElementById('gajiHadiah').value;
+      const hadiah = hadiahSel === 'custom' ? (Number(document.getElementById('gajiHadiahCustom').value) || 0) : Number(hadiahSel);
+      const tip = Number(document.getElementById('gajiTip').value) || 0;
+      const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
+      const poin = _gajiCtx.poin || 0;
+      const potAbsen = absen * POT_ABSEN_PER_HARI;
+      const potPoin  = poin * POT_POIN_PER_POIN;
+      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+      const total = gajiBulanIni + bagian + hadiah + tip - pengurangan;
+      document.getElementById('prevPotAbsen').innerHTML = '<span>\u2212 Potongan Absen (' + absen + ' hari)</span><span>' + formatRupiah(potAbsen) + '</span>';
+      document.getElementById('prevPotPoin').innerHTML  = '<span>\u2212 Potongan Pelanggaran (' + poin + ' poin)</span><span>' + formatRupiah(potPoin) + '</span>';
+      document.getElementById('prevGajiBulanIni').innerHTML = '<span>= Gaji Bulan Ini</span><span style="font-weight:700;">' + formatRupiah(gajiBulanIni) + '</span>';
+      document.getElementById('prevBagian').innerHTML   = '<span>+ Gaji Bagian</span><span>' + formatRupiah(bagian) + '</span>';
+      document.getElementById('prevHadiah').innerHTML   = '<span>+ Hadiah Pondok</span><span>' + formatRupiah(hadiah) + '</span>';
+      document.getElementById('prevTip').innerHTML      = '<span>+ Tip</span><span>' + formatRupiah(tip) + '</span>';
+      document.getElementById('prevPengurangan').innerHTML = '<span>\u2212 Pengurangan Lain</span><span>' + formatRupiah(pengurangan) + '</span>';
+      document.getElementById('prevTotal').innerHTML    = '<span><strong>TOTAL GAJI</strong></span><span style="font-weight:700;color:var(--primary);">' + formatRupiah(total) + '</span>';
+    }
+
+    function openSlipFromInput() {
+      const { id, nama, bagian, fM, fY, poin } = _gajiCtx;
+      const absen = Number(document.getElementById('gajiAbsen').value) || 0;
+      const bagianVal = Number(document.getElementById('gajiBagian').value) || 0;
+      const hadiahSel = document.getElementById('gajiHadiah').value;
+      const hadiah = hadiahSel === 'custom' ? (Number(document.getElementById('gajiHadiahCustom').value) || 0) : Number(hadiahSel);
+      const tip = Number(document.getElementById('gajiTip').value) || 0;
+      const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
+      saveGajiData(id, fM, fY, { absen, bagian: bagianVal, hadiah, tip, pengurangan });
+      const potAbsen = absen * POT_ABSEN_PER_HARI;
+      const potPoin  = poin * POT_POIN_PER_POIN;
+      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+      const total = gajiBulanIni + bagianVal + hadiah + tip - pengurangan;
+      closeModal('gajiInputModal');
+      openSlipModal(nama, bagian, fM, fY, absen, poin, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total);
+      calculatePayroll();
     }
 
     // Modal Settings Salary Config per Role
@@ -2032,67 +2176,88 @@
       Object.keys(config).forEach(role => {
         const gapokVal = Number(document.getElementById(`setting-gapok-${role.replace(/\s+/g, '_')}`).value);
         const tunjVal = Number(document.getElementById(`setting-tunjangan-${role.replace(/\s+/g, '_')}`).value);
-        newConfig[role] = { gapok: gapokVal, tunjangan: tunjVal };
-      });
-
       localStorage.setItem('kuk_salary_config', JSON.stringify(newConfig));
       closeModal('salarySettingsModal');
       showToast('Pengaturan nominal gaji disimpan!', 'success');
       calculatePayroll();
     }
 
-    // Modal Slip Preview and print
-    function openSlipModal(nama, bagian, gapok, hariHadir, totalTunjangan, poin, potongan, gajiBersih) {
-      const fMName = mNames[parseInt(document.getElementById('payrollMonth').value) - 1];
-      const fY = document.getElementById('payrollYear').value;
+    // Terbilang (number to words in Indonesian)
+    function terbilang(n) {
+      const sat = ['','satu','dua','tiga','empat','lima','enam','tujuh','delapan','sembilan','sepuluh','sebelas'];
+      if (n < 12) return sat[n];
+      if (n < 20) return sat[n-10]+' belas';
+      if (n < 100) return sat[Math.floor(n/10)]+' puluh'+(n%10?' '+sat[n%10]:'');
+      if (n < 200) return 'seratus'+(n%100?' '+terbilang(n%100):'');
+      if (n < 1000) return sat[Math.floor(n/100)]+' ratus'+(n%100?' '+terbilang(n%100):'');
+      if (n < 2000) return 'seribu'+(n%1000?' '+terbilang(n%1000):'');
+      if (n < 1000000) return terbilang(Math.floor(n/1000))+' ribu'+(n%1000?' '+terbilang(n%1000):'');
+      if (n < 1000000000) return terbilang(Math.floor(n/1000000))+' juta'+(n%1000000?' '+terbilang(n%1000000):'');
+      return n;
+    }
+
+    function openSlipModal(nama, bagian, fM, fY, absen, poin, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total) {
+      const fMName = mNames[parseInt(fM) - 1];
+      const potAbsen = absen * POT_ABSEN_PER_HARI;
+      const potPoin  = poin * POT_POIN_PER_POIN;
+      const nomorSurat = 'SKG/' + fY + '/' + String(fM).padStart(2,'0') + '/' + nama.replace(/\s+/g,'').toUpperCase().slice(0,4);
 
       const slipHtml = `
-        <div class="slip-header">
-          <h3>RISING GIANT GROUP</h3>
-          <p style="font-size:12px; font-weight:bold;">SLIP GAJI KARYAWAN KUK</p>
-          <p style="font-size:12px;">Periode: ${fMName} ${fY}</p>
-        </div>
-        <div class="slip-meta">
-          <div>
-            <strong>Nama Karyawan:</strong> ${nama}<br>
-            <strong>Bagian/Divisi:</strong> ${bagian}
-          </div>
-          <div style="text-align:right;">
-            <strong>Tanggal Cetak:</strong> ${getTodayStrIndo()}
+        <div style="text-align:center; margin-bottom:14px;">
+          <div style="font-size:17px; font-weight:900; letter-spacing:1px; text-transform:uppercase;">KUK La Tansa</div>
+          <div style="font-size:11px; color:#666;">Pondok Modern Darussalam Gontor</div>
+          <div style="border-top:2px solid #000; border-bottom:1px solid #000; margin:8px 0; padding:4px 0;">
+            <div style="font-size:14px; font-weight:700;">SURAT KETERANGAN GAJI</div>
+            <div style="font-size:11px;">No: ${nomorSurat}</div>
           </div>
         </div>
 
-        <div class="slip-section-title">Pendapatan / Earnings</div>
-        <div class="slip-row">
-          <span>Gaji Pokok</span>
-          <span>${formatRupiah(gapok)}</span>
-        </div>
-        <div class="slip-row">
-          <span>Tunjangan Kehadiran (${hariHadir} hari)</span>
-          <span>${formatRupiah(totalTunjangan)}</span>
+        <table style="width:100%; font-size:13px; margin-bottom:14px; border-collapse:collapse;">
+          <tr><td style="width:42%; padding:3px 0;">Nama</td><td>: <strong>${nama}</strong></td></tr>
+          <tr><td style="padding:3px 0;">Bagian / Jabatan</td><td>: ${bagian}</td></tr>
+          <tr><td style="padding:3px 0;">Periode Gaji</td><td>: ${fMName} ${fY}</td></tr>
+          <tr><td style="padding:3px 0;">Tanggal Cetak</td><td>: ${getTodayStrIndo()}</td></tr>
+        </table>
+
+        <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Rincian Gaji</div>
+        <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
+          <tr><td style="padding:3px 0;">Gaji Pokok</td><td style="text-align:right;">${formatRupiah(GAPOK)}</td></tr>
+          ${absen > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Potongan Tdk Masuk (${absen} hr &times; Rp 28.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potAbsen)}</td></tr>` : ''}
+          ${poin > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Potongan Pelanggaran (${poin} poin &times; Rp 2.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potPoin)}</td></tr>` : ''}
+          <tr style="border-top:1px dashed #aaa;">
+            <td style="padding:4px 0; font-weight:700;">Gaji Bulan Ini</td>
+            <td style="text-align:right; font-weight:700;">${formatRupiah(gajiBulanIni)}</td>
+          </tr>
+        </table>
+
+        ${(bagianVal + hadiah + tip + pengurangan) > 0 ? `
+        <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Tambahan &amp; Pengurangan</div>
+        <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
+          ${bagianVal > 0 ? `<tr><td style="padding:3px 0;">Gaji Bagian</td><td style="text-align:right;">${formatRupiah(bagianVal)}</td></tr>` : ''}
+          ${hadiah > 0 ? `<tr><td style="padding:3px 0;">Hadiah dari Pondok</td><td style="text-align:right;">${formatRupiah(hadiah)}</td></tr>` : ''}
+          ${tip > 0 ? `<tr><td style="padding:3px 0;">Tip</td><td style="text-align:right;">${formatRupiah(tip)}</td></tr>` : ''}
+          ${pengurangan > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pengurangan</td><td style="text-align:right; color:#c00;">- ${formatRupiah(pengurangan)}</td></tr>` : ''}
+        </table>` : ''}
+
+        <div style="border:1.5px solid #000; padding:10px 12px; margin-bottom:20px; background:#f9f9f9;">
+          <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700;">
+            <span>TOTAL GAJI</span><span>${formatRupiah(total)}</span>
+          </div>
+          <div style="font-size:11px; margin-top:5px; color:#555; font-style:italic;">
+            Terbilang: ${terbilang(total)} rupiah
+          </div>
         </div>
 
-        <div class="slip-section-title" style="margin-top:15px;">Potongan / Deductions</div>
-        <div class="slip-row" style="color:red;">
-          <span>Pelanggaran (${poin} poin)</span>
-          <span>-${formatRupiah(potongan)}</span>
-        </div>
-
-        <div class="slip-total">
-          <span>Gaji Bersih (Net Take Home Pay)</span>
-          <span>${formatRupiah(gajiBersih)}</span>
-        </div>
-
-        <div class="slip-sign">
+        <div style="display:grid; grid-template-columns:1fr 1fr; text-align:center; font-size:12px; margin-top:10px;">
           <div>
-            <p>Penerima,</p>
-            <div class="slip-sign-space"></div>
-            <p><strong>${nama}</strong></p>
+            <div>Penerima,</div>
+            <div style="height:60px;"></div>
+            <div style="border-top:1px solid #000; display:inline-block; min-width:120px; padding-top:4px;"><strong>${nama}</strong></div>
           </div>
           <div>
-            <p>HR & Admin KUK,</p>
-            <div class="slip-sign-space"></div>
-            <p><strong>RISING GIANT</strong></p>
+            <div>Bendahara TB. KUK La Tansa,</div>
+            <div style="height:60px;"></div>
+            <div style="border-top:1px solid #000; display:inline-block; min-width:120px; padding-top:4px;"><strong>Ari Hermawan</strong></div>
           </div>
         </div>
       `;
