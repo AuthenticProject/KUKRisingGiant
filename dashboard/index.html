@@ -2176,6 +2176,9 @@
       Object.keys(config).forEach(role => {
         const gapokVal = Number(document.getElementById(`setting-gapok-${role.replace(/\s+/g, '_')}`).value);
         const tunjVal = Number(document.getElementById(`setting-tunjangan-${role.replace(/\s+/g, '_')}`).value);
+        newConfig[role] = { gapok: gapokVal, tunjangan: tunjVal };
+      });
+
       localStorage.setItem('kuk_salary_config', JSON.stringify(newConfig));
       closeModal('salarySettingsModal');
       showToast('Pengaturan nominal gaji disimpan!', 'success');
