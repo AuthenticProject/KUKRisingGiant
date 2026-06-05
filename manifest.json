@@ -2,7 +2,7 @@
   "name": "KUK HR Portal",
   "short_name": "KUK HR",
   "description": "Portal Manajemen Cuti, Absensi Briefing, dan Pelanggaran Karyawan KUK",
-  "start_url": "./dashboard/",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#fafafa",

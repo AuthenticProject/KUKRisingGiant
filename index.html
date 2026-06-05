@@ -19,9 +19,14 @@
       --surface: #1e293b;
       --surface2: #273549;
       --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-light: rgba(59,130,246,0.15);
       --text: #f1f5f9;
       --text-muted: #94a3b8;
       --border: rgba(255,255,255,0.08);
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 20px;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
@@ -31,10 +36,9 @@
       color: var(--text);
       min-height: 100vh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 32px 20px;
+      padding: 24px 20px;
       position: relative;
       overflow-x: hidden;
     }
@@ -56,33 +60,45 @@
       pointer-events: none; z-index: 0;
     }
 
-    .container {
+    /* ===== LOGIN SCREEN ===== */
+    #loginScreen {
       width: 100%;
-      max-width: 440px;
-      display: flex;
-      flex-direction: column;
-      gap: 28px;
+      max-width: 400px;
       position: relative;
       z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ===== PORTAL SCREEN ===== */
+    #portalScreen {
+      width: 100%;
+      max-width: 440px;
+      position: relative;
+      z-index: 1;
+      display: none;
+      flex-direction: column;
+      gap: 24px;
     }
 
     /* Brand */
     .brand { text-align: center; }
 
     .brand-logo {
-      width: 76px; height: 76px;
+      width: 72px; height: 72px;
       background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-      border-radius: 22px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 16px;
-      box-shadow: 0 8px 32px rgba(59,130,246,0.4);
-      font-size: 36px;
+      margin: 0 auto 14px;
+      box-shadow: 0 8px 28px rgba(59,130,246,0.4);
+      font-size: 34px;
     }
 
     .brand h1 {
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 800;
       background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
       -webkit-background-clip: text;
@@ -91,11 +107,134 @@
       letter-spacing: -0.5px;
     }
 
-    .brand p {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-top: 6px;
+    .brand p { font-size: 14px; color: var(--text-muted); margin-top: 6px; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 28px;
     }
+
+    /* Form elements */
+    .form-group { display: flex; flex-direction: column; gap: 8px; }
+
+    .form-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-muted);
+    }
+
+    select, input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 13px 16px;
+      font-size: 15px;
+      font-weight: 500;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    select { appearance: none; cursor: pointer; }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Password wrapper */
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 46px; }
+    .pw-toggle {
+      position: absolute;
+      right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: var(--text-muted);
+      cursor: pointer; padding: 4px;
+    }
+    .pw-toggle:hover { color: var(--text); }
+
+    /* Error message */
+    .err-msg {
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 13px;
+      color: #fca5a5;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .err-msg.show { display: flex; }
+
+    /* Primary button */
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 15px rgba(59,130,246,0.35);
+      font-family: 'Outfit', sans-serif;
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(59,130,246,0.45);
+    }
+    .btn-primary:disabled {
+      background: var(--surface2);
+      color: var(--text-muted);
+      box-shadow: none; cursor: not-allowed;
+    }
+
+    /* Welcome bar */
+    .welcome-bar {
+      background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(16,185,129,0.1));
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 16px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .welcome-avatar {
+      width: 42px; height: 42px;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+    .welcome-info h3 { font-size: 15px; font-weight: 700; }
+    .welcome-info p  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .btn-logout {
+      margin-left: auto;
+      background: rgba(239,68,68,0.12);
+      border: 1px solid rgba(239,68,68,0.25);
+      color: #fca5a5;
+      border-radius: 9px;
+      padding: 7px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: 'Outfit', sans-serif;
+      flex-shrink: 0;
+    }
+    .btn-logout:hover { background: rgba(239,68,68,0.22); }
 
     /* Section label */
     .section-label {
@@ -104,9 +243,7 @@
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: var(--text-muted);
-      margin-bottom: 12px;
-      padding: 0 2px;
-      display: block;
+      margin-bottom: 10px;
     }
 
     /* Menu Grid */
@@ -119,172 +256,299 @@
     .menu-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 22px 18px 18px;
+      border-radius: 18px;
+      padding: 20px 16px 16px;
       text-decoration: none;
       color: var(--text);
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
-                  box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
-                  border-color 0.22s;
-      cursor: pointer;
+      gap: 9px;
+      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.2s, border-color 0.2s;
       position: relative;
       overflow: hidden;
     }
-
     .menu-card:active { transform: scale(0.97); }
-
     .menu-card:hover {
       transform: translateY(-4px);
       border-color: var(--accent, rgba(255,255,255,0.18));
-      box-shadow: 0 16px 40px rgba(0,0,0,0.35),
-                  0 0 0 1px var(--accent, transparent);
+      box-shadow: 0 14px 36px rgba(0,0,0,0.35), 0 0 0 1px var(--accent, transparent);
     }
-
     .menu-card.blue  { --accent: #3b82f6; }
     .menu-card.green { --accent: #10b981; }
     .menu-card.amber { --accent: #f59e0b; }
     .menu-card.red   { --accent: #ef4444; }
 
     .menu-icon {
-      width: 48px; height: 48px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
+      width: 46px; height: 46px;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
       transition: transform 0.2s;
     }
-
     .menu-card:hover .menu-icon { transform: scale(1.1); }
-
     .menu-card.blue  .menu-icon { background: rgba(59,130,246,0.18); }
     .menu-card.green .menu-icon { background: rgba(16,185,129,0.18); }
     .menu-card.amber .menu-icon { background: rgba(245,158,11,0.18); }
     .menu-card.red   .menu-icon { background: rgba(239,68,68,0.18); }
 
-    .menu-card-label {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.2;
-    }
+    .menu-card-label { font-size: 14px; font-weight: 700; }
+    .menu-card-desc  { font-size: 11px; color: var(--text-muted); line-height: 1.4; margin-top: -3px; }
 
-    .menu-card-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.4;
-      margin-top: -4px;
-    }
-
-    /* Arrow indicator */
     .menu-arrow {
-      position: absolute;
-      right: 14px; bottom: 14px;
-      color: var(--text-muted);
-      opacity: 0;
+      position: absolute; right: 12px; bottom: 12px;
+      color: var(--text-muted); opacity: 0;
       transition: opacity 0.2s, transform 0.2s;
-      transform: translateX(-6px);
+      transform: translateX(-4px);
     }
-    .menu-card:hover .menu-arrow {
-      opacity: 0.6;
-      transform: translateX(0);
-    }
+    .menu-card:hover .menu-arrow { opacity: 0.6; transform: translateX(0); }
 
-    /* Full-width card (for dashboard) */
+    /* Full-width card */
     .menu-card.full {
       grid-column: 1 / -1;
       flex-direction: row;
       align-items: center;
-      padding: 18px 20px;
-      gap: 16px;
+      padding: 16px 18px;
+      gap: 14px;
     }
     .menu-card.full .menu-info { flex: 1; }
     .menu-card.full .menu-arrow {
-      position: static;
-      opacity: 0.4;
-      transform: none;
+      position: static; opacity: 0.4; transform: none;
     }
-    .menu-card.full:hover .menu-arrow {
-      opacity: 0.8;
-      transform: translateX(4px);
-    }
+    .menu-card.full:hover .menu-arrow { opacity: 0.8; transform: translateX(4px); }
 
-    /* Footer note */
-    .footer-note {
-      text-align: center;
-      font-size: 12px;
-      color: #475569;
-      padding-top: 8px;
+    /* Footer */
+    .footer-note { text-align: center; font-size: 12px; color: #334155; }
+
+    /* Toast */
+    .toast-container {
+      position: fixed; top: 20px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 999;
+      display: flex; flex-direction: column; gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface);
+      color: var(--text);
+      padding: 12px 20px;
+      border-radius: 100px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+      font-weight: 500; font-size: 14px;
+      border-left: 4px solid var(--primary);
+      display: flex; align-items: center; gap: 8px;
+      animation: toastIn 0.3s ease;
+      pointer-events: auto;
+      white-space: nowrap;
+    }
+    .toast.error   { border-left-color: var(--danger); }
+    .toast.success { border-left-color: var(--success); }
+
+    @keyframes toastIn  { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { to   { transform: translateY(-20px); opacity: 0; } }
+
+    /* Select arrow */
+    .sel-wrap { position: relative; }
+    .sel-wrap::after {
+      content: '';
+      position: absolute;
+      right: 16px; top: 50%;
+      transform: translateY(-60%) rotate(45deg);
+      width: 9px; height: 9px;
+      border-right: 2px solid var(--text-muted);
+      border-bottom: 2px solid var(--text-muted);
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Brand -->
+  <!-- ===== LOGIN SCREEN ===== -->
+  <div id="loginScreen">
     <div class="brand">
       <div class="brand-logo">🏪</div>
       <h1>KUK HR Portal</h1>
-      <p>Sistem Manajemen Karyawan</p>
+      <p>Masuk untuk mengakses aplikasi</p>
     </div>
 
-    <!-- Menu -->
-    <div>
-      <span class="section-label">Pilih Menu</span>
-      <div class="menu-grid">
-
-        <!-- Absen Briefing -->
-        <a href="absen.html" class="menu-card blue">
-          <div class="menu-icon">📋</div>
-          <div class="menu-card-label">Rekap Absen</div>
-          <div class="menu-card-desc">Briefing pagi harian</div>
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </a>
-
-        <!-- Cuti -->
-        <a href="cuti.html" class="menu-card green">
-          <div class="menu-icon">🏖️</div>
-          <div class="menu-card-label">Pengajuan Cuti</div>
-          <div class="menu-card-desc">Pilih jadwal libur</div>
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </a>
-
-        <!-- Pelanggaran -->
-        <a href="pelanggaran.html" class="menu-card amber">
-          <div class="menu-icon">⚠️</div>
-          <div class="menu-card-label">Pelanggaran</div>
-          <div class="menu-card-desc">Catat pelanggaran</div>
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </a>
-
-        <!-- Dashboard Admin (full width) -->
-        <a href="dashboard/" class="menu-card red full">
-          <div class="menu-icon">📊</div>
-          <div class="menu-info">
-            <div class="menu-card-label">Dashboard Admin</div>
-            <div class="menu-card-desc">Rekap data & laporan — login staf</div>
-          </div>
-          <svg class="menu-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="m9 18 6-6-6-6"/>
-          </svg>
-        </a>
-
+    <div class="card" style="display:flex; flex-direction:column; gap:18px;">
+      <div class="form-group">
+        <label class="form-label">Pilih Pengguna</label>
+        <div class="sel-wrap">
+          <select id="loginUser">
+            <option value="fariz">fariz</option>
+            <option value="andika">andika</option>
+            <option value="irsyadil">irsyadil</option>
+            <option value="ari">ari</option>
+            <option value="aria">aria</option>
+            <option value="zain">zain</option>
+          </select>
+        </div>
       </div>
+
+      <div class="form-group">
+        <label class="form-label">Kata Sandi</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" placeholder="Masukkan password" autocomplete="current-password">
+          <button class="pw-toggle" id="pwToggle" type="button">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+              <circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="err-msg" id="errMsg">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        <span id="errText">Password salah, coba lagi.</span>
+      </div>
+
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()">Masuk</button>
     </div>
 
     <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
-
   </div>
+
+  <!-- ===== PORTAL SCREEN (after login) ===== -->
+  <div id="portalScreen">
+    <!-- Welcome bar -->
+    <div class="welcome-bar">
+      <div class="welcome-avatar">👤</div>
+      <div class="welcome-info">
+        <h3 id="welcomeName">Pengguna</h3>
+        <p>Staf KUK HR Portal</p>
+      </div>
+      <button class="btn-logout" onclick="doLogout()">Keluar</button>
+    </div>
+
+    <!-- Brand mini -->
+    <div style="text-align:center;">
+      <div style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.5px; color:var(--text-muted);">Pilih Menu</div>
+    </div>
+
+    <div class="menu-grid">
+      <!-- Absen -->
+      <a href="absen.html" class="menu-card blue">
+        <div class="menu-icon">📋</div>
+        <div class="menu-card-label">Rekap Absen</div>
+        <div class="menu-card-desc">Briefing pagi harian</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Cuti -->
+      <a href="cuti.html" class="menu-card green">
+        <div class="menu-icon">🏖️</div>
+        <div class="menu-card-label">Pengajuan Cuti</div>
+        <div class="menu-card-desc">Pilih jadwal libur</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Pelanggaran -->
+      <a href="pelanggaran.html" class="menu-card amber">
+        <div class="menu-icon">⚠️</div>
+        <div class="menu-card-label">Pelanggaran</div>
+        <div class="menu-card-desc">Catat pelanggaran</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
+      <!-- Dashboard -->
+      <a href="dashboard/" class="menu-card red">
+        <div class="menu-icon">📊</div>
+        <div class="menu-card-label">Dashboard</div>
+        <div class="menu-card-desc">Rekap & laporan</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+
+    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
+  </div>
+
+  <script>
+    // === AUTH CONFIG (sama dengan dashboard) ===
+    const VALID_USERS = ['fariz', 'andika', 'irsyadil', 'ari', 'aria', 'zain'];
+    const DEFAULT_PASSWORD = '12345';
+
+    function getStoredPassword(username) {
+      return localStorage.getItem('kuk_pass_' + username) || DEFAULT_PASSWORD;
+    }
+
+    // === TOAST ===
+    function showToast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.textContent = msg;
+      c.appendChild(t);
+      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    // === PASSWORD TOGGLE ===
+    document.getElementById('pwToggle').onclick = () => {
+      const inp = document.getElementById('loginPassword');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    };
+
+    // === ENTER KEY ===
+    document.getElementById('loginPassword').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // === LOGIN ===
+    function doLogin() {
+      const user = document.getElementById('loginUser').value;
+      const pass = document.getElementById('loginPassword').value;
+      const errEl = document.getElementById('errMsg');
+
+      if (!pass) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Harap masukkan kata sandi.';
+        return;
+      }
+
+      const stored = getStoredPassword(user);
+      if (pass !== stored) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Password salah, coba lagi.';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginPassword').focus();
+        return;
+      }
+
+      // Success
+      localStorage.setItem('kuk_user', user);
+      errEl.classList.remove('show');
+      showPortal(user);
+    }
+
+    // === SHOW PORTAL MENU ===
+    function showPortal(username) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('portalScreen').style.display = 'flex';
+      document.getElementById('welcomeName').textContent = username;
+    }
+
+    // === LOGOUT ===
+    function doLogout() {
+      localStorage.removeItem('kuk_user');
+      document.getElementById('portalScreen').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('errMsg').classList.remove('show');
+    }
+
+    // === CHECK SESSION ON LOAD ===
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem('kuk_user');
+      if (saved && VALID_USERS.includes(saved)) {
+        showPortal(saved);
+      }
+    });
+  </script>
 
   <script>
     if ('serviceWorker' in navigator) {
