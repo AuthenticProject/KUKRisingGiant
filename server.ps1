@@ -9,7 +9,18 @@ try {
         $req = $context.Request
         $res = $context.Response
         $path = $req.Url.LocalPath
-        if ($path -eq "/") { $path = "/index.html" }
+        if ($path -eq "/") { 
+            $path = "/index.html" 
+        } elseif ($path.EndsWith("/")) {
+            $path = $path + "index.html"
+        } else {
+            $localFolder = Join-Path "d:\00. Me\Code Project\KUK" $path.TrimStart('/').Replace('/', '\')
+            if (Test-Path $localFolder -PathType Container) {
+                $res.Redirect($path + "/")
+                $res.Close()
+                continue
+            }
+        }
         
         $filePath = Join-Path "d:\00. Me\Code Project\KUK" $path.TrimStart('/').Replace('/', '\')
         if (Test-Path $filePath -PathType Leaf) {
