@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KUK HR Portal</title>
   <link rel="manifest" href="manifest.json">
   <meta name="description" content="Portal HR KUK - Absensi, Cuti, dan Pelanggaran Karyawan">
-  <meta name="theme-color" content="#2563eb">
+  <meta name="theme-color" content="#0f172a">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -20,16 +19,9 @@
       --surface: #1e293b;
       --surface2: #273549;
       --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --primary-light: rgba(59,130,246,0.15);
       --text: #f1f5f9;
       --text-muted: #94a3b8;
       --border: rgba(255,255,255,0.08);
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --radius: 20px;
-      --shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
@@ -42,61 +34,57 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px 20px;
+      padding: 32px 20px;
       position: relative;
       overflow-x: hidden;
     }
 
-    /* Background blobs */
     body::before {
       content: '';
       position: fixed;
-      top: -200px; left: -200px;
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-      pointer-events: none;
+      top: -200px; left: -150px;
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
     }
     body::after {
       content: '';
       position: fixed;
-      bottom: -200px; right: -200px;
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
-      pointer-events: none;
+      bottom: -150px; right: -150px;
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(16,185,129,0.08) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
     }
 
     .container {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 28px;
       position: relative;
       z-index: 1;
     }
 
-    /* Logo / Brand */
-    .brand {
-      text-align: center;
-    }
+    /* Brand */
+    .brand { text-align: center; }
 
     .brand-logo {
-      width: 72px;
-      height: 72px;
-      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-      border-radius: 20px;
+      width: 76px; height: 76px;
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      border-radius: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       margin: 0 auto 16px;
-      box-shadow: 0 8px 24px rgba(59,130,246,0.4);
-      font-size: 32px;
+      box-shadow: 0 8px 32px rgba(59,130,246,0.4);
+      font-size: 36px;
     }
 
     .brand h1 {
-      font-size: 26px;
+      font-size: 28px;
       font-weight: 800;
-      background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+      background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -109,225 +97,19 @@
       margin-top: 6px;
     }
 
-    /* Card */
-    .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      padding: 28px;
-    }
-
-    /* Login Section */
-    #loginSection { display: flex; flex-direction: column; gap: 20px; }
-    #menuSection  { display: none;  flex-direction: column; gap: 16px; }
-
+    /* Section label */
     .section-label {
-      font-size: 13px;
-      font-weight: 600;
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       color: var(--text-muted);
-      margin-bottom: 4px;
+      margin-bottom: 12px;
+      padding: 0 2px;
       display: block;
     }
 
-    /* Dropdown Select */
-    .select-wrap {
-      position: relative;
-    }
-
-    .select-wrap select {
-      width: 100%;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: 500;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      color: var(--text);
-      appearance: none;
-      outline: none;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .select-wrap select:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-light);
-    }
-
-    .select-wrap::after {
-      content: '';
-      position: absolute;
-      right: 18px;
-      top: 50%;
-      transform: translateY(-60%) rotate(45deg);
-      width: 10px; height: 10px;
-      border-right: 2px solid var(--text-muted);
-      border-bottom: 2px solid var(--text-muted);
-      pointer-events: none;
-    }
-
-    /* PIN Input */
-    .pin-label {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .pin-label a {
-      font-size: 12px;
-      color: var(--primary);
-      text-decoration: none;
-      cursor: pointer;
-    }
-
-    .pin-wrap {
-      position: relative;
-    }
-
-    .pin-wrap input {
-      width: 100%;
-      padding: 14px 48px 14px 18px;
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 8px;
-      background: var(--surface2);
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      color: var(--text);
-      outline: none;
-      transition: 0.2s;
-    }
-
-    .pin-wrap input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px var(--primary-light);
-    }
-
-    .pin-toggle {
-      position: absolute;
-      right: 14px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: none;
-      border: none;
-      color: var(--text-muted);
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    .pin-toggle:hover { color: var(--text); }
-
-    /* Error message */
-    .err-msg {
-      background: rgba(239,68,68,0.1);
-      border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 10px;
-      padding: 12px 16px;
-      font-size: 14px;
-      color: #fca5a5;
-      display: none;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .err-msg.show { display: flex; }
-
-    /* Buttons */
-    .btn-primary {
-      width: 100%;
-      padding: 16px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
-      color: white;
-      border: none;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: 0.3s;
-      box-shadow: 0 4px 15px rgba(59,130,246,0.35);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-primary:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(59,130,246,0.45);
-    }
-
-    .btn-primary:disabled {
-      background: var(--surface2);
-      color: var(--text-muted);
-      box-shadow: none;
-      cursor: not-allowed;
-    }
-
-    /* Welcome bar */
-    .welcome-bar {
-      background: linear-gradient(135deg, rgba(59,130,246,0.2), rgba(16,185,129,0.1));
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: 16px;
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .welcome-avatar {
-      width: 44px; height: 44px;
-      background: linear-gradient(135deg, var(--primary), #1d4ed8);
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      flex-shrink: 0;
-    }
-
-    .welcome-info h3 {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text);
-    }
-
-    .welcome-info p {
-      font-size: 13px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .btn-logout {
-      margin-left: auto;
-      background: rgba(239,68,68,0.15);
-      border: 1px solid rgba(239,68,68,0.3);
-      color: #fca5a5;
-      border-radius: 10px;
-      padding: 8px 14px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: 0.2s;
-      flex-shrink: 0;
-    }
-
-    .btn-logout:hover {
-      background: rgba(239,68,68,0.25);
-    }
-
     /* Menu Grid */
-    .menu-title {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      padding: 0 2px;
-    }
-
     .menu-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -337,201 +119,112 @@
     .menu-card {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 22px 18px;
+      border-radius: 20px;
+      padding: 22px 18px 18px;
       text-decoration: none;
       color: var(--text);
       display: flex;
       flex-direction: column;
-      gap: 12px;
-      transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      gap: 10px;
+      transition: transform 0.22s cubic-bezier(0.4,0,0.2,1),
+                  box-shadow 0.22s cubic-bezier(0.4,0,0.2,1),
+                  border-color 0.22s;
       cursor: pointer;
       position: relative;
       overflow: hidden;
     }
 
-    .menu-card::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      transition: 0.25s;
-      border-radius: inherit;
-    }
+    .menu-card:active { transform: scale(0.97); }
 
     .menu-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255,255,255,0.15);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+      transform: translateY(-4px);
+      border-color: var(--accent, rgba(255,255,255,0.18));
+      box-shadow: 0 16px 40px rgba(0,0,0,0.35),
+                  0 0 0 1px var(--accent, transparent);
     }
-
-    .menu-card:hover::before { opacity: 1; }
 
     .menu-card.blue  { --accent: #3b82f6; }
     .menu-card.green { --accent: #10b981; }
     .menu-card.amber { --accent: #f59e0b; }
     .menu-card.red   { --accent: #ef4444; }
 
-    .menu-card:hover { box-shadow: 0 12px 30px rgba(0,0,0,0.3), 0 0 0 1px var(--accent); }
-
     .menu-icon {
-      width: 46px; height: 46px;
-      border-radius: 12px;
+      width: 48px; height: 48px;
+      border-radius: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
+      transition: transform 0.2s;
     }
 
-    .menu-card.blue  .menu-icon { background: rgba(59,130,246,0.2); }
-    .menu-card.green .menu-icon { background: rgba(16,185,129,0.2); }
-    .menu-card.amber .menu-icon { background: rgba(245,158,11,0.2); }
-    .menu-card.red   .menu-icon { background: rgba(239,68,68,0.2); }
+    .menu-card:hover .menu-icon { transform: scale(1.1); }
+
+    .menu-card.blue  .menu-icon { background: rgba(59,130,246,0.18); }
+    .menu-card.green .menu-icon { background: rgba(16,185,129,0.18); }
+    .menu-card.amber .menu-icon { background: rgba(245,158,11,0.18); }
+    .menu-card.red   .menu-icon { background: rgba(239,68,68,0.18); }
 
     .menu-card-label {
       font-size: 15px;
       font-weight: 700;
       color: var(--text);
+      line-height: 1.2;
     }
 
     .menu-card-desc {
       font-size: 12px;
       color: var(--text-muted);
       line-height: 1.4;
-      margin-top: -6px;
+      margin-top: -4px;
     }
 
+    /* Arrow indicator */
     .menu-arrow {
       position: absolute;
       right: 14px; bottom: 14px;
       color: var(--text-muted);
       opacity: 0;
-      transition: 0.2s;
-      transform: translateX(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+      transform: translateX(-6px);
     }
-
     .menu-card:hover .menu-arrow {
-      opacity: 1;
+      opacity: 0.6;
       transform: translateX(0);
     }
 
-    /* Full-width menu card */
+    /* Full-width card (for dashboard) */
     .menu-card.full {
       grid-column: 1 / -1;
       flex-direction: row;
       align-items: center;
-      gap: 16px;
       padding: 18px 20px;
+      gap: 16px;
     }
-
     .menu-card.full .menu-info { flex: 1; }
-
-    /* Spinner */
-    .spinner {
-      width: 20px; height: 20px;
-      border: 2.5px solid rgba(255,255,255,0.3);
-      border-top-color: white;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      display: none;
+    .menu-card.full .menu-arrow {
+      position: static;
+      opacity: 0.4;
+      transform: none;
+    }
+    .menu-card.full:hover .menu-arrow {
+      opacity: 0.8;
+      transform: translateX(4px);
     }
 
-    .btn-primary.loading .spinner { display: block; }
-    .btn-primary.loading .btn-text { display: none; }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Toast */
-    .toast-container {
-      position: fixed;
-      top: 20px; left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      pointer-events: none;
-    }
-
-    .toast {
-      background: var(--surface2);
-      color: var(--text);
-      padding: 12px 20px;
-      border-radius: 100px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-      font-weight: 500;
-      font-size: 14px;
-      border-left: 4px solid var(--primary);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      animation: toastIn 0.3s ease;
-      pointer-events: auto;
-      white-space: nowrap;
-    }
-
-    .toast.error { border-left-color: var(--danger); }
-    .toast.success { border-left-color: var(--success); }
-
-    @keyframes toastIn {
-      from { transform: translateY(-20px); opacity: 0; }
-      to   { transform: translateY(0); opacity: 1; }
-    }
-
-    @keyframes toastOut {
-      to { transform: translateY(-20px); opacity: 0; }
-    }
-
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: var(--bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 500;
-      transition: opacity 0.4s;
-    }
-
-    .loading-overlay.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .loading-dots {
-      display: flex;
-      gap: 8px;
-    }
-
-    .loading-dots span {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--primary);
-      animation: bounce 1.2s ease infinite;
-    }
-
-    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes bounce {
-      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
-      40% { transform: scale(1); opacity: 1; }
+    /* Footer note */
+    .footer-note {
+      text-align: center;
+      font-size: 12px;
+      color: #475569;
+      padding-top: 8px;
     }
   </style>
 </head>
-
 <body>
 
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-dots">
-      <span></span><span></span><span></span>
-    </div>
-  </div>
-
-  <div class="toast-container" id="toastContainer"></div>
-
   <div class="container">
+
     <!-- Brand -->
     <div class="brand">
       <div class="brand-logo">🏪</div>
@@ -539,70 +232,16 @@
       <p>Sistem Manajemen Karyawan</p>
     </div>
 
-    <!-- LOGIN CARD -->
-    <div class="card" id="loginCard">
-      <div id="loginSection">
-        <div>
-          <span class="section-label">Pilih Nama Karyawan</span>
-          <div class="select-wrap">
-            <select id="namaSelect" disabled>
-              <option value="">Memuat data...</option>
-            </select>
-          </div>
-        </div>
-
-        <div>
-          <div class="pin-label">
-            <span class="section-label">PIN Karyawan</span>
-            <a id="forgotPin">Lupa PIN?</a>
-          </div>
-          <div class="pin-wrap">
-            <input type="password" id="pinInput" maxlength="6" placeholder="••••••" inputmode="numeric" autocomplete="off">
-            <button class="pin-toggle" id="pinToggle" type="button">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                <circle cx="12" cy="12" r="3"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="err-msg" id="errMsg">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
-          <span id="errText">PIN salah, coba lagi.</span>
-        </div>
-
-        <button class="btn-primary" id="loginBtn" onclick="doLogin()" disabled>
-          <div class="spinner"></div>
-          <span class="btn-text">Masuk</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- MENU SECTION (shown after login) -->
-    <div id="menuSection">
-      <!-- Welcome bar -->
-      <div class="welcome-bar">
-        <div class="welcome-avatar">👤</div>
-        <div class="welcome-info">
-          <h3 id="welcomeName">Karyawan</h3>
-          <p id="welcomeBagian">-</p>
-        </div>
-        <button class="btn-logout" onclick="doLogout()">Keluar</button>
-      </div>
-
-      <div class="menu-title">Menu Utama</div>
-
+    <!-- Menu -->
+    <div>
+      <span class="section-label">Pilih Menu</span>
       <div class="menu-grid">
-        <!-- Absen -->
+
+        <!-- Absen Briefing -->
         <a href="absen.html" class="menu-card blue">
           <div class="menu-icon">📋</div>
-          <div>
-            <div class="menu-card-label">Rekap Absen</div>
-            <div class="menu-card-desc">Briefing pagi harian</div>
-          </div>
+          <div class="menu-card-label">Rekap Absen</div>
+          <div class="menu-card-desc">Briefing pagi harian</div>
           <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m9 18 6-6-6-6"/>
           </svg>
@@ -611,10 +250,8 @@
         <!-- Cuti -->
         <a href="cuti.html" class="menu-card green">
           <div class="menu-icon">🏖️</div>
-          <div>
-            <div class="menu-card-label">Ajukan Cuti</div>
-            <div class="menu-card-desc">Pilih jadwal libur</div>
-          </div>
+          <div class="menu-card-label">Pengajuan Cuti</div>
+          <div class="menu-card-desc">Pilih jadwal libur</div>
           <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m9 18 6-6-6-6"/>
           </svg>
@@ -623,152 +260,31 @@
         <!-- Pelanggaran -->
         <a href="pelanggaran.html" class="menu-card amber">
           <div class="menu-icon">⚠️</div>
-          <div>
-            <div class="menu-card-label">Pelanggaran</div>
-            <div class="menu-card-desc">Catat pelanggaran</div>
-          </div>
+          <div class="menu-card-label">Pelanggaran</div>
+          <div class="menu-card-desc">Catat pelanggaran</div>
           <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m9 18 6-6-6-6"/>
           </svg>
         </a>
 
-        <!-- Dashboard (Admin) -->
-        <a href="dashboard/" class="menu-card red">
+        <!-- Dashboard Admin (full width) -->
+        <a href="dashboard/" class="menu-card red full">
           <div class="menu-icon">📊</div>
-          <div>
-            <div class="menu-card-label">Dashboard</div>
-            <div class="menu-card-desc">Admin & rekap data</div>
+          <div class="menu-info">
+            <div class="menu-card-label">Dashboard Admin</div>
+            <div class="menu-card-desc">Rekap data & laporan — login staf</div>
           </div>
-          <svg class="menu-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <svg class="menu-arrow" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m9 18 6-6-6-6"/>
           </svg>
         </a>
+
       </div>
     </div>
 
-  </div><!-- .container -->
+    <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
 
-  <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
-
-    let dbKaryawan = [];
-    let currentUser = null;
-
-    // --- Toast ---
-    function showToast(msg, type = 'info') {
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.textContent = msg;
-      c.appendChild(t);
-      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3000);
-    }
-
-    // --- PIN Toggle ---
-    document.getElementById('pinToggle').onclick = () => {
-      const inp = document.getElementById('pinInput');
-      const isHidden = inp.type === 'password';
-      inp.type = isHidden ? 'text' : 'password';
-    };
-
-    // --- Forgot PIN ---
-    document.getElementById('forgotPin').onclick = () => {
-      showToast('Hubungi admin untuk reset PIN.', 'info');
-    };
-
-    // --- Enable login btn when both fields filled ---
-    document.getElementById('namaSelect').addEventListener('change', checkForm);
-    document.getElementById('pinInput').addEventListener('input', checkForm);
-    document.getElementById('pinInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') doLogin();
-    });
-
-    function checkForm() {
-      const nama = document.getElementById('namaSelect').value;
-      const pin  = document.getElementById('pinInput').value;
-      document.getElementById('loginBtn').disabled = !(nama && pin.length >= 4);
-      document.getElementById('errMsg').classList.remove('show');
-    }
-
-    // --- INIT: load karyawan list ---
-    function init() {
-      fetch(`${SCRIPT_URL}?action=init`)
-        .then(r => r.json())
-        .then(res => {
-          dbKaryawan = (res.karyawan || []).filter(k =>
-            String(k.status || 'Aktif').toLowerCase() !== 'nonaktif'
-          );
-          const sel = document.getElementById('namaSelect');
-          sel.innerHTML = '<option value="">— Pilih nama Anda —</option>' +
-            dbKaryawan.map(k => `<option value="${k.id}">${k.nama}</option>`).join('');
-          sel.disabled = false;
-        })
-        .catch(() => showToast('Gagal memuat data server.', 'error'))
-        .finally(() => {
-          document.getElementById('loadingOverlay').classList.add('hidden');
-        });
-    }
-
-    // --- LOGIN ---
-    function doLogin() {
-      const selEl = document.getElementById('namaSelect');
-      const pinEl = document.getElementById('pinInput');
-      const btn   = document.getElementById('loginBtn');
-      const errEl = document.getElementById('errMsg');
-
-      const id  = selEl.value;
-      const pin = pinEl.value.trim();
-
-      if (!id || pin.length < 4) return;
-
-      const user = dbKaryawan.find(k => String(k.id) === String(id));
-      if (!user) return;
-
-      // Validate PIN: stored in user.pin field (4-6 digit)
-      const storedPin = String(user.pin || '');
-      if (!storedPin || pin !== storedPin) {
-        errEl.classList.add('show');
-        document.getElementById('errText').textContent = 'PIN salah, coba lagi.';
-        pinEl.value = '';
-        pinEl.focus();
-        return;
-      }
-
-      // Success
-      currentUser = user;
-      errEl.classList.remove('show');
-      showMenu(user);
-    }
-
-    // --- SHOW MENU ---
-    function showMenu(user) {
-      document.getElementById('loginCard').style.display = 'none';
-      const menuSec = document.getElementById('menuSection');
-      menuSec.style.display = 'flex';
-
-      document.getElementById('welcomeName').textContent = user.nama;
-      document.getElementById('welcomeBagian').textContent = user.bagian || 'Karyawan';
-
-      // Show/hide admin menu based on role
-      const isDashboardUser = ['kepala toko', 'admin'].includes(
-        String(user.bagian || '').trim().toLowerCase()
-      );
-      // Dashboard card always visible, just highlight differently
-    }
-
-    // --- LOGOUT ---
-    function doLogout() {
-      currentUser = null;
-      document.getElementById('menuSection').style.display = 'none';
-      document.getElementById('loginCard').style.display = 'block';
-      document.getElementById('namaSelect').value = '';
-      document.getElementById('pinInput').value = '';
-      document.getElementById('loginBtn').disabled = true;
-      document.getElementById('errMsg').classList.remove('show');
-    }
-
-    init();
-  </script>
+  </div>
 
   <script>
     if ('serviceWorker' in navigator) {
