@@ -1574,7 +1574,7 @@
 
     // Authentication Checks
     window.addEventListener('DOMContentLoaded', () => {
-      const loggedUser = localStorage.getItem('kuk_user');
+      const loggedUser = sessionStorage.getItem('kuk_user');
       if (loggedUser) {
         showApp(loggedUser);
       } else {
@@ -1607,13 +1607,13 @@
         return;
       }
 
-      localStorage.setItem('kuk_user', user);
+      sessionStorage.setItem('kuk_user', user);
       showApp(user);
       showToast(`Selamat datang, ${user}!`, 'success');
     }
 
     function logout() {
-      localStorage.removeItem('kuk_user');
+      sessionStorage.removeItem('kuk_user');
       window.location.href = '../index.html';
     }
 
@@ -2131,8 +2131,8 @@
     // --- TAB: PELANGGARAN ---
     let currentPelanggaranTab = 'catat';
     function switchPelanggaranTab(tabId) {
-      document.querySelectorAll('.sub-tab-pelanggaran-content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.tab-pelanggaran-sub').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('#tab-pelanggaran .sub-tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('#tab-pelanggaran .sub-tab').forEach(t => t.classList.remove('active'));
 
       currentPelanggaranTab = tabId;
       if (tabId === 'catat') {

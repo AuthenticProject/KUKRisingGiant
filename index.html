@@ -531,7 +531,7 @@
       }
 
       // Success
-      localStorage.setItem('kuk_user', user);
+      sessionStorage.setItem('kuk_user', user);
       errEl.classList.remove('show');
       showPortal(user);
     }
@@ -545,7 +545,7 @@
 
     // === LOGOUT ===
     function doLogout() {
-      localStorage.removeItem('kuk_user');
+      sessionStorage.removeItem('kuk_user');
       document.getElementById('portalScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
       document.getElementById('loginPassword').value = '';
@@ -554,7 +554,7 @@
 
     // === CHECK SESSION ON LOAD ===
     window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem('kuk_user');
+      const saved = sessionStorage.getItem('kuk_user');
       if (saved && VALID_USERS.includes(saved)) {
         showPortal(saved);
       }
