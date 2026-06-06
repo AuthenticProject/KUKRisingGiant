@@ -1101,7 +1101,7 @@
         <!-- Info Banner -->
         <div style="background:var(--primary-light); border:1px solid var(--primary); border-radius:12px; padding:14px 20px; margin-bottom:20px; font-size:13px; color:var(--primary); display:flex; align-items:center; gap:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × poin pelanggaran) + Gaji Bagian + Hadiah Pondok + Tip</span>
+          <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × jumlah keterlambatan) + Gaji Bagian + Hadiah Pondok + Tip</span>
         </div>
         <div class="card">
           <div class="card-header">
@@ -1121,7 +1121,7 @@
                   <th>Gaji Bagian</th>
                   <th>Hadiah Pondok</th>
                   <th>Tip</th>
-                  <th>Pot. Pelanggaran</th>
+                  <th>Pot. Terlambat</th>
                   <th style="font-weight:700;">Total Gaji</th>
                   <th style="text-align:right;">Aksi</th>
                 </tr>
@@ -2251,9 +2251,9 @@
       const fY = parseInt(document.getElementById('payrollYear').value);
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
 
-      // Count violation points for selected month
-      const violationPoints = {};
-      activeKaryawan.forEach(k => { violationPoints[k.id] = 0; });
+      // Hitung jumlah keterlambatan (bukan total poin) untuk bulan yang dipilih
+      const terlambatCount = {};
+      activeKaryawan.forEach(k => { terlambatCount[k.id] = 0; });
       rawViolationsData.forEach(v => {
         try {
           const tgl = new Date(v.waktu);
@@ -2261,7 +2261,10 @@
           const m = String(tgl.getMonth() + 1).padStart(2, '0');
           if (m === fM && String(y) === String(fY)) {
             const emp = activeKaryawan.find(e => e.nama === v.nama);
-            if (emp) violationPoints[emp.id] = (violationPoints[emp.id] || 0) + Number(v.poin || 0);
+            // Hanya hitung jika jenisnya mengandung kata 'terlambat'
+            if (emp && v.jenis && v.jenis.toLowerCase().includes('terlambat')) {
+              terlambatCount[emp.id] = (terlambatCount[emp.id] || 0) + 1;
+            }
           }
         } catch {}
       });
@@ -2270,10 +2273,10 @@
       activeKaryawan.forEach(k => {
         const defaultBagian = getDefaultBagian(k.nama);
         const d = getGajiData(k.id, fM, fY, defaultBagian);
-        const poin = violationPoints[k.id] || 0;
+        const kali = terlambatCount[k.id] || 0;
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
-        const potPoin  = poin * POT_POIN_PER_POIN;
-        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+        const potTerlambat = kali * POT_POIN_PER_POIN;
+        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
         const total = gajiBulanIni + d.bagian + d.hadiah + d.tip - d.pengurangan;
 
         html += `
@@ -2296,10 +2299,10 @@
             </td>
             <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
-            <td style="color:var(--danger);font-size:13px;">${poin > 0 ? formatRupiah(potPoin)+' ('+poin+' pts)' : '-'}</td>
+            <td style="color:var(--danger);font-size:13px;">${kali > 0 ? formatRupiah(potTerlambat)+' ('+kali+'x terlambat)' : '-'}</td>
             <td style="font-weight:700;color:${total >= GAPOK ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
             <td style="text-align:right;">
-              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}','${k.nama}','${k.bagian}','${fM}','${fY}',${poin})">✏️ Input</button>
+              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}','${k.nama}','${k.bagian}','${fM}','${fY}',${kali})">✏️ Input</button>
             </td>
           </tr>
         `;
@@ -2332,8 +2335,8 @@
     }
 
     let _gajiCtx = {};
-    function openGajiInput(id, nama, bagian, fM, fY, poin) {
-      _gajiCtx = { id, nama, bagian, fM, fY, poin: Number(poin) };
+    function openGajiInput(id, nama, bagian, fM, fY, kaliTerlambat) {
+      _gajiCtx = { id, nama, bagian, fM, fY, kaliTerlambat: Number(kaliTerlambat) };
       const d = getGajiData(id, fM, fY);
       document.getElementById('gajiInputNama').textContent = nama;
       document.getElementById('gajiInputBagian').textContent = bagian;
@@ -2368,13 +2371,13 @@
       const hadiah = hadiahSel === 'custom' ? (Number(document.getElementById('gajiHadiahCustom').value) || 0) : Number(hadiahSel);
       const tip = Number(document.getElementById('gajiTip').value) || 0;
       const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
-      const poin = _gajiCtx.poin || 0;
+      const kaliTerlambat = _gajiCtx.kaliTerlambat || 0;
       const potAbsen = absen * POT_ABSEN_PER_HARI;
-      const potPoin  = poin * POT_POIN_PER_POIN;
-      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+      const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
+      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
       const total = gajiBulanIni + bagian + hadiah + tip - pengurangan;
       document.getElementById('prevPotAbsen').innerHTML = '<span>\u2212 Potongan Absen (' + absen + ' hari)</span><span>' + formatRupiah(potAbsen) + '</span>';
-      document.getElementById('prevPotPoin').innerHTML  = '<span>\u2212 Potongan Pelanggaran (' + poin + ' poin)</span><span>' + formatRupiah(potPoin) + '</span>';
+      document.getElementById('prevPotPoin').innerHTML  = '<span>\u2212 Pot. Terlambat (' + kaliTerlambat + 'x)</span><span>' + formatRupiah(potTerlambat) + '</span>';
       document.getElementById('prevGajiBulanIni').innerHTML = '<span>= Gaji Bulan Ini</span><span style="font-weight:700;">' + formatRupiah(gajiBulanIni) + '</span>';
       document.getElementById('prevBagian').innerHTML   = '<span>+ Gaji Bagian</span><span>' + formatRupiah(bagian) + '</span>';
       document.getElementById('prevHadiah').innerHTML   = '<span>+ Hadiah Pondok</span><span>' + formatRupiah(hadiah) + '</span>';
@@ -2384,7 +2387,7 @@
     }
 
     function openSlipFromInput() {
-      const { id, nama, bagian, fM, fY, poin } = _gajiCtx;
+      const { id, nama, bagian, fM, fY, kaliTerlambat } = _gajiCtx;
       const absen = Number(document.getElementById('gajiAbsen').value) || 0;
       const bagianVal = Number(document.getElementById('gajiBagian').value) || 0;
       const hadiahSel = document.getElementById('gajiHadiah').value;
@@ -2392,12 +2395,24 @@
       const tip = Number(document.getElementById('gajiTip').value) || 0;
       const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
       saveGajiData(id, fM, fY, { absen, bagian: bagianVal, hadiah, tip, pengurangan });
+
       const potAbsen = absen * POT_ABSEN_PER_HARI;
-      const potPoin  = poin * POT_POIN_PER_POIN;
-      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potPoin);
+      const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
+      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
       const total = gajiBulanIni + bagianVal + hadiah + tip - pengurangan;
+
+      // Ambil semua pelanggaran karyawan ini untuk bulan/tahun ybs
+      const pelanggaranBulanIni = rawViolationsData.filter(v => {
+        try {
+          const tgl = new Date(v.waktu);
+          const m = String(tgl.getMonth() + 1).padStart(2, '0');
+          const y = tgl.getFullYear();
+          return String(m) === String(fM) && String(y) === String(fY) && v.nama === nama;
+        } catch { return false; }
+      });
+
       closeModal('gajiInputModal');
-      openSlipModal(nama, bagian, fM, fY, absen, poin, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total);
+      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total, pelanggaranBulanIni);
       calculatePayroll();
     }
 
@@ -2458,11 +2473,35 @@
       return n;
     }
 
-    function openSlipModal(nama, bagian, fM, fY, absen, poin, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total) {
+    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total, pelanggaranList = []) {
       const fMName = mNames[parseInt(fM) - 1];
       const potAbsen = absen * POT_ABSEN_PER_HARI;
-      const potPoin  = poin * POT_POIN_PER_POIN;
+      const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
       const nomorSurat = 'SKG/' + fY + '/' + String(fM).padStart(2,'0') + '/' + nama.replace(/\s+/g,'').toUpperCase().slice(0,4);
+
+      // Section catatan pelanggaran
+      let pelanggaranSection = '';
+      if (pelanggaranList.length > 0) {
+        const rows = pelanggaranList.map(v =>
+          `<tr>
+            <td style="padding:3px 0; font-size:12px;">${v.jenis}</td>
+            <td style="text-align:right; font-size:12px; color:#c00; font-weight:600; white-space:nowrap;">${v.poin} poin</td>
+          </tr>`
+        ).join('');
+        pelanggaranSection = `
+          <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; margin-top:12px;">⚠️ Catatan Pelanggaran</div>
+          <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
+            <tr style="background:#fff5f5;">
+              <th style="text-align:left; padding:4px 0; font-size:11px; color:#888; font-weight:600;">Jenis Pelanggaran</th>
+              <th style="text-align:right; font-size:11px; color:#888; font-weight:600;">Poin</th>
+            </tr>
+            ${rows}
+            <tr style="border-top:1px dashed #aaa;">
+              <td style="padding:4px 0; font-weight:700; font-size:12px;">Total Poin Pelanggaran</td>
+              <td style="text-align:right; font-weight:700; font-size:12px; color:#c00;">${pelanggaranList.reduce((s,v) => s + Number(v.poin||0), 0)} poin</td>
+            </tr>
+          </table>`;
+      }
 
       const slipHtml = `
         <div style="text-align:center; margin-bottom:14px;">
@@ -2485,7 +2524,7 @@
         <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
           <tr><td style="padding:3px 0;">Gaji Pokok</td><td style="text-align:right;">${formatRupiah(GAPOK)}</td></tr>
           ${absen > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Potongan Tdk Masuk (${absen} hr &times; Rp 28.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potAbsen)}</td></tr>` : ''}
-          ${poin > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Potongan Pelanggaran (${poin} poin &times; Rp 2.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potPoin)}</td></tr>` : ''}
+          ${kaliTerlambat > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pot. Terlambat (${kaliTerlambat}x &times; Rp 2.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potTerlambat)}</td></tr>` : ''}
           <tr style="border-top:1px dashed #aaa;">
             <td style="padding:4px 0; font-weight:700;">Gaji Bulan Ini</td>
             <td style="text-align:right; font-weight:700;">${formatRupiah(gajiBulanIni)}</td>
@@ -2500,6 +2539,8 @@
           ${tip > 0 ? `<tr><td style="padding:3px 0;">Tip</td><td style="text-align:right;">${formatRupiah(tip)}</td></tr>` : ''}
           ${pengurangan > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pengurangan</td><td style="text-align:right; color:#c00;">- ${formatRupiah(pengurangan)}</td></tr>` : ''}
         </table>` : ''}
+
+        ${pelanggaranSection}
 
         <div style="border:1.5px solid #000; padding:10px 12px; margin-bottom:20px; background:#f9f9f9;">
           <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700;">
