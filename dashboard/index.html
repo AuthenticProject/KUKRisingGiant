@@ -530,7 +530,7 @@
     .sub-tab-content { display: none; padding: 24px; }
     .sub-tab-content.active { display: block; }
 
-    /* RESPONSIVE LAYOUT */
+    /* RESPONSIVE LAYOUT — TABLET */
     @media (max-width: 1024px) {
       .sidebar { width: 70px; }
       .sidebar-brand span, .menu-item span, .user-details, .sidebar-footer button span { display: none; }
@@ -540,10 +540,133 @@
       .main-content { margin-left: 70px; }
     }
 
+    /* RESPONSIVE LAYOUT — MOBILE */
+    .mobile-nav { display: none; }
+
     @media (max-width: 768px) {
-      .top-bar { padding: 0 16px; }
-      .content-section { padding: 16px; }
-      .stats-grid { grid-template-columns: 1fr; }
+      /* Hide desktop sidebar completely */
+      .sidebar { display: none !important; }
+
+      /* Main content fills full width + space for bottom nav */
+      .main-content {
+        margin-left: 0 !important;
+        padding-bottom: 70px;
+      }
+
+      /* Top bar compact */
+      .top-bar {
+        height: 54px;
+        padding: 0 14px;
+        gap: 8px;
+      }
+      .top-bar h2 { font-size: 16px; }
+      #statusIndicator { display: none !important; }
+      .top-bar-actions { gap: 8px; }
+      .top-bar-actions .btn-outline { display: none; }
+      .top-bar-mobile-actions { display: flex !important; align-items: center; gap: 8px; }
+
+      /* Content sections */
+      .content-section { padding: 14px; }
+
+      /* Stats grid — 2 columns on mobile */
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+      .stat-card { padding: 16px; }
+      .stat-val { font-size: 22px; }
+      .stat-title { font-size: 11px; }
+
+      /* Dashboard 2-col → 1-col */
+      #tab-dashboard > div[style*='grid-template-columns'] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+      }
+
+      /* Cuti & Absen 2-col → 1-col */
+      #tab-cuti > div[style*='grid-template-columns'],
+      #tab-absen > div[style*='grid-template-columns'] {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 14px !important;
+      }
+
+      /* Cards */
+      .card { border-radius: 10px; margin-bottom: 14px; }
+      .card-header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
+      .card-title { font-size: 14px; }
+
+      /* Tables — horizontal scroll */
+      .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      table { min-width: 500px; }
+      th { padding: 10px 14px; font-size: 11px; }
+      td { padding: 12px 14px; font-size: 13px; }
+
+      /* Gantt filter wrap */
+      .card-header select { width: 110px !important; font-size: 12px; }
+
+      /* Sub-tabs compact */
+      .sub-tab { padding: 12px 14px; font-size: 13px; }
+
+      /* Payroll table min-width larger because many cols */
+      #payrollTableBody tr td:first-child { min-width: 110px; }
+
+      /* Modal full-screen on mobile */
+      .modal-overlay { padding: 0; align-items: flex-end; }
+      .modal-container {
+        max-width: 100% !important;
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      /* Slip container */
+      .slip-container { padding: 18px; }
+
+      /* Form groups */
+      .form-group { margin-bottom: 14px; }
+
+      /* Bottom navigation bar */
+      .mobile-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--sidebar);
+        z-index: 300;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        padding: 4px 0;
+        padding-bottom: env(safe-area-inset-bottom, 4px);
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+      }
+
+      .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        padding: 8px 2px 6px;
+        color: rgba(148,163,184,0.7);
+        cursor: pointer;
+        transition: 0.2s;
+        border-radius: 8px;
+        margin: 0 2px;
+        font-size: 9px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .mobile-nav-item svg { transition: 0.2s; }
+      .mobile-nav-item.active {
+        color: white;
+        background: rgba(37,99,235,0.3);
+      }
+      .mobile-nav-item.active svg { stroke: #60a5fa; }
     }
   </style>
 </head>
@@ -637,6 +760,19 @@
           </div>
           <button class="btn btn-outline" onclick="syncDataAll()">
             🔄 Segarkan Data
+          </button>
+        </div>
+        <!-- Mobile-only action buttons -->
+        <div class="top-bar-mobile-actions" style="display:none;">
+          <button onclick="syncDataAll()" title="Segarkan Data"
+            style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--text-muted);transition:0.2s;"
+            onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='none'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+          </button>
+          <button onclick="logout()" title="Log Out"
+            style="background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--danger);transition:0.2s;"
+            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='none'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </button>
         </div>
       </header>
@@ -998,6 +1134,30 @@
         </div>
       </section>
     </main>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-nav" id="mobileNav">
+      <div class="mobile-nav-item active" id="mn-dashboard" onclick="navigate('dashboard', document.querySelector('.menu-item.active') || this); syncMobileNav('dashboard')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span>Home</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-cuti" onclick="syncMobileNav('cuti'); navigateMobile('cuti')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Cuti</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-absen" onclick="syncMobileNav('absen'); navigateMobile('absen')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Absen</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-pelanggaran" onclick="syncMobileNav('pelanggaran'); navigateMobile('pelanggaran')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Tilang</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-gaji" onclick="syncMobileNav('gaji'); navigateMobile('gaji')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        <span>Gaji</span>
+      </div>
+    </nav>
   </div>
 
   <!-- MODAL: ADD/EDIT KARYAWAN -->
@@ -1340,21 +1500,23 @@
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
     // Navigation and Tab Control
+    const titleMap = {
+      'dashboard': 'Dashboard',
+      'cuti': 'Rekapan Cuti',
+      'absen': 'Absen Briefing',
+      'pelanggaran': 'Pelanggaran',
+      'gaji': 'Gaji / Payroll'
+    };
+
     function navigate(tabId, el) {
       document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
       document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
 
       el.classList.add('active');
       document.getElementById('tab-' + tabId).classList.add('active');
-      
-      const titleMap = {
-        'dashboard': 'Dashboard Ringkasan',
-        'cuti': 'Rekapan & Manajemen Cuti',
-        'absen': 'Kehadiran Briefing Pagi',
-        'pelanggaran': 'Pencatatan & Poin Pelanggaran',
-        'gaji': 'Penggajian & Slip Gaji'
-      };
       document.getElementById('activeTabTitle').textContent = titleMap[tabId] || 'Portal';
+
+      syncMobileNav(tabId);
 
       // Load specific triggers on navigate
       if (tabId === 'absen') {
@@ -1363,6 +1525,24 @@
       } else if (tabId === 'gaji') {
         calculatePayroll();
       }
+    }
+
+    // Mobile nav helper — navigates without requiring a sidebar .menu-item el
+    function navigateMobile(tabId) {
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+      document.getElementById('activeTabTitle').textContent = titleMap[tabId] || 'Portal';
+      // Scroll to top
+      document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+      if (tabId === 'absen') { renderAbsenLogger(); renderRekapBulanan(); }
+      else if (tabId === 'gaji') { calculatePayroll(); }
+    }
+
+    function syncMobileNav(tabId) {
+      document.querySelectorAll('.mobile-nav-item').forEach(i => i.classList.remove('active'));
+      const el = document.getElementById('mn-' + tabId);
+      if (el) el.classList.add('active');
     }
 
     // Init Month/Year dropdown filters
@@ -2026,24 +2206,40 @@
     const POT_ABSEN_PER_HARI = 28500;
     const POT_POIN_PER_POIN = 2500;
 
-    // Default Gaji Bagian per nama karyawan (sesuai data yang ditetapkan)
-    const DEFAULT_GAJI_BAGIAN = {
-      "Nurhadi Prasetya":       610000,
-      "Agus Prakoso":           450000,
-      "Wiba Sepdioko":          500000,
-      "Ariyan Muhammad":        300000,
-      "Irfan Ulinnuha":         650000,
-      "Hiba Ali Syahbana":      200000,
-      "Alip Rejeki":            400000,
-      "Muhammad Shirojul Kahf": 300000,
-      "Muhammad Irvan":         650000,
-      "Muhammad Lailurrohman":  200000
-    };
+    // Default Gaji Bagian — cocokkan dengan sebagian nama (partial match)
+    // Mendukung nama pendek ("Nur", "Wiba") maupun nama lengkap
+    const DEFAULT_GAJI_BAGIAN = [
+      { kata: ['nurhadi', 'nur'],               nilai: 610000 },
+      { kata: ['agus'],                          nilai: 450000 },
+      { kata: ['wiba'],                          nilai: 500000 },
+      { kata: ['ariyan', 'riyan'],               nilai: 300000 },
+      { kata: ['irfan', 'ulin', 'ulinnuha'],     nilai: 650000 },
+      { kata: ['hiba'],                          nilai: 200000 },
+      { kata: ['alip'],                          nilai: 400000 },
+      { kata: ['kahf', 'kahfi', 'shirojul'],     nilai: 300000 },
+      { kata: ['irvan'],                         nilai: 650000 },
+      { kata: ['lailur', 'rohman', 'lailurro'],  nilai: 200000 }
+    ];
+    function getDefaultBagian(nama) {
+      if (!nama) return 0;
+      const n = nama.toLowerCase();
+      for (const entry of DEFAULT_GAJI_BAGIAN) {
+        if (entry.kata.some(k => n.includes(k))) return entry.nilai;
+      }
+      return 0;
+    }
 
     function gajiKey(id, fM, fY) { return 'kuk_gaji_' + id + '_' + fY + '_' + fM; }
     function getGajiData(id, fM, fY, defaultBagian = 0) {
       const raw = localStorage.getItem(gajiKey(id, fM, fY));
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        // Jika bagian tersimpan 0, pakai default (override data lama)
+        if ((parsed.bagian === 0 || parsed.bagian == null) && defaultBagian > 0) {
+          parsed.bagian = defaultBagian;
+        }
+        return parsed;
+      }
       return { absen: 0, bagian: defaultBagian, hadiah: 150000, tip: 0, pengurangan: 0 };
     }
     function saveGajiData(id, fM, fY, data) {
@@ -2072,7 +2268,7 @@
 
       let html = '';
       activeKaryawan.forEach(k => {
-        const defaultBagian = DEFAULT_GAJI_BAGIAN[k.nama] || 0;
+        const defaultBagian = getDefaultBagian(k.nama);
         const d = getGajiData(k.id, fM, fY, defaultBagian);
         const poin = violationPoints[k.id] || 0;
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
