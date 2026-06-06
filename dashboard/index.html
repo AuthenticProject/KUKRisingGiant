@@ -1101,7 +1101,7 @@
         <!-- Info Banner -->
         <div style="background:var(--primary-light); border:1px solid var(--primary); border-radius:12px; padding:14px 20px; margin-bottom:20px; font-size:13px; color:var(--primary); display:flex; align-items:center; gap:12px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-          <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × jumlah keterlambatan) + Gaji Bagian + Hadiah Pondok + Tip</span>
+          <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × jumlah keterlambatan) + Gaji Bagian + Hadiah Pondok + Tip + Berkeluarga</span>
         </div>
         <div class="card">
           <div class="card-header">
@@ -1121,6 +1121,7 @@
                   <th>Gaji Bagian</th>
                   <th>Hadiah Pondok</th>
                   <th>Tip</th>
+                  <th>Berkeluarga</th>
                   <th>Pot. Terlambat</th>
                   <th style="font-weight:700;">Total Gaji</th>
                   <th style="text-align:right;">Aksi</th>
@@ -1344,6 +1345,11 @@
           <label>Tip (Rp)</label>
           <input type="number" id="gajiTip" min="0" placeholder="0" oninput="updateGajiPreview()">
         </div>
+        <!-- Tunjangan Berkeluarga -->
+        <div class="form-group">
+          <label>Tunjangan Berkeluarga (Rp)</label>
+          <input type="number" id="gajiBerkeluarga" min="0" placeholder="0" oninput="updateGajiPreview()">
+        </div>
         <!-- Pengurangan lain -->
         <div class="form-group">
           <label>Pengurangan Lain (Rp)</label>
@@ -1359,6 +1365,7 @@
           <div style="display:flex; justify-content:space-between;" id="prevBagian"><span>+ Gaji Bagian</span><span>Rp 0</span></div>
           <div style="display:flex; justify-content:space-between;" id="prevHadiah"><span>+ Hadiah Pondok</span><span>Rp 150.000</span></div>
           <div style="display:flex; justify-content:space-between;" id="prevTip"><span>+ Tip</span><span>Rp 0</span></div>
+          <div style="display:flex; justify-content:space-between;" id="prevBerkeluarga"><span>+ Tunj. Berkeluarga</span><span>Rp 0</span></div>
           <div style="display:flex; justify-content:space-between; color:var(--danger);" id="prevPengurangan"><span>− Pengurangan Lain</span><span>Rp 0</span></div>
           <hr style="border-color:var(--primary); opacity:0.5; margin:6px 0;">
           <div style="display:flex; justify-content:space-between; font-size:15px;" id="prevTotal"><span><strong>TOTAL GAJI</strong></span><span style="font-weight:700; color:var(--primary);">Rp 1.000.000</span></div>
@@ -2229,8 +2236,17 @@
       return 0;
     }
 
+    function getDefaultBerkeluarga(nama) {
+      if (!nama) return 0;
+      const n = nama.toLowerCase();
+      if (['wiba', 'nur', 'nurhadi', 'ariyan', 'riyan'].some(k => n.includes(k))) {
+        return 50000;
+      }
+      return 0;
+    }
+
     function gajiKey(id, fM, fY) { return 'kuk_gaji_' + id + '_' + fY + '_' + fM; }
-    function getGajiData(id, fM, fY, defaultBagian = 0) {
+    function getGajiData(id, fM, fY, defaultBagian = 0, defaultBerkeluarga = 0) {
       const raw = localStorage.getItem(gajiKey(id, fM, fY));
       if (raw) {
         const parsed = JSON.parse(raw);
@@ -2238,9 +2254,12 @@
         if ((parsed.bagian === 0 || parsed.bagian == null) && defaultBagian > 0) {
           parsed.bagian = defaultBagian;
         }
+        if (parsed.berkeluarga == null) {
+          parsed.berkeluarga = defaultBerkeluarga;
+        }
         return parsed;
       }
-      return { absen: 0, bagian: defaultBagian, hadiah: 150000, tip: 0, pengurangan: 0 };
+      return { absen: 0, bagian: defaultBagian, hadiah: 150000, tip: 0, berkeluarga: defaultBerkeluarga, pengurangan: 0 };
     }
     function saveGajiData(id, fM, fY, data) {
       localStorage.setItem(gajiKey(id, fM, fY), JSON.stringify(data));
@@ -2272,12 +2291,13 @@
       let html = '';
       activeKaryawan.forEach(k => {
         const defaultBagian = getDefaultBagian(k.nama);
-        const d = getGajiData(k.id, fM, fY, defaultBagian);
+        const defaultBerkeluarga = getDefaultBerkeluarga(k.nama);
+        const d = getGajiData(k.id, fM, fY, defaultBagian, defaultBerkeluarga);
         const kali = terlambatCount[k.id] || 0;
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
         const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-        const total = gajiBulanIni + d.bagian + d.hadiah + d.tip - d.pengurangan;
+        const total = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga - d.pengurangan;
 
         html += `
           <tr>
@@ -2299,6 +2319,7 @@
             </td>
             <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
+            <td style="color:var(--text-muted);font-size:13px;">${d.berkeluarga > 0 ? formatRupiah(d.berkeluarga) : '-'}</td>
             <td style="color:var(--danger);font-size:13px;">${kali > 0 ? formatRupiah(potTerlambat)+' ('+kali+'x terlambat)' : '-'}</td>
             <td style="font-weight:700;color:${total >= GAPOK ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
             <td style="text-align:right;">
@@ -2311,7 +2332,11 @@
     }
 
     function quickSaveAbsen(id, fM, fY, val) {
-      const d = getGajiData(id, fM, fY);
+      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
+      const emp = activeKaryawan.find(k => k.id === id);
+      const defaultBagian = emp ? getDefaultBagian(emp.nama) : 0;
+      const defaultBerkeluarga = emp ? getDefaultBerkeluarga(emp.nama) : 0;
+      const d = getGajiData(id, fM, fY, defaultBagian, defaultBerkeluarga);
       d.absen = Number(val) || 0;
       saveGajiData(id, fM, fY, d);
     }
@@ -2326,7 +2351,11 @@
     function saveEditGajiBagian() {
       const { id, fM, fY } = _editBagianCtx;
       const val = Number(document.getElementById('editBagianInput').value) || 0;
-      const d = getGajiData(id, fM, fY);
+      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
+      const emp = activeKaryawan.find(k => k.id === id);
+      const defaultBagian = emp ? getDefaultBagian(emp.nama) : 0;
+      const defaultBerkeluarga = emp ? getDefaultBerkeluarga(emp.nama) : 0;
+      const d = getGajiData(id, fM, fY, defaultBagian, defaultBerkeluarga);
       d.bagian = val;
       saveGajiData(id, fM, fY, d);
       closeModal('editGajiBagianModal');
@@ -2352,6 +2381,7 @@
         document.getElementById('gajiHadiahCustomWrap').style.display = 'none';
       }
       document.getElementById('gajiTip').value = d.tip || 0;
+      document.getElementById('gajiBerkeluarga').value = d.berkeluarga || 0;
       document.getElementById('gajiPengurangan').value = d.pengurangan || 0;
       updateGajiPreview();
       openModal('gajiInputModal');
@@ -2370,18 +2400,20 @@
       const hadiahSel = document.getElementById('gajiHadiah').value;
       const hadiah = hadiahSel === 'custom' ? (Number(document.getElementById('gajiHadiahCustom').value) || 0) : Number(hadiahSel);
       const tip = Number(document.getElementById('gajiTip').value) || 0;
+      const berkeluarga = Number(document.getElementById('gajiBerkeluarga').value) || 0;
       const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
       const kaliTerlambat = _gajiCtx.kaliTerlambat || 0;
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const total = gajiBulanIni + bagian + hadiah + tip - pengurangan;
+      const total = gajiBulanIni + bagian + hadiah + tip + berkeluarga - pengurangan;
       document.getElementById('prevPotAbsen').innerHTML = '<span>\u2212 Potongan Absen (' + absen + ' hari)</span><span>' + formatRupiah(potAbsen) + '</span>';
       document.getElementById('prevPotPoin').innerHTML  = '<span>\u2212 Pot. Terlambat (' + kaliTerlambat + 'x)</span><span>' + formatRupiah(potTerlambat) + '</span>';
       document.getElementById('prevGajiBulanIni').innerHTML = '<span>= Gaji Bulan Ini</span><span style="font-weight:700;">' + formatRupiah(gajiBulanIni) + '</span>';
       document.getElementById('prevBagian').innerHTML   = '<span>+ Gaji Bagian</span><span>' + formatRupiah(bagian) + '</span>';
       document.getElementById('prevHadiah').innerHTML   = '<span>+ Hadiah Pondok</span><span>' + formatRupiah(hadiah) + '</span>';
       document.getElementById('prevTip').innerHTML      = '<span>+ Tip</span><span>' + formatRupiah(tip) + '</span>';
+      document.getElementById('prevBerkeluarga').innerHTML = '<span>+ Tunj. Berkeluarga</span><span>' + formatRupiah(berkeluarga) + '</span>';
       document.getElementById('prevPengurangan').innerHTML = '<span>\u2212 Pengurangan Lain</span><span>' + formatRupiah(pengurangan) + '</span>';
       document.getElementById('prevTotal').innerHTML    = '<span><strong>TOTAL GAJI</strong></span><span style="font-weight:700;color:var(--primary);">' + formatRupiah(total) + '</span>';
     }
@@ -2393,13 +2425,14 @@
       const hadiahSel = document.getElementById('gajiHadiah').value;
       const hadiah = hadiahSel === 'custom' ? (Number(document.getElementById('gajiHadiahCustom').value) || 0) : Number(hadiahSel);
       const tip = Number(document.getElementById('gajiTip').value) || 0;
+      const berkeluarga = Number(document.getElementById('gajiBerkeluarga').value) || 0;
       const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
-      saveGajiData(id, fM, fY, { absen, bagian: bagianVal, hadiah, tip, pengurangan });
+      saveGajiData(id, fM, fY, { absen, bagian: bagianVal, hadiah, tip, berkeluarga, pengurangan });
 
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const total = gajiBulanIni + bagianVal + hadiah + tip - pengurangan;
+      const total = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga - pengurangan;
 
       // Ambil semua pelanggaran karyawan ini untuk bulan/tahun ybs
       const pelanggaranBulanIni = rawViolationsData.filter(v => {
@@ -2412,7 +2445,7 @@
       });
 
       closeModal('gajiInputModal');
-      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total, pelanggaranBulanIni);
+      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pelanggaranBulanIni);
       calculatePayroll();
     }
 
@@ -2473,7 +2506,7 @@
       return n;
     }
 
-    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, pengurangan, gajiBulanIni, total, pelanggaranList = []) {
+    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pelanggaranList = []) {
       const fMName = mNames[parseInt(fM) - 1];
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
@@ -2531,12 +2564,13 @@
           </tr>
         </table>
 
-        ${(bagianVal + hadiah + tip + pengurangan) > 0 ? `
+        ${(bagianVal + hadiah + tip + berkeluarga + pengurangan) > 0 ? `
         <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Tambahan &amp; Pengurangan</div>
         <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
           ${bagianVal > 0 ? `<tr><td style="padding:3px 0;">Gaji Bagian</td><td style="text-align:right;">${formatRupiah(bagianVal)}</td></tr>` : ''}
           ${hadiah > 0 ? `<tr><td style="padding:3px 0;">Hadiah dari Pondok</td><td style="text-align:right;">${formatRupiah(hadiah)}</td></tr>` : ''}
           ${tip > 0 ? `<tr><td style="padding:3px 0;">Tip</td><td style="text-align:right;">${formatRupiah(tip)}</td></tr>` : ''}
+          ${berkeluarga > 0 ? `<tr><td style="padding:3px 0;">Tunjangan Berkeluarga</td><td style="text-align:right;">${formatRupiah(berkeluarga)}</td></tr>` : ''}
           ${pengurangan > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pengurangan</td><td style="text-align:right; color:#c00;">- ${formatRupiah(pengurangan)}</td></tr>` : ''}
         </table>` : ''}
 
