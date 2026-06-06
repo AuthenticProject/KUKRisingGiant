@@ -559,7 +559,7 @@
         padding: 0 14px;
         gap: 8px;
       }
-      .top-bar h2 { font-size: 16px; }
+      .top-bar h2 { font-size: 18px; }
       #statusIndicator { display: none !important; }
       .top-bar-actions { gap: 8px; }
       .top-bar-actions .btn-outline { display: none; }
@@ -571,8 +571,8 @@
       /* Stats grid — 2 columns on mobile */
       .stats-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
       .stat-card { padding: 16px; }
-      .stat-val { font-size: 22px; }
-      .stat-title { font-size: 11px; }
+      .stat-val { font-size: 24px; }
+      .stat-title { font-size: 12px; }
 
       /* Dashboard 2-col → 1-col */
       #tab-dashboard > div[style*='grid-template-columns'] {
@@ -592,7 +592,7 @@
       /* Cards */
       .card { border-radius: 10px; margin-bottom: 14px; }
       .card-header { padding: 14px 16px; flex-wrap: wrap; gap: 8px; }
-      .card-title { font-size: 14px; }
+      .card-title { font-size: 16px; }
 
       /* Tables — horizontal scroll */
       .table-responsive {
@@ -600,14 +600,14 @@
         -webkit-overflow-scrolling: touch;
       }
       table { min-width: 500px; }
-      th { padding: 10px 14px; font-size: 11px; }
-      td { padding: 12px 14px; font-size: 13px; }
+      th { padding: 12px 14px; font-size: 12px; }
+      td { padding: 14px 14px; font-size: 14px; }
 
       /* Gantt filter wrap */
       .card-header select { width: 110px !important; font-size: 12px; }
 
       /* Sub-tabs compact */
-      .sub-tab { padding: 12px 14px; font-size: 13px; }
+      .sub-tab { padding: 14px 14px; font-size: 14px; }
 
       /* Payroll table min-width larger because many cols */
       #payrollTableBody tr td:first-child { min-width: 110px; }
@@ -648,14 +648,14 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 3px;
-        padding: 8px 2px 6px;
+        gap: 4px;
+        padding: 10px 2px 8px;
         color: rgba(148,163,184,0.7);
         cursor: pointer;
         transition: 0.2s;
         border-radius: 8px;
         margin: 0 2px;
-        font-size: 9px;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.3px;
@@ -1446,12 +1446,11 @@
 
     // Authentication Checks
     window.addEventListener('DOMContentLoaded', () => {
-      const loggedUser = sessionStorage.getItem('kuk_user');
+      const loggedUser = localStorage.getItem('kuk_user');
       if (loggedUser) {
         showApp(loggedUser);
       } else {
-        document.getElementById('loginScreen').style.display = 'flex';
-        document.getElementById('appWrapper').style.display = 'none';
+        window.location.href = '../index.html';
       }
       
       initDateFilters();
@@ -1480,16 +1479,14 @@
         return;
       }
 
-      sessionStorage.setItem('kuk_user', user);
+      localStorage.setItem('kuk_user', user);
       showApp(user);
       showToast(`Selamat datang, ${user}!`, 'success');
     }
 
     function logout() {
-      sessionStorage.removeItem('kuk_user');
-      document.getElementById('loginScreen').style.display = 'flex';
-      document.getElementById('appWrapper').style.display = 'none';
-      document.getElementById('loginPassword').value = '';
+      localStorage.removeItem('kuk_user');
+      window.location.href = '../index.html';
     }
 
     function showApp(username) {
