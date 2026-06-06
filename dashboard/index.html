@@ -1098,6 +1098,27 @@
     </div>
   </div>
 
+  <!-- MODAL: EDIT GAJI BAGIAN -->
+  <div class="modal-overlay" id="editGajiBagianModal">
+    <div class="modal-container" style="max-width:380px;">
+      <div class="modal-header">
+        <h3>✏️ Edit Gaji Bagian</h3>
+        <button class="btn-link" onclick="closeModal('editGajiBagianModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Karyawan: <strong id="editBagianNama">-</strong></p>
+        <div class="form-group">
+          <label>Nominal Gaji Bagian (Rp)</label>
+          <input type="number" id="editBagianInput" min="0" placeholder="0" style="font-size:16px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('editGajiBagianModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveEditGajiBagian()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: PENGATURAN GAJI -->
   <div class="modal-overlay" id="salarySettingsModal">
     <div class="modal-container" style="max-width:560px;">
@@ -2005,10 +2026,25 @@
     const POT_ABSEN_PER_HARI = 28500;
     const POT_POIN_PER_POIN = 2500;
 
+    // Default Gaji Bagian per nama karyawan (sesuai data yang ditetapkan)
+    const DEFAULT_GAJI_BAGIAN = {
+      "Nurhadi Prasetya":       610000,
+      "Agus Prakoso":           450000,
+      "Wiba Sepdioko":          500000,
+      "Ariyan Muhammad":        300000,
+      "Irfan Ulinnuha":         650000,
+      "Hiba Ali Syahbana":      200000,
+      "Alip Rejeki":            400000,
+      "Muhammad Shirojul Kahf": 300000,
+      "Muhammad Irvan":         650000,
+      "Muhammad Lailurrohman":  200000
+    };
+
     function gajiKey(id, fM, fY) { return 'kuk_gaji_' + id + '_' + fY + '_' + fM; }
-    function getGajiData(id, fM, fY) {
+    function getGajiData(id, fM, fY, defaultBagian = 0) {
       const raw = localStorage.getItem(gajiKey(id, fM, fY));
-      return raw ? JSON.parse(raw) : { absen: 0, bagian: 0, hadiah: 150000, tip: 0, pengurangan: 0 };
+      if (raw) return JSON.parse(raw);
+      return { absen: 0, bagian: defaultBagian, hadiah: 150000, tip: 0, pengurangan: 0 };
     }
     function saveGajiData(id, fM, fY, data) {
       localStorage.setItem(gajiKey(id, fM, fY), JSON.stringify(data));
@@ -2036,7 +2072,8 @@
 
       let html = '';
       activeKaryawan.forEach(k => {
-        const d = getGajiData(k.id, fM, fY);
+        const defaultBagian = DEFAULT_GAJI_BAGIAN[k.nama] || 0;
+        const d = getGajiData(k.id, fM, fY, defaultBagian);
         const poin = violationPoints[k.id] || 0;
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potPoin  = poin * POT_POIN_PER_POIN;
@@ -2052,12 +2089,14 @@
                 style="width:60px;text-align:center;padding:6px;border-radius:6px;border:1px solid var(--border);font-size:13px;"
                 onchange="quickSaveAbsen('${k.id}','${fM}','${fY}',this.value);calculatePayroll()">
             </td>
-            <td>
-              <input type="number" min="0" value="${d.bagian}"
-                style="width:90px;text-align:right;padding:6px;border-radius:6px;border:1px solid var(--border);font-size:13px;"
-                placeholder="0"
-                onchange="quickSaveBagian('${k.id}','${fM}','${fY}',this.value);calculatePayroll()"
-                title="Gaji Bagian (Rp)">
+            <td style="font-size:13px;">
+              <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                <span style="font-weight:600;">${formatRupiah(d.bagian)}</span>
+                <button onclick="editGajiBagian('${k.id}','${k.nama}','${fM}','${fY}',${d.bagian})" title="Edit Gaji Bagian"
+                  style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:4px;color:var(--text-muted);transition:0.15s;"
+                  onmouseover="this.style.background='var(--primary-light)';this.style.color='var(--primary)'"
+                  onmouseout="this.style.background='none';this.style.color='var(--text-muted)'">✏️</button>
+              </div>
             </td>
             <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
@@ -2078,10 +2117,22 @@
       saveGajiData(id, fM, fY, d);
     }
 
-    function quickSaveBagian(id, fM, fY, val) {
+    let _editBagianCtx = {};
+    function editGajiBagian(id, nama, fM, fY, currentVal) {
+      _editBagianCtx = { id, fM, fY };
+      document.getElementById('editBagianNama').textContent = nama;
+      document.getElementById('editBagianInput').value = currentVal;
+      openModal('editGajiBagianModal');
+    }
+    function saveEditGajiBagian() {
+      const { id, fM, fY } = _editBagianCtx;
+      const val = Number(document.getElementById('editBagianInput').value) || 0;
       const d = getGajiData(id, fM, fY);
-      d.bagian = Number(val) || 0;
+      d.bagian = val;
       saveGajiData(id, fM, fY, d);
+      closeModal('editGajiBagianModal');
+      calculatePayroll();
+      showToast('Gaji Bagian berhasil diperbarui!', 'success');
     }
 
     let _gajiCtx = {};
