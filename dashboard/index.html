@@ -2052,7 +2052,13 @@
                 style="width:60px;text-align:center;padding:6px;border-radius:6px;border:1px solid var(--border);font-size:13px;"
                 onchange="quickSaveAbsen('${k.id}','${fM}','${fY}',this.value);calculatePayroll()">
             </td>
-            <td style="color:var(--text-muted);font-size:13px;">${d.bagian > 0 ? formatRupiah(d.bagian) : '-'}</td>
+            <td>
+              <input type="number" min="0" value="${d.bagian}"
+                style="width:90px;text-align:right;padding:6px;border-radius:6px;border:1px solid var(--border);font-size:13px;"
+                placeholder="0"
+                onchange="quickSaveBagian('${k.id}','${fM}','${fY}',this.value);calculatePayroll()"
+                title="Gaji Bagian (Rp)">
+            </td>
             <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
             <td style="color:var(--danger);font-size:13px;">${poin > 0 ? formatRupiah(potPoin)+' ('+poin+' pts)' : '-'}</td>
@@ -2069,6 +2075,12 @@
     function quickSaveAbsen(id, fM, fY, val) {
       const d = getGajiData(id, fM, fY);
       d.absen = Number(val) || 0;
+      saveGajiData(id, fM, fY, d);
+    }
+
+    function quickSaveBagian(id, fM, fY, val) {
+      const d = getGajiData(id, fM, fY);
+      d.bagian = Number(val) || 0;
       saveGajiData(id, fM, fY, d);
     }
 
