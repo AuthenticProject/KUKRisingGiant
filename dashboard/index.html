@@ -1141,6 +1141,41 @@
 
       <!-- TAB: TIP KACA -->
       <section id="tab-tipkaca" class="content-section">
+        
+        <!-- Filter and Summary -->
+        <div class="card" style="margin-bottom: 14px; padding: 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:14px;">
+            <div style="font-weight:700; font-size:16px;">🔍 Filter & Rekapan Tip Kaca</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <select id="tkFilterBulan" onchange="renderTipKaca()" style="padding:6px; border-radius:6px; border:1px solid var(--border); font-size:13px;">
+                <option value="01">Januari</option>
+                <option value="02">Februari</option>
+                <option value="03">Maret</option>
+                <option value="04">April</option>
+                <option value="05">Mei</option>
+                <option value="06">Juni</option>
+                <option value="07">Juli</option>
+                <option value="08">Agustus</option>
+                <option value="09">September</option>
+                <option value="10">Oktober</option>
+                <option value="11">November</option>
+                <option value="12">Desember</option>
+              </select>
+              <select id="tkFilterTahun" onchange="renderTipKaca()" style="padding:6px; border-radius:6px; border:1px solid var(--border); font-size:13px;">
+                <option value="2025">2025</option>
+                <option value="2026">2026</option>
+                <option value="2027">2027</option>
+              </select>
+              <select id="tkFilterKaryawan" onchange="renderTipKaca()" style="padding:6px; border-radius:6px; border:1px solid var(--border); font-size:13px;">
+                <option value="ALL">Semua Karyawan</option>
+              </select>
+            </div>
+          </div>
+          <div id="tkRekapContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:10px;">
+            <!-- JS Injected Rekapan -->
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-header">
             <div class="card-title">🪟 Rekap Tip Pemotongan Kaca</div>
@@ -3130,13 +3165,53 @@
     function renderTipKaca() {
       const tips = JSON.parse(localStorage.getItem('kuk_tips_data') || '[]');
       const tbody = document.getElementById('tipKacaTableBody');
-      if(!tbody) return;
-      let html = '';
+      const selKaryawan = document.getElementById('tkFilterKaryawan');
+      const rekapContainer = document.getElementById('tkRekapContainer');
+      
+      if(!tbody || !selKaryawan || !rekapContainer) return;
+      
+      // Init Default Dropdowns (only once)
+      if (!window.tkFilterInited) {
+        const now = new Date();
+        document.getElementById('tkFilterBulan').value = String(now.getMonth() + 1).padStart(2, '0');
+        document.getElementById('tkFilterTahun').value = String(now.getFullYear());
+        window.tkFilterInited = true;
+      }
+      
+      // Populate tkFilterKaryawan
+      if (selKaryawan.options.length <= 1 && dbKaryawan.length > 0) {
+        const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
+        let kHtml = '<option value="ALL">Semua Karyawan</option>';
+        activeKaryawan.forEach(k => {
+          kHtml += `<option value="${k.id}">${k.nama}</option>`;
+        });
+        selKaryawan.innerHTML = kHtml;
+      }
+
+      const fM = document.getElementById('tkFilterBulan').value;
+      const fY = document.getElementById('tkFilterTahun').value;
+      const fK = document.getElementById('tkFilterKaryawan').value;
+      
+      // Filter Tips
+      let filteredTips = tips.filter(t => {
+        if(!t.tanggal) return false;
+        const [y, m, d] = t.tanggal.split('-');
+        if(y !== fY || m !== fM) return false;
+        if(fK !== 'ALL' && t.idKaryawan !== fK) return false;
+        return true;
+      });
       
       // Sort desc by id (newest first)
-      tips.sort((a,b) => b.id - a.id);
+      filteredTips.sort((a,b) => b.id - a.id);
       
-      tips.forEach(t => {
+      let html = '';
+      let sumByEmp = {};
+      
+      filteredTips.forEach(t => {
+        // Accumulate for summary
+        if (!sumByEmp[t.nama]) sumByEmp[t.nama] = 0;
+        sumByEmp[t.nama] += Number(t.tip) || 0;
+        
         html += `
           <tr>
             <td style="font-size:13px; color:var(--text-muted);">${t.tanggal || '-'}</td>
@@ -3156,11 +3231,38 @@
         `;
       });
       
-      if(tips.length === 0) {
+      if(filteredTips.length === 0) {
         html = '<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:30px;">Belum ada rekap data pemotongan kaca.</td></tr>';
       }
-      
       tbody.innerHTML = html;
+      
+      // Render Summary
+      let sumHtml = '';
+      let totalTipBulan = 0;
+      
+      for(let emp in sumByEmp) {
+        const amt = sumByEmp[emp];
+        totalTipBulan += amt;
+        sumHtml += `
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px;">
+            <div style="font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; margin-bottom:4px;">${emp}</div>
+            <div style="font-size:16px; font-weight:700; color:var(--success);">${formatRupiah(amt)}</div>
+          </div>
+        `;
+      }
+      
+      if(Object.keys(sumByEmp).length === 0) {
+        sumHtml = '<div style="font-size:13px; color:var(--text-muted);">Tidak ada rekapan untuk bulan & filter ini.</div>';
+      } else if (fK === 'ALL') {
+        sumHtml = `
+          <div style="background:var(--primary-light); border:1px solid var(--primary); border-radius:10px; padding:12px;">
+            <div style="font-size:11px; color:var(--primary); font-weight:600; text-transform:uppercase; margin-bottom:4px;">Total Keseluruhan</div>
+            <div style="font-size:16px; font-weight:700; color:var(--primary);">${formatRupiah(totalTipBulan)}</div>
+          </div>
+        ` + sumHtml;
+      }
+      
+      rekapContainer.innerHTML = sumHtml;
     }
 
     function hapusTipKaca(id) {
