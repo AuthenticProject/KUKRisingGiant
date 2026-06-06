@@ -1144,7 +1144,10 @@
         <div class="card">
           <div class="card-header">
             <div class="card-title">🪟 Rekap Tip Pemotongan Kaca</div>
-            <button class="btn btn-primary btn-sm" onclick="renderTipKaca()">🔄 Segarkan Data</button>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="renderTipKaca()">🔄 Refresh</button>
+              <button class="btn btn-primary btn-sm" onclick="openInputTipModal()">➕ Input Tip</button>
+            </div>
           </div>
           <div class="table-responsive">
             <table>
@@ -1429,6 +1432,60 @@
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal('slipModal')">Kembali</button>
         <button class="btn btn-primary" onclick="printSlip()">🖨️ Cetak</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INPUT TIP KACA -->
+  <div class="modal-overlay" id="inputTipModal">
+    <div class="modal-container" style="max-width:400px;">
+      <div class="modal-header">
+        <h3>Input Tip Kaca</h3>
+        <button class="btn-link" onclick="closeModal('inputTipModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Pilih Karyawan</label>
+          <select id="tkKaryawanMod">
+            <option value="" disabled selected>Pilih karyawan...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jenis Kaca</label>
+          <select id="tkJenisMod" onchange="hitungTipMod()">
+            <option value="" disabled selected>Pilih jenis kaca...</option>
+            <option value="11" data-name="Kaca Air 2mm">Kaca Air 2mm - Rp 11/m²</option>
+            <option value="13" data-name="Kaca Air 3mm">Kaca Air 3mm - Rp 13/m²</option>
+            <option value="16" data-name="Kaca Air 5mm">Kaca Air 5mm - Rp 16/m²</option>
+            <option value="16" data-name="Kaca Cermin 2mm">Kaca Cermin 2mm - Rp 16/m²</option>
+            <option value="20" data-name="Kaca Cermin 3mm">Kaca Cermin 3mm - Rp 20/m²</option>
+            <option value="11" data-name="Kaca Es 3mm">Kaca Es 3mm - Rp 11/m²</option>
+            <option value="20" data-name="Kaca Es 5mm">Kaca Es 5mm - Rp 20/m²</option>
+            <option value="18" data-name="Kaca Riben 5mm">Kaca Riben 5mm - Rp 18/m²</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Luas Kaca (m²)</label>
+          <input type="number" id="tkLuasMod" placeholder="Contoh: 1.5" step="0.01" min="0" oninput="hitungTipMod()">
+        </div>
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <div style="flex:1;">
+            <label style="font-size:12px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:6px;">Total Harga</label>
+            <input type="text" id="tkTotalHargaMod" readonly value="Rp 0" style="background:#f1f5f9;border:1px solid #e2e8f0;width:100%;padding:8px;border-radius:6px;font-weight:600;">
+          </div>
+          <div style="flex:1;">
+            <label style="font-size:12px;color:var(--text-muted);font-weight:600;display:block;margin-bottom:6px;">Tip (3%)</label>
+            <input type="text" id="tkTipMod" readonly value="Rp 0" style="background:#ecfdf5;border:1px solid #10b981;width:100%;padding:8px;border-radius:6px;font-weight:700;color:#10b981;">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Tanggal Pemotongan</label>
+          <input type="date" id="tkWaktuMod">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('inputTipModal')">Batal</button>
+        <button class="btn btn-primary" onclick="simpanTipMod()">Simpan Data</button>
       </div>
     </div>
   </div>
@@ -3113,6 +3170,78 @@
       localStorage.setItem('kuk_tips_data', JSON.stringify(tips));
       renderTipKaca();
       showToast('Data berhasil dihapus.', 'success');
+    }
+
+    function openInputTipModal() {
+      // populate dropdown
+      const sel = document.getElementById('tkKaryawanMod');
+      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
+      
+      if (activeKaryawan.length === 0) {
+        sel.innerHTML = '<option value="" disabled selected>Tidak ada karyawan aktif</option>';
+      } else {
+        sel.innerHTML = '<option value="" disabled selected>Pilih karyawan...</option>' + 
+          activeKaryawan.map(k => `<option value="${k.id}" data-nama="${k.nama}">${k.nama} (${k.bagian})</option>`).join('');
+      }
+
+      // set default date
+      document.getElementById('tkWaktuMod').value = getTodayStr();
+      document.getElementById('tkJenisMod').value = '';
+      document.getElementById('tkLuasMod').value = '';
+      document.getElementById('tkTotalHargaMod').value = 'Rp 0';
+      document.getElementById('tkTipMod').value = 'Rp 0';
+
+      openModal('inputTipModal');
+    }
+
+    function hitungTipMod() {
+      const hargaPerM2 = Number(document.getElementById('tkJenisMod').value) || 0;
+      const luas = Number(document.getElementById('tkLuasMod').value) || 0;
+      const totalHarga = hargaPerM2 * luas;
+      const tip = totalHarga * 0.03;
+      
+      document.getElementById('tkTotalHargaMod').value = formatRupiah(totalHarga);
+      document.getElementById('tkTipMod').value = formatRupiah(tip);
+    }
+
+    function simpanTipMod() {
+      const selectKaryawan = document.getElementById('tkKaryawanMod');
+      const nama = selectKaryawan.options[selectKaryawan.selectedIndex]?.getAttribute('data-nama');
+      const idKaryawan = selectKaryawan.value;
+      
+      const selectJenis = document.getElementById('tkJenisMod');
+      const jenisKaca = selectJenis.options[selectJenis.selectedIndex]?.getAttribute('data-name');
+      const hargaPerM2 = Number(selectJenis.value);
+      
+      const luas = Number(document.getElementById('tkLuasMod').value);
+      const tanggal = document.getElementById('tkWaktuMod').value;
+
+      if (!idKaryawan) return showToast('Pilih karyawan terlebih dahulu!', 'error');
+      if (!jenisKaca) return showToast('Pilih jenis kaca!', 'error');
+      if (!luas || luas <= 0) return showToast('Masukkan luas kaca yang valid!', 'error');
+      if (!tanggal) return showToast('Pilih tanggal!', 'error');
+
+      const totalHarga = hargaPerM2 * luas;
+      const tip = totalHarga * 0.03;
+
+      const newTip = {
+        id: Date.now().toString(),
+        idKaryawan,
+        nama,
+        jenisKaca,
+        luas,
+        totalHarga,
+        tip,
+        tanggal
+      };
+
+      let tips = JSON.parse(localStorage.getItem('kuk_tips_data') || '[]');
+      tips.push(newTip);
+      localStorage.setItem('kuk_tips_data', JSON.stringify(tips));
+
+      showToast('Data tip berhasil disimpan!', 'success');
+      closeModal('inputTipModal');
+      renderTipKaca();
     }
   </script>
 
