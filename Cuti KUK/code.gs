@@ -915,7 +915,7 @@ function checkAndInitAkun(ss) {
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_AKUN);
     sheet.getRange(1, 1, 1, 2).setValues([['Username', 'Password']]).setFontWeight('bold');
-    const defaultUsernames = ['fariz', 'andika', 'irsyadil', 'ari', 'aria', 'zain'];
+    const defaultUsernames = ['fariz', 'andika', 'irsyadil', 'ari', 'shuva', 'aria', 'zain'];
     const rows = defaultUsernames.map(u => [u, '12345']);
     sheet.getRange(2, 1, rows.length, 2).setValues(rows);
   }
