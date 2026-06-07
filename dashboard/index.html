@@ -2878,7 +2878,18 @@
       
       document.getElementById('epPoin').value = poin;
       document.getElementById('epTempat').value = tempat;
-      document.getElementById('epStaf').value = staf;
+      // Case-insensitive selection for staf
+      const stafSelect = document.getElementById('epStaf');
+      const lowerStaf = (staf || '').toLowerCase();
+      let stafFound = false;
+      for (let i = 0; i < stafSelect.options.length; i++) {
+        if (stafSelect.options[i].value.toLowerCase() === lowerStaf) {
+          stafSelect.selectedIndex = i;
+          stafFound = true;
+          break;
+        }
+      }
+      if (!stafFound) stafSelect.value = '';
       
       // Convert waktu format if needed (needs yyyy-MM-ddThh:mm format)
       let w = waktu;
