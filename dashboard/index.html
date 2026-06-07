@@ -1453,7 +1453,16 @@
 
               <div class="form-group">
                 <label>Nama Staf Penginput</label>
-                <input type="text" id="vpStaf" placeholder="Nama Admin / Staf yang mencatat">
+                <select id="vpStaf">
+                  <option value="" disabled selected>Pilih nama staf...</option>
+                  <option value="fariz">fariz</option>
+                  <option value="andika">andika</option>
+                  <option value="irsyadil">irsyadil</option>
+                  <option value="ari">ari</option>
+                  <option value="shuva">shuva</option>
+                  <option value="aria">aria</option>
+                  <option value="zain">zain</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -1735,6 +1744,83 @@
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal('karyawanModal')">Batal</button>
         <button class="btn btn-primary" onclick="saveKaryawan()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT PELANGGARAN -->
+  <div class="modal-overlay" id="editPelanggaranModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Pelanggaran</h3>
+        <button class="btn-link" onclick="closeModal('editPelanggaranModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="epOldWaktu">
+        <input type="hidden" id="epIdKaryawan">
+        <input type="hidden" id="epNama">
+        <p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">Karyawan: <strong id="epNamaText">-</strong></p>
+        
+        <div class="form-group">
+          <label>Jenis Pelanggaran</label>
+          <select id="epJenis" onchange="updateEditViolationPoints()">
+            <option value="" disabled selected>Pilih jenis pelanggaran...</option>
+            <optgroup label="Pelanggaran Ringan - 10 Poin">
+              <option value="Terlambat lebih dari 5 menit">Terlambat lebih dari 5 menit</option>
+              <option value="Tidak mengenakan seragam kerja">Tidak mengenakan seragam kerja</option>
+              <option value="Tidak melaksanakan tugas kebersihan dapur">Tidak melaksanakan tugas kebersihan dapur</option>
+              <option value="Menggunakan HP untuk kepentingan pribadi">Menggunakan HP untuk kepentingan pribadi</option>
+              <option value="Mengambil istirahat berlebihan">Mengambil istirahat berlebihan</option>
+            </optgroup>
+            <optgroup label="Pelanggaran Sedang - 20 Poin">
+              <option value="Merokok jam operasional">Merokok jam operasional</option>
+              <option value="Mengakhiri jam kerja sebelum waktunya">Mengakhiri jam kerja sebelum waktunya</option>
+              <option value="Mengabaikan instruksi dari staf">Mengabaikan instruksi dari staf</option>
+              <option value="Menerima ulasan negatif">Menerima ulasan negatif</option>
+              <option value="Tidak hadir tanpa izin">Tidak hadir tanpa izin</option>
+              <option value="Menggunakan fasilitas toko untuk kebutuhan pribadi">Menggunakan fasilitas toko untuk kebutuhan pribadi</option>
+              <option value="Melakukan aktivitas di luar tanggung jawab kerja saat operasional">Melakukan aktivitas di luar tanggung jawab kerja saat operasional</option>
+            </optgroup>
+            <optgroup label="Pelanggaran Berat - 50 Poin">
+              <option value="Tidak melaksanakan sholat dzuhur dan ashar">Tidak melaksanakan sholat dzuhur dan ashar</option>
+              <option value="Mengambil barang milik toko tanpa seizin staf">Mengambil barang milik toko tanpa seizin staf</option>
+            </optgroup>
+            <option value="Lainnya">Lainnya (Ketik manual...)</option>
+          </select>
+        </div>
+        <div class="form-group" id="epCustomJenisGroup" style="display:none;">
+          <label>Ketik Jenis Pelanggaran Lainnya</label>
+          <input type="text" id="epCustomJenis" placeholder="Ketik jenis pelanggaran jika tidak ada di list">
+        </div>
+        <div class="form-group">
+          <label>Poin Pelanggaran</label>
+          <input type="number" id="epPoin" placeholder="Poin" min="0">
+        </div>
+        <div class="form-group">
+          <label>Tempat Kejadian</label>
+          <input type="text" id="epTempat" placeholder="Contoh: Area Kasir, Gudang Belakang">
+        </div>
+        <div class="form-group">
+          <label>Nama Staf Penginput</label>
+          <select id="epStaf">
+            <option value="" disabled selected>Pilih nama staf...</option>
+            <option value="fariz">fariz</option>
+            <option value="andika">andika</option>
+            <option value="irsyadil">irsyadil</option>
+            <option value="ari">ari</option>
+            <option value="shuva">shuva</option>
+            <option value="aria">aria</option>
+            <option value="zain">zain</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Waktu Kejadian</label>
+          <input type="datetime-local" id="epWaktu">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('editPelanggaranModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveEditPelanggaran()">Simpan Perubahan</button>
       </div>
     </div>
   </div>
@@ -2750,7 +2836,10 @@
               <td style="font-weight:700; color:var(--danger)">${v.poin}</td>
               <td>${v.tempat}</td>
               <td>${v.staf}</td>
-              <td style="text-align:right;">
+              <td style="text-align:right; white-space:nowrap;">
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--primary); border-color:#bfdbfe; margin-right:4px;" onclick="openEditPelanggaran('${v.idKaryawan}', '${v.waktu}', \`${v.nama.replace(/`/g, '')}\`, \`${v.jenis.replace(/`/g, '')}\`, ${v.poin}, \`${v.tempat.replace(/`/g, '')}\`, \`${v.staf.replace(/`/g, '')}\`)">
+                  Edit
+                </button>
                 <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:#fecaca;" onclick="deletePelanggaran('${v.idKaryawan}', '${v.waktu}')">
                   Hapus
                 </button>
@@ -2760,6 +2849,135 @@
         });
       }
       document.getElementById('pelanggaranTableBody').innerHTML = html;
+    }
+
+    function openEditPelanggaran(idKaryawan, waktu, nama, jenis, poin, tempat, staf) {
+      document.getElementById('epIdKaryawan').value = idKaryawan;
+      document.getElementById('epOldWaktu').value = waktu;
+      document.getElementById('epNama').value = nama;
+      document.getElementById('epNamaText').textContent = nama;
+      
+      const selectJenis = document.getElementById('epJenis');
+      let isPredefined = false;
+      for (let i = 0; i < selectJenis.options.length; i++) {
+        if (selectJenis.options[i].value === jenis) {
+          isPredefined = true;
+          break;
+        }
+      }
+      
+      if (isPredefined) {
+        selectJenis.value = jenis;
+        document.getElementById('epCustomJenisGroup').style.display = 'none';
+        document.getElementById('epCustomJenis').value = '';
+      } else {
+        selectJenis.value = 'Lainnya';
+        document.getElementById('epCustomJenisGroup').style.display = 'block';
+        document.getElementById('epCustomJenis').value = jenis;
+      }
+      
+      document.getElementById('epPoin').value = poin;
+      document.getElementById('epTempat').value = tempat;
+      document.getElementById('epStaf').value = staf;
+      
+      // Convert waktu format if needed (needs yyyy-MM-ddThh:mm format)
+      let w = waktu;
+      if (waktu.endsWith('Z')) {
+        const d = new Date(waktu);
+        const offset = d.getTimezoneOffset() * 60000;
+        w = new Date(d.getTime() - offset).toISOString().slice(0, 16);
+      } else if (waktu.length > 16) {
+        w = waktu.substring(0, 16);
+      }
+      document.getElementById('epWaktu').value = w;
+      
+      updateEditViolationPoints(); // to set readonly state if predefined
+      
+      openModal('editPelanggaranModal');
+    }
+
+    function updateEditViolationPoints() {
+      const select = document.getElementById('epJenis');
+      const customGroup = document.getElementById('epCustomJenisGroup');
+      const inputPoin = document.getElementById('epPoin');
+      const val = select.value;
+
+      if (val === 'Lainnya') {
+        customGroup.style.display = 'block';
+        inputPoin.removeAttribute('readonly');
+      } else {
+        customGroup.style.display = 'none';
+
+        const p10 = ["Terlambat lebih dari 5 menit", "Tidak mengenakan seragam kerja", "Tidak melaksanakan tugas kebersihan dapur", "Menggunakan HP untuk kepentingan pribadi", "Mengambil istirahat berlebihan"];
+        const p20 = ["Merokok jam operasional", "Mengakhiri jam kerja sebelum waktunya", "Mengabaikan instruksi dari staf", "Menerima ulasan negatif", "Tidak hadir tanpa izin", "Menggunakan fasilitas toko untuk kebutuhan pribadi", "Melakukan aktivitas di luar tanggung jawab kerja saat operasional"];
+        const p50 = ["Tidak melaksanakan sholat dzuhur dan ashar", "Mengambil barang milik toko tanpa seizin staf"];
+
+        if (p10.includes(val)) {
+          inputPoin.value = 10;
+          inputPoin.setAttribute('readonly', 'true');
+        } else if (p20.includes(val)) {
+          inputPoin.value = 20;
+          inputPoin.setAttribute('readonly', 'true');
+        } else if (p50.includes(val)) {
+          inputPoin.value = 50;
+          inputPoin.setAttribute('readonly', 'true');
+        } else {
+          inputPoin.removeAttribute('readonly');
+        }
+      }
+    }
+
+    function saveEditPelanggaran() {
+      const idKaryawan = document.getElementById('epIdKaryawan').value;
+      const oldWaktu = document.getElementById('epOldWaktu').value;
+      const nama = document.getElementById('epNama').value;
+      
+      const selectJenis = document.getElementById('epJenis').value;
+      let jenis = selectJenis;
+      if (selectJenis === 'Lainnya') {
+        jenis = document.getElementById('epCustomJenis').value;
+      }
+      
+      const poin = Number(document.getElementById('epPoin').value);
+      const tempat = document.getElementById('epTempat').value;
+      const staf = document.getElementById('epStaf').value;
+      const waktu = document.getElementById('epWaktu').value;
+      
+      if (!jenis) return showToast('Pilih atau ketik jenis pelanggaran!', 'error');
+      if (poin === undefined || isNaN(poin) || poin < 0) return showToast('Poin harus berupa angka positif!', 'error');
+      if (!tempat) return showToast('Tempat kejadian wajib diisi!', 'error');
+      if (!staf) return showToast('Nama staf penginput wajib diisi!', 'error');
+      if (!waktu) return showToast('Waktu kejadian wajib diisi!', 'error');
+      
+      showToast('Menyimpan perubahan...', 'info');
+      
+      const payload = {
+        action: 'edit_pelanggaran',
+        idKaryawan,
+        oldWaktu,
+        waktu,
+        nama,
+        jenis,
+        poin,
+        tempat,
+        staf
+      };
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if (res.result === 'success') {
+          showToast('Pelanggaran berhasil diubah!', 'success');
+          closeModal('editPelanggaranModal');
+          syncDataAll();
+        } else {
+          showToast(res.message || 'Gagal menyimpan perubahan.', 'error');
+        }
+      })
+      .catch(e => showToast('Kesalahan jaringan.', 'error'));
     }
 
     function deletePelanggaran(idKaryawan, waktu) {

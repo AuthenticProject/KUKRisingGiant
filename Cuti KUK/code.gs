@@ -101,6 +101,8 @@ function doPost(e) {
       return handleSavePelanggaran(ss, payload);
     } else if (action === 'delete_pelanggaran') {
       return handleDeletePelanggaran(ss, payload);
+    } else if (action === 'edit_pelanggaran') {
+      return handleEditPelanggaran(ss, payload);
     } else if (action === 'login') {
       return handleLogin(ss, payload);
     } else if (action === 'change_password') {
@@ -829,6 +831,54 @@ function handleDeletePelanggaran(ss, payload) {
     
     if (found) {
       return jsonResponse({ result: 'success', message: 'Pelanggaran berhasil dihapus.' });
+    } else {
+      return jsonResponse({ result: 'error', message: 'Data pelanggaran tidak ditemukan.' });
+    }
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
+}
+
+function handleEditPelanggaran(ss, payload) {
+  try {
+    const { idKaryawan, oldWaktu, waktu, nama, jenis, poin, tempat, staf } = payload;
+    if (!idKaryawan || !oldWaktu) {
+      return jsonResponse({ result: 'error', message: 'Parameter tidak lengkap: idKaryawan dan oldWaktu diperlukan.' });
+    }
+    
+    const sheet = getOrCreatePelanggaranSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return jsonResponse({ result: 'error', message: 'Tidak ada data untuk diedit.' });
+    }
+    
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 7);
+    const values = dataRange.getValues();
+    const tz = Session.getScriptTimeZone();
+    
+    let found = false;
+    for (let i = values.length - 1; i >= 0; i--) {
+      const rowId = String(values[i][1]);
+      
+      let rowWaktu = '';
+      const rawWaktu = values[i][0];
+      if (rawWaktu instanceof Date) {
+        rowWaktu = Utilities.formatDate(rawWaktu, tz, "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+      } else {
+        rowWaktu = String(rawWaktu || '').trim();
+      }
+      
+      if (rowId === String(idKaryawan) && (rowWaktu === String(oldWaktu) || rowWaktu.substring(0, 19) === String(oldWaktu).substring(0, 19))) {
+        // Update values in this row
+        const rowToUpdate = i + 2;
+        sheet.getRange(rowToUpdate, 1, 1, 7).setValues([[waktu, idKaryawan, nama, jenis, poin, tempat, staf]]);
+        found = true;
+        break;
+      }
+    }
+    
+    if (found) {
+      return jsonResponse({ result: 'success', message: 'Pelanggaran berhasil diubah.' });
     } else {
       return jsonResponse({ result: 'error', message: 'Data pelanggaran tidak ditemukan.' });
     }
