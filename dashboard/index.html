@@ -2513,7 +2513,7 @@
     // Absen Clock and Date Display
     function updateClock() {
       const now = new Date();
-      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(/\./g, ':');
+      const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\./g, ':');
       const clockEl = document.getElementById('absenClockText');
       if (clockEl) clockEl.textContent = timeStr;
 
@@ -3791,7 +3791,7 @@
       if (!dateStr) return '-';
       try {
         const d = new Date(dateStr);
-        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).replace(/\./g, ':');
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(/\./g, ':');
       } catch { return dateStr; }
     }
 
