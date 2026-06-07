@@ -13,6 +13,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
   <style>
     :root {
       --bg: #fafafa;
@@ -325,7 +327,7 @@
 
       <div class="form-group">
         <label>Waktu & Tanggal Kejadian</label>
-        <input type="datetime-local" id="vpWaktu">
+        <input type="text" id="vpWaktu" placeholder="Pilih waktu & tanggal...">
       </div>
 
       <button class="btn-submit" id="submitBtn" onclick="savePelanggaran()">
@@ -359,7 +361,15 @@
       const now = new Date();
       const offset = now.getTimezoneOffset() * 60000;
       const localISOTime = new Date(now - offset).toISOString().slice(0, 16);
-      document.getElementById('vpWaktu').value = localISOTime;
+      
+      flatpickr("#vpWaktu", { 
+        enableTime: true, 
+        dateFormat: "Y-m-d\\TH:i", 
+        time_24hr: true, 
+        altInput: true, 
+        altFormat: "d M Y, H:i",
+        defaultDate: localISOTime
+      });
 
       // Fetch employees list
       fetch(`${SCRIPT_URL}?action=dashboard_data`)

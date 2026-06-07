@@ -16,6 +16,8 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
   <style>
     :root {
@@ -1467,7 +1469,7 @@
 
               <div class="form-group">
                 <label>Waktu Kejadian</label>
-                <input type="datetime-local" id="vpWaktu">
+                <input type="text" id="vpWaktu" placeholder="Pilih waktu & tanggal...">
               </div>
 
               <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="savePelanggaran()">
@@ -1815,7 +1817,7 @@
         </div>
         <div class="form-group">
           <label>Waktu Kejadian</label>
-          <input type="datetime-local" id="epWaktu">
+          <input type="text" id="epWaktu" placeholder="Pilih waktu & tanggal...">
         </div>
       </div>
       <div class="modal-footer">
@@ -2147,6 +2149,10 @@
       initDateFilters();
       // Setup live clock in Absen tab
       setInterval(updateClock, 1000);
+
+      // Initialize flatpickr for 24-hour time support
+      flatpickr("#vpWaktu", { enableTime: true, dateFormat: "Y-m-d\\TH:i", time_24hr: true, altInput: true, altFormat: "d M Y, H:i" });
+      flatpickr("#epWaktu", { enableTime: true, dateFormat: "Y-m-d\\TH:i", time_24hr: true, altInput: true, altFormat: "d M Y, H:i" });
     });
 
     // Daftar akun yang valid
