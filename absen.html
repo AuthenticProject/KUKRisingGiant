@@ -472,7 +472,8 @@
     </div>
 
     <div style="text-align: center; margin-top: 10px;">
-      <a href="index.html" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600;">← Kembali ke Portal</a>
+      <a href="index.html" style="color: var(--primary); text-decoration: none; font-size: 14px; font-weight: 600;">←
+        Kembali ke Portal</a>
     </div>
   </div>
 
@@ -531,46 +532,46 @@
         fetch(`${SCRIPT_URL}?action=dashboard_data`).then(r => r.json()),
         fetch(`${SCRIPT_URL}?action=rekapAbsen`).then(r => r.json())
       ])
-      .then(([initRes, dashRes, absenRes]) => {
-        dbKaryawan = (initRes.karyawan || []).filter(k =>
-          String(k.status || 'Aktif').toLowerCase() !== 'nonaktif'
-        );
+        .then(([initRes, dashRes, absenRes]) => {
+          dbKaryawan = (initRes.karyawan || []).filter(k =>
+            String(k.status || 'Aktif').toLowerCase() !== 'nonaktif'
+          );
 
-        // Cek apakah absen hari ini sudah pernah diisi
-        const absenData = absenRes.data || [];
-        const absenHariIni = absenData.filter(r => {
-          // waktu bisa ISO string; ambil tanggal-nya saja
-          try {
-            const tgl = new Date(r.waktu);
-            const y = tgl.getFullYear();
-            const m = String(tgl.getMonth() + 1).padStart(2, '0');
-            const d = String(tgl.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}` === today;
-          } catch { return false; }
-        });
-
-        if (absenHariIni.length > 0) {
-          // Sudah diisi hari ini — tampilkan pesan dan kunci form
-          showAlreadyDone(today);
-          return;
-        }
-
-        // Build set of employee IDs who are on leave today
-        const cutiHariIni = new Set();
-        if (dashRes.result === 'success' && Array.isArray(dashRes.data)) {
-          dashRes.data.forEach(entry => {
-            if (entry.tanggal === today) {
-              cutiHariIni.add(String(entry.idKaryawan));
-            }
+          // Cek apakah absen hari ini sudah pernah diisi
+          const absenData = absenRes.data || [];
+          const absenHariIni = absenData.filter(r => {
+            // waktu bisa ISO string; ambil tanggal-nya saja
+            try {
+              const tgl = new Date(r.waktu);
+              const y = tgl.getFullYear();
+              const m = String(tgl.getMonth() + 1).padStart(2, '0');
+              const d = String(tgl.getDate()).padStart(2, '0');
+              return `${y}-${m}-${d}` === today;
+            } catch { return false; }
           });
-        }
 
-        renderKaryawanList(cutiHariIni);
-      })
-      .catch(e => {
-        document.getElementById('karyawanList').innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat data server.</td></tr>';
-        showToast('Gagal memuat data server.', 'error');
-      });
+          if (absenHariIni.length > 0) {
+            // Sudah diisi hari ini — tampilkan pesan dan kunci form
+            showAlreadyDone(today);
+            return;
+          }
+
+          // Build set of employee IDs who are on leave today
+          const cutiHariIni = new Set();
+          if (dashRes.result === 'success' && Array.isArray(dashRes.data)) {
+            dashRes.data.forEach(entry => {
+              if (entry.tanggal === today) {
+                cutiHariIni.add(String(entry.idKaryawan));
+              }
+            });
+          }
+
+          renderKaryawanList(cutiHariIni);
+        })
+        .catch(e => {
+          document.getElementById('karyawanList').innerHTML = '<tr><td colspan="2" style="text-align:center; color:red;">Gagal memuat data server.</td></tr>';
+          showToast('Gagal memuat data server.', 'error');
+        });
     }
 
     function showAlreadyDone(todayStr) {
@@ -611,7 +612,7 @@
 
       // Separate karyawan into active attendees and those on leave
       const hadir = dbKaryawan.filter(k => !cutiHariIni.has(String(k.id)));
-      const cuti  = dbKaryawan.filter(k =>  cutiHariIni.has(String(k.id)));
+      const cuti = dbKaryawan.filter(k => cutiHariIni.has(String(k.id)));
 
       if (hadir.length === 0) {
         tbody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:30px; color:var(--text-muted);">Semua karyawan sedang cuti hari ini.</td></tr>';
@@ -686,7 +687,7 @@
 
     function handleAbsen() {
       const hadirList = window._hadirKaryawan || [];
-      const cutiList  = window._cutiKaryawan  || [];
+      const cutiList = window._cutiKaryawan || [];
 
       if (hadirList.length === 0 && cutiList.length === 0) {
         showToast('Tidak ada data karyawan untuk disimpan.', 'error');

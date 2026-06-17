@@ -436,7 +436,7 @@
 
     <div class="menu-grid">
       <!-- Absen -->
-      <a href="absen.html" class="menu-card blue">
+      <a href="absen.html" id="menu-absen" class="menu-card blue" style="display:none;">
         <div class="menu-icon">📋</div>
         <div class="menu-card-label">Rekap Absen</div>
         <div class="menu-card-desc">Briefing pagi harian</div>
@@ -444,7 +444,7 @@
       </a>
 
       <!-- Cuti -->
-      <a href="cuti.html" class="menu-card green">
+      <a href="cuti.html" id="menu-cuti" class="menu-card green" style="display:none;">
         <div class="menu-icon">🏖️</div>
         <div class="menu-card-label">Pengajuan Cuti</div>
         <div class="menu-card-desc">Pilih jadwal libur</div>
@@ -452,7 +452,7 @@
       </a>
 
       <!-- Pelanggaran -->
-      <a href="pelanggaran.html" class="menu-card amber">
+      <a href="pelanggaran.html" id="menu-pelanggaran" class="menu-card amber" style="display:none;">
         <div class="menu-icon">⚠️</div>
         <div class="menu-card-label">Pelanggaran</div>
         <div class="menu-card-desc">Catat pelanggaran</div>
@@ -460,7 +460,7 @@
       </a>
 
       <!-- Dashboard -->
-      <a href="dashboard/" class="menu-card red">
+      <a href="dashboard/" id="menu-dashboard" class="menu-card red" style="display:none;">
         <div class="menu-icon">📊</div>
         <div class="menu-card-label">Dashboard</div>
         <div class="menu-card-desc">Rekap & laporan</div>
@@ -468,25 +468,56 @@
       </a>
 
       <!-- Tip Kaca -->
-      <a href="tip.html" class="menu-card purple full">
-        <div class="menu-info">
-          <div class="menu-card-label">Catat Tip Kaca</div>
-          <div class="menu-card-desc">Input tip 3% pemotongan kaca karyawan</div>
-        </div>
-        <div class="menu-icon" style="flex-shrink:0;">🪟</div>
+      <a href="tip.html" id="menu-tip" class="menu-card purple" style="display:none;">
+        <div class="menu-icon">🪟</div>
+        <div class="menu-card-label">Tip Kaca</div>
+        <div class="menu-card-desc">Input tip 3% kaca</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
       </a>
+
     </div>
 
     <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
   </div>
 
   <script>
-    // === AUTH CONFIG (sama dengan dashboard) ===
-    const VALID_USERS = ['fariz', 'andika', 'irsyadil', 'ari', 'shuva', 'aria', 'zain'];
-    const DEFAULT_PASSWORD = '12345';
+    // === AUTH CONFIG ===
+    const DEFAULT_USERS = [
+      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] }
+    ];
 
-    function getStoredPassword(username) {
-      return localStorage.getItem('kuk_pass_' + username) || DEFAULT_PASSWORD;
+    function getUsersDB() {
+      const stored = localStorage.getItem('kuk_users_db');
+      if (stored) {
+        return JSON.parse(stored);
+      } else {
+        // Migrate old passwords if exists
+        const migrated = DEFAULT_USERS.map(u => {
+          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
+          if (oldPass) u.password = oldPass;
+          return u;
+        });
+        localStorage.setItem('kuk_users_db', JSON.stringify(migrated));
+        return migrated;
+      }
+    }
+
+    function initUserDropdown() {
+      const users = getUsersDB();
+      const sel = document.getElementById('loginUser');
+      sel.innerHTML = '';
+      users.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.username;
+        opt.textContent = u.username;
+        sel.appendChild(opt);
+      });
     }
 
     // === TOAST ===
@@ -522,8 +553,15 @@
         return;
       }
 
-      const stored = getStoredPassword(user);
-      if (pass !== stored) {
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === user);
+      if (!userObj) {
+        errEl.classList.add('show');
+        document.getElementById('errText').textContent = 'Pengguna tidak ditemukan.';
+        return;
+      }
+
+      if (pass !== userObj.password) {
         errEl.classList.add('show');
         document.getElementById('errText').textContent = 'Password salah, coba lagi.';
         document.getElementById('loginPassword').value = '';
@@ -539,6 +577,26 @@
 
     // === SHOW PORTAL MENU ===
     function showPortal(username) {
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === username);
+      if (!userObj) return doLogout();
+
+      const perms = userObj.permissions || [];
+      const menuMap = {
+        'absen': 'menu-absen',
+        'cuti': 'menu-cuti',
+        'pelanggaran': 'menu-pelanggaran',
+        'dashboard': 'menu-dashboard',
+        'tip': 'menu-tip'
+      };
+
+      for (let key in menuMap) {
+        const el = document.getElementById(menuMap[key]);
+        if (el) {
+          el.style.display = perms.includes(key) ? 'flex' : 'none';
+        }
+      }
+
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('portalScreen').style.display = 'flex';
       document.getElementById('welcomeName').textContent = username;
@@ -555,8 +613,10 @@
 
     // === CHECK SESSION ON LOAD ===
     window.addEventListener('DOMContentLoaded', () => {
+      initUserDropdown();
       const saved = sessionStorage.getItem('kuk_user');
-      if (saved && VALID_USERS.includes(saved)) {
+      const users = getUsersDB();
+      if (saved && users.some(u => u.username === saved)) {
         showPortal(saved);
       }
     });

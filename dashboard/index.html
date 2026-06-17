@@ -1127,6 +1127,15 @@
           </svg>
           <span>Tip Kaca</span>
         </div>
+        <div class="menu-item" id="nav-users" onclick="navigate('users', this)" style="display:none;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          <span>Pengguna</span>
+        </div>
       </nav>
       <div class="sidebar-footer">
         <div class="user-info">
@@ -1647,6 +1656,30 @@
           </div>
         </div>
       </section>
+
+      <!-- TAB: PENGGUNA -->
+      <section id="tab-users" class="content-section">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">👥 Manajemen Pengguna</div>
+            <button class="btn btn-primary btn-sm" onclick="openUserModal()">➕ Tambah User</button>
+          </div>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Akses Menu</th>
+                  <th style="text-align:right;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="dbUserTableBody">
+                <!-- JS Injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
 
     <!-- MOBILE BOTTOM NAVIGATION -->
@@ -1704,6 +1737,41 @@
         <span>Tip Kaca</span>
       </div>
     </nav>
+  </div>
+
+  <!-- MODAL: MANAJEMEN USER -->
+  <div class="modal-overlay" id="userManagementModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <div class="card-title" id="userModalTitle">Tambah Pengguna</div>
+        <button onclick="closeModal('userManagementModal')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="userInputUsername" placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label>Kata Sandi</label>
+          <input type="text" id="userInputPassword" placeholder="Masukkan kata sandi">
+        </div>
+        <div class="form-group">
+          <label>Akses Menu</label>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="userPermContainer">
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="absen"> Rekap Absen</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="cuti"> Pengajuan Cuti</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="pelanggaran"> Pelanggaran</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="dashboard"> Dashboard</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="tip"> Tip Kaca</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="users"> User Admin</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('userManagementModal')">Batal</button>
+        <button class="btn btn-primary" onclick="saveDbUser()">Simpan</button>
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: ADD/EDIT KARYAWAN -->
@@ -2156,11 +2224,27 @@
     });
 
     // Daftar akun yang valid
-    const VALID_USERS = ['fariz', 'andika', 'irsyadil', 'ari', 'shuva', 'aria', 'zain'];
-    const DEFAULT_PASSWORD = '12345';
+    const DEFAULT_USERS = [
+      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] }
+    ];
 
-    function getStoredPassword(username) {
-      return localStorage.getItem('kuk_pass_' + username) || DEFAULT_PASSWORD;
+    function getUsersDB() {
+      const stored = localStorage.getItem('kuk_users_db');
+      if (stored) return JSON.parse(stored);
+      
+      const migrated = DEFAULT_USERS.map(u => {
+        const oldPass = localStorage.getItem('kuk_pass_' + u.username);
+        if (oldPass) u.password = oldPass;
+        return u;
+      });
+      localStorage.setItem('kuk_users_db', JSON.stringify(migrated));
+      return migrated;
     }
 
     function attemptLogin() {
@@ -2168,10 +2252,12 @@
       const pass = document.getElementById('loginPassword').value;
 
       if (!pass) return showToast('Harap masukkan kata sandi!', 'error');
-      if (!VALID_USERS.includes(user)) return showToast('Username tidak dikenali.', 'error');
+      
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === user);
+      if (!userObj) return showToast('Username tidak dikenali.', 'error');
 
-      const storedPass = getStoredPassword(user);
-      if (pass !== storedPass) {
+      if (pass !== userObj.password) {
         showToast('Password salah. Coba lagi.', 'error');
         return;
       }
@@ -2193,6 +2279,27 @@
       document.getElementById('userNameTxt').textContent = username;
       document.getElementById('userAvatar').textContent = username.substring(0, 1).toUpperCase();
 
+      const users = getUsersDB();
+      const userObj = users.find(u => u.username === username);
+      const perms = userObj ? (userObj.permissions || []) : [];
+      
+      const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
+      menuItems.forEach(el => {
+        const onclickAttr = el.getAttribute('onclick');
+        if (onclickAttr) {
+          const match = onclickAttr.match(/navigate\('([^']+)'/);
+          if (match) {
+            const tabId = match[1];
+            // Admin only menus
+            if (tabId === 'users' && !perms.includes('users')) {
+              el.style.display = 'none';
+            } else {
+              el.style.display = 'flex';
+            }
+          }
+        }
+      });
+
       syncDataAll();
     }
 
@@ -2207,7 +2314,8 @@
       'absen': 'Absen Briefing',
       'pelanggaran': 'Pelanggaran',
       'gaji': 'Gaji / Payroll',
-      'tipkaca': 'Tip Pemotongan Kaca'
+      'tipkaca': 'Tip Pemotongan Kaca',
+      'users': 'Manajemen Pengguna'
     };
 
     function navigate(tabId, el) {
@@ -2228,6 +2336,8 @@
         calculatePayroll();
       } else if (tabId === 'tipkaca') {
         renderTipKaca();
+      } else if (tabId === 'users') {
+        renderUserTable();
       }
     }
 
@@ -2242,6 +2352,7 @@
       if (tabId === 'absen') { renderAbsenLogger(); renderRekapBulanan(); }
       else if (tabId === 'gaji') { calculatePayroll(); }
       else if (tabId === 'tipkaca') { renderTipKaca(); }
+      else if (tabId === 'users') { renderUserTable(); }
     }
 
     function syncMobileNav(tabId) {
@@ -3778,13 +3889,17 @@
       if (newPass !== confPass) return showToast('Konfirmasi password tidak cocok!', 'error');
       if (newPass.length < 4) return showToast('Password baru minimal 4 karakter!', 'error');
 
-      const currentPass = getStoredPassword(user);
-      if (oldPass !== currentPass) {
+      const users = getUsersDB();
+      const userIdx = users.findIndex(u => u.username === user);
+      if (userIdx === -1) return showToast('User tidak valid!', 'error');
+
+      if (oldPass !== users[userIdx].password) {
         showToast('Password lama salah!', 'error');
         return;
       }
 
-      localStorage.setItem('kuk_pass_' + user, newPass);
+      users[userIdx].password = newPass;
+      localStorage.setItem('kuk_users_db', JSON.stringify(users));
       showToast('Kata sandi berhasil diubah!', 'success');
       closeModal('changePasswordModal');
     }
@@ -4056,6 +4171,89 @@
       showToast('Data tip berhasil disimpan!', 'success');
       closeModal('inputTipModal');
       renderTipKaca();
+    }
+
+    // === USER MANAGEMENT (ADMIN ONLY) ===
+    let editingUserIndex = null;
+
+    function renderUserTable() {
+      const users = getUsersDB();
+      const tbody = document.getElementById('dbUserTableBody');
+      tbody.innerHTML = '';
+
+      users.forEach((u, i) => {
+        const perms = (u.permissions || []).join(', ');
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${u.username}</strong></td>
+            <td style="font-size:13px; color:var(--text-muted);">${perms || 'Tidak ada akses'}</td>
+            <td style="text-align:right;">
+              <button class="btn btn-outline btn-sm" onclick="editDbUser(${i})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteDbUser(${i})">Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openUserModal() {
+      editingUserIndex = null;
+      document.getElementById('userModalTitle').textContent = 'Tambah Pengguna';
+      document.getElementById('userInputUsername').value = '';
+      document.getElementById('userInputPassword').value = '';
+      document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
+      openModal('userManagementModal');
+    }
+
+    function editDbUser(index) {
+      const users = getUsersDB();
+      editingUserIndex = index;
+      const u = users[index];
+      
+      document.getElementById('userModalTitle').textContent = 'Edit Pengguna';
+      document.getElementById('userInputUsername').value = u.username;
+      document.getElementById('userInputPassword').value = u.password;
+      
+      document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => {
+        cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
+      });
+      openModal('userManagementModal');
+    }
+
+    function saveDbUser() {
+      const username = document.getElementById('userInputUsername').value.trim();
+      const password = document.getElementById('userInputPassword').value.trim();
+      
+      if (!username || !password) return showToast('Username dan kata sandi wajib diisi!', 'error');
+      
+      const checkboxes = document.querySelectorAll('#userPermContainer input[type="checkbox"]:checked');
+      const permissions = Array.from(checkboxes).map(cb => cb.value);
+      
+      let users = getUsersDB();
+      
+      if (editingUserIndex !== null) {
+        // check unique
+        const existing = users.findIndex(u => u.username === username);
+        if (existing !== -1 && existing !== editingUserIndex) return showToast('Username sudah ada!', 'error');
+        users[editingUserIndex] = { username, password, permissions };
+      } else {
+        if (users.some(u => u.username === username)) return showToast('Username sudah ada!', 'error');
+        users.push({ username, password, permissions });
+      }
+      
+      localStorage.setItem('kuk_users_db', JSON.stringify(users));
+      showToast('Data pengguna berhasil disimpan.', 'success');
+      closeModal('userManagementModal');
+      renderUserTable();
+    }
+
+    function deleteDbUser(index) {
+      if (!confirm('Yakin ingin menghapus pengguna ini?')) return;
+      let users = getUsersDB();
+      users.splice(index, 1);
+      localStorage.setItem('kuk_users_db', JSON.stringify(users));
+      showToast('Pengguna dihapus.', 'success');
+      renderUserTable();
     }
   </script>
 

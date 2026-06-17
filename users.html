@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manajemen Pengguna</title>
+  <meta name="theme-color" content="#64748b">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fafafa;
+      --surface: #ffffff;
+      --primary: #64748b;
+      --primary-hover: #475569;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --success: #10b981;
+      --danger: #ef4444;
+      --radius: 16px;
+      --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+    body { background-color: var(--bg); color: var(--text); padding: 40px 20px 100px; min-height: 100vh; }
+    .app-container { width: 100%; max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+    .header { text-align: center; margin-bottom: 10px; }
+    .header h1 { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+    .header p { font-size: 15px; color: var(--text-muted); margin-top: 8px; }
+    
+    .card { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; border: 1px solid rgba(255, 255, 255, 0.8); }
+    
+    .btn { padding: 12px 16px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .btn-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.2); }
+    
+    .user-list { display: flex; flex-direction: column; gap: 12px; }
+    .user-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; }
+    .user-info h3 { font-size: 16px; margin-bottom: 4px; }
+    .user-info p { font-size: 12px; color: var(--text-muted); }
+    
+    .actions { display: flex; gap: 8px; }
+    
+    .back-link { text-align: center; margin-top: 10px; }
+    .back-link a { color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 600; transition: 0.2s; }
+    .back-link a:hover { color: var(--primary); }
+    
+    /* Modal */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 100; padding: 20px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: var(--surface); width: 100%; max-width: 400px; border-radius: var(--radius); padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalIn 0.3s ease; }
+    .modal h2 { margin-bottom: 16px; font-size: 20px; }
+    @keyframes modalIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input[type="text"] { width: 100%; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--border); font-size: 15px; font-weight: 500; outline: none; background: #f8fafc; color: var(--text); }
+    .form-group input:focus { border-color: var(--primary); background: var(--surface); box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1); }
+    
+    .perm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .perm-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+    
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+    
+    /* Toast */
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 300; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+    .toast { background: white; color: var(--text); padding: 14px 24px; border-radius: 100px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); font-weight: 500; font-size: 14px; border-left: 4px solid var(--primary); display: flex; align-items: center; gap: 10px; animation: toastIn 0.3s ease; pointer-events: auto; }
+    .toast.success { border-left-color: var(--success); }
+    @keyframes toastIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
+  </style>
+</head>
+<body>
+  <div class="toast-container" id="toastContainer"></div>
+  
+  <div class="app-container">
+    <div class="header">
+      <h1>Manajemen Pengguna</h1>
+      <p>Atur akun dan hak akses portal untuk setiap staf.</p>
+    </div>
+    
+    <div class="card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 18px;">Daftar Pengguna</h2>
+        <button class="btn btn-primary" onclick="openModal()">+ Tambah User</button>
+      </div>
+      
+      <div class="user-list" id="userList">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+    
+    <div class="back-link">
+      <a href="index.html">← Kembali ke Portal</a>
+    </div>
+  </div>
+
+  <!-- Modal Tambah/Edit User -->
+  <div class="modal-overlay" id="userModal">
+    <div class="modal">
+      <h2 id="modalTitle">Tambah Pengguna</h2>
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="usernameInput" placeholder="Masukkan username">
+      </div>
+      <div class="form-group">
+        <label>Kata Sandi</label>
+        <input type="text" id="passwordInput" placeholder="Masukkan kata sandi">
+      </div>
+      <div class="form-group">
+        <label>Akses Menu</label>
+        <div class="perm-grid" id="permContainer">
+          <label class="perm-item"><input type="checkbox" value="absen"> Rekap Absen</label>
+          <label class="perm-item"><input type="checkbox" value="cuti"> Cuti</label>
+          <label class="perm-item"><input type="checkbox" value="pelanggaran"> Pelanggaran</label>
+          <label class="perm-item"><input type="checkbox" value="dashboard"> Dashboard</label>
+          <label class="perm-item"><input type="checkbox" value="tip"> Tip Kaca</label>
+          <label class="perm-item"><input type="checkbox" value="users"> User Admin</label>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button class="btn" style="background: var(--surface); border: 1px solid var(--border);" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="saveUser()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEFAULT_USERS = [
+      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
+      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] }
+    ];
+
+    let usersDB = [];
+    let editingUser = null;
+
+    function showToast(msg, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = type === 'success' ? `✓ ${msg}` : `! ${msg}`;
+      container.appendChild(t);
+      setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
+    }
+
+    function initDB() {
+      const stored = localStorage.getItem('kuk_users_db');
+      if (stored) {
+        usersDB = JSON.parse(stored);
+      } else {
+        // Migrate old passwords if exists
+        usersDB = DEFAULT_USERS.map(u => {
+          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
+          if (oldPass) u.password = oldPass;
+          return u;
+        });
+        localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
+      }
+      renderUsers();
+    }
+
+    function renderUsers() {
+      const list = document.getElementById('userList');
+      list.innerHTML = '';
+      
+      usersDB.forEach((u, i) => {
+        const div = document.createElement('div');
+        div.className = 'user-item';
+        
+        const permsText = u.permissions && u.permissions.length > 0 
+          ? u.permissions.join(', ') 
+          : 'Tidak ada akses';
+          
+        div.innerHTML = `
+          <div class="user-info">
+            <h3>${u.username}</h3>
+            <p>Akses: ${permsText}</p>
+          </div>
+          <div class="actions">
+            <button class="btn" style="background: #e2e8f0;" onclick="editUser(${i})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteUser(${i})">Hapus</button>
+          </div>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function openModal(index = null) {
+      editingUser = index;
+      document.getElementById('modalTitle').textContent = index !== null ? 'Edit Pengguna' : 'Tambah Pengguna';
+      
+      const uInput = document.getElementById('usernameInput');
+      const pInput = document.getElementById('passwordInput');
+      const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]');
+      
+      if (index !== null) {
+        const u = usersDB[index];
+        uInput.value = u.username;
+        pInput.value = u.password;
+        // uInput.disabled = true; // Optional: prevent changing username
+        checkboxes.forEach(cb => {
+          cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
+        });
+      } else {
+        uInput.value = '';
+        pInput.value = '';
+        // uInput.disabled = false;
+        checkboxes.forEach(cb => cb.checked = false);
+      }
+      
+      document.getElementById('userModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('userModal').classList.remove('show');
+    }
+
+    function saveUser() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+      
+      if (!username || !password) {
+        return showToast('Username dan kata sandi wajib diisi!', 'error');
+      }
+      
+      const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]:checked');
+      const permissions = Array.from(checkboxes).map(cb => cb.value);
+      
+      if (editingUser !== null) {
+        // Check if username conflict
+        const existing = usersDB.findIndex(u => u.username === username);
+        if (existing !== -1 && existing !== editingUser) {
+          return showToast('Username sudah digunakan!', 'error');
+        }
+        usersDB[editingUser] = { username, password, permissions };
+        showToast('Data pengguna berhasil diubah.', 'success');
+      } else {
+        if (usersDB.some(u => u.username === username)) {
+          return showToast('Username sudah ada!', 'error');
+        }
+        usersDB.push({ username, password, permissions });
+        showToast('Pengguna baru berhasil ditambahkan.', 'success');
+      }
+      
+      localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
+      renderUsers();
+      closeModal();
+    }
+
+    function deleteUser(index) {
+      const u = usersDB[index];
+      if (confirm(`Yakin ingin menghapus pengguna "${u.username}"?`)) {
+        usersDB.splice(index, 1);
+        localStorage.setItem('kuk_users_db', JSON.stringify(usersDB));
+        renderUsers();
+        showToast('Pengguna berhasil dihapus.', 'success');
+      }
+    }
+
+    initDB();
+  </script>
+</body>
+</html>
