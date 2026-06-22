@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v7';
+const CACHE_NAME = 'kuk-hr-cache-v8';
 const STATIC_ASSETS = [
   './',
   './index.html',

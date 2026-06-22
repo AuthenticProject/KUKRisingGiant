@@ -2426,6 +2426,48 @@
     }
 
     // --- TAB: DASHBOARD RENDERING ---
+
+    // Migrate old local tips to cloud if they exist
+    function migrateLocalTips() {
+      const oldTipsStr = localStorage.getItem('kuk_tips_db');
+      if (!oldTipsStr) return;
+      
+      try {
+        const oldTips = JSON.parse(oldTipsStr);
+        if (!Array.isArray(oldTips) || oldTips.length === 0) {
+          localStorage.removeItem('kuk_tips_db');
+          return;
+        }
+
+        showToast(`Migrasi ${oldTips.length} data Tip Kaca lama ke Cloud...`, 'info');
+        
+        // Sequentially post to avoid overwhelming Apps Script
+        let p = Promise.resolve();
+        oldTips.forEach(tip => {
+          p = p.then(() => {
+            const payload = { action: 'save_tip', ...tip };
+            // Ensure ID is present
+            if (!payload.id) payload.id = Date.now().toString() + Math.random().toString(36).substr(2, 5);
+            return fetch(SCRIPT_URL, {
+              method: 'POST',
+              body: JSON.stringify(payload)
+            }).then(r => r.json());
+          });
+        });
+        
+        p.then(() => {
+          localStorage.removeItem('kuk_tips_db');
+          showToast('Migrasi Tip Kaca berhasil!', 'success');
+          syncDataAll(); // reload data
+        }).catch(err => {
+          console.error("Migration error", err);
+          showToast('Gagal migrasi sebagian data Tip Kaca.', 'error');
+        });
+
+      } catch(e) {
+        localStorage.removeItem('kuk_tips_db');
+      }
+    }
     function renderDashboard() {
       const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
       document.getElementById('dbTotalKaryawan').textContent = activeKaryawan.length;
@@ -4310,7 +4352,6 @@
     }
   </script>
 
-  <!-- REGISTER PWA SERVICE WORKER -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -4319,6 +4360,11 @@
           .catch(err => console.error('Service Worker registration failed:', err));
       });
     }
+
+    // Run migration on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(migrateLocalTips, 3000); // delay so it doesn't interrupt syncDataAll
+    });
   </script>
 </body>
 
