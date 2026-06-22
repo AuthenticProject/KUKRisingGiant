@@ -103,6 +103,10 @@ function doPost(e) {
       return handleDeletePelanggaran(ss, payload);
     } else if (action === 'edit_pelanggaran') {
       return handleEditPelanggaran(ss, payload);
+    } else if (action === 'save_tip') {
+      return handleSaveTip(ss, payload);
+    } else if (action === 'delete_tip') {
+      return handleDeleteTip(ss, payload);
     } else if (action === 'login') {
       return handleLogin(ss, payload);
     } else if (action === 'change_password') {
@@ -508,7 +512,10 @@ function getDashboardData(ss) {
   // Ambil data pelanggaran
   const violations = getViolationsData(ss);
   
-  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations };
+  // Ambil data tip kaca
+  const tips = getTipKacaData(ss);
+  
+  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips };
 }
 
 function jsonResponse(obj) {
@@ -1007,4 +1014,123 @@ function handleChangePassword(ss, payload) {
     }
   }
   return jsonResponse({ result: 'error', message: 'Username tidak ditemukan.' });
+}
+
+// ================================================================
+// SISTEM TIP KACA
+// ================================================================
+function getOrCreateTipKacaSheet(ss) {
+  let sheet = ss.getSheetByName("Tip Kaca");
+  if (!sheet) {
+    sheet = ss.insertSheet("Tip Kaca");
+    sheet.appendRow(["ID", "Waktu (Timestamp)", "ID Karyawan", "Nama Karyawan", "Jenis Kaca", "Luas (m2)", "Total Harga", "Tip"]);
+    const headerRange = sheet.getRange("A1:H1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f3f4f6");
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, 8);
+  }
+  return sheet;
+}
+
+function getTipKacaData(ss) {
+  try {
+    const sheet = getOrCreateTipKacaSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+    
+    const dataRange = sheet.getRange(2, 1, lastRow - 1, 8);
+    const values = dataRange.getValues();
+    const tips = [];
+    const tz = Session.getScriptTimeZone();
+    
+    for (let i = values.length - 1; i >= 0; i--) {
+      let waktuStr = '';
+      const rawWaktu = values[i][1];
+      if (rawWaktu instanceof Date) {
+        waktuStr = Utilities.formatDate(rawWaktu, tz, "yyyy-MM-dd");
+      } else {
+        waktuStr = String(rawWaktu || '').trim();
+      }
+      
+      tips.push({
+        id: String(values[i][0]),
+        tanggal: waktuStr,
+        idKaryawan: String(values[i][2]),
+        nama: String(values[i][3]),
+        jenisKaca: String(values[i][4]),
+        luas: Number(values[i][5]) || 0,
+        totalHarga: Number(values[i][6]) || 0,
+        tip: Number(values[i][7]) || 0
+      });
+    }
+    return tips;
+  } catch (e) {
+    Logger.log("Error getTipKacaData: " + e.toString());
+    return [];
+  }
+}
+
+function handleSaveTip(ss, payload) {
+  try {
+    const { id, idKaryawan, nama, jenisKaca, luas, totalHarga, tip, tanggal } = payload;
+    
+    if (!idKaryawan || !nama || !jenisKaca || !luas || !tanggal) {
+      return jsonResponse({ result: 'error', message: 'Data tip tidak lengkap.' });
+    }
+    
+    const sheet = getOrCreateTipKacaSheet(ss);
+    
+    sheet.appendRow([
+      id,
+      tanggal,
+      idKaryawan,
+      nama,
+      jenisKaca,
+      luas,
+      totalHarga,
+      tip
+    ]);
+    
+    sheet.getRange(sheet.getLastRow(), 1).setNumberFormat('@'); // ID
+    sheet.getRange(sheet.getLastRow(), 3).setNumberFormat('@'); // ID Karyawan
+    
+    return jsonResponse({ result: 'success', message: 'Tip berhasil dicatat.' });
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
+}
+
+function handleDeleteTip(ss, payload) {
+  try {
+    const { id } = payload;
+    if (!id) {
+      return jsonResponse({ result: 'error', message: 'Parameter tidak lengkap: id diperlukan.' });
+    }
+    
+    const sheet = getOrCreateTipKacaSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return jsonResponse({ result: 'error', message: 'Data tip kosong.' });
+    }
+    
+    const values = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    let deleted = false;
+    
+    for (let i = values.length - 1; i >= 0; i--) {
+      if (String(values[i][0]) === String(id)) {
+        sheet.deleteRow(i + 2);
+        deleted = true;
+        break;
+      }
+    }
+    
+    if (deleted) {
+      return jsonResponse({ result: 'success', message: 'Data tip berhasil dihapus.' });
+    } else {
+      return jsonResponse({ result: 'error', message: 'Data tip tidak ditemukan.' });
+    }
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
 }

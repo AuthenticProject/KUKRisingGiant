@@ -166,6 +166,7 @@
       const tip = totalHarga * 0.03;
 
       const newTip = {
+        action: 'save_tip',
         id: Date.now().toString(),
         idKaryawan,
         nama,
@@ -176,13 +177,32 @@
         tanggal
       };
 
-      let tips = JSON.parse(localStorage.getItem('kuk_tips_data') || '[]');
-      tips.push(newTip);
-      localStorage.setItem('kuk_tips_data', JSON.stringify(tips));
+      const btn = document.getElementById('submitBtn');
+      const originalText = btn.textContent;
+      btn.textContent = 'Menyimpan...';
+      btn.disabled = true;
 
-      showToast('Data tip berhasil disimpan!', 'success');
-      document.getElementById('tkLuas').value = '';
-      hitungTip();
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(newTip)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.result === 'success') {
+          showToast('Data tip berhasil disimpan!', 'success');
+          document.getElementById('tkLuas').value = '';
+          hitungTip();
+        } else {
+          showToast(res.message || 'Gagal menyimpan data.', 'error');
+        }
+      })
+      .catch(e => {
+        showToast('Kesalahan jaringan. Gagal menyimpan tip.', 'error');
+      })
+      .finally(() => {
+        btn.textContent = originalText;
+        btn.disabled = false;
+      });
     }
 
     init();
