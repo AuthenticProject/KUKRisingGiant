@@ -481,6 +481,8 @@
   </div>
 
   <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
+
     // === AUTH CONFIG ===
     const DEFAULT_USERS = [
       { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
@@ -497,13 +499,11 @@
       if (stored) {
         return JSON.parse(stored);
       } else {
-        // Migrate old passwords if exists
         const migrated = DEFAULT_USERS.map(u => {
           const oldPass = localStorage.getItem('kuk_pass_' + u.username);
           if (oldPass) u.password = oldPass;
           return u;
         });
-        localStorage.setItem('kuk_users_db', JSON.stringify(migrated));
         return migrated;
       }
     }
@@ -518,6 +518,24 @@
         opt.textContent = u.username;
         sel.appendChild(opt);
       });
+      
+      // Async fetch to update local users DB
+      fetch(`${SCRIPT_URL}?action=dashboard_data`)
+        .then(r => r.json())
+        .then(res => {
+          if (res.users && res.users.length > 0) {
+            localStorage.setItem('kuk_users_db', JSON.stringify(res.users));
+            // Reload dropdown
+            sel.innerHTML = '';
+            res.users.forEach(u => {
+              const opt = document.createElement('option');
+              opt.value = u.username;
+              opt.textContent = u.username;
+              sel.appendChild(opt);
+            });
+          }
+        })
+        .catch(e => console.log('Failed to sync users'));
     }
 
     // === TOAST ===

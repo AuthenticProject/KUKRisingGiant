@@ -111,6 +111,10 @@ function doPost(e) {
       return handleLogin(ss, payload);
     } else if (action === 'change_password') {
       return handleChangePassword(ss, payload);
+    } else if (action === 'save_user') {
+      return handleSaveUser(ss, payload);
+    } else if (action === 'delete_user') {
+      return handleDeleteUser(ss, payload);
     }
 
     return jsonResponse({ result: 'error', message: 'Unknown Action' });
@@ -515,7 +519,10 @@ function getDashboardData(ss) {
   // Ambil data tip kaca
   const tips = getTipKacaData(ss);
   
-  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips };
+  // Ambil data users
+  const users = getUsersData(ss);
+  
+  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips, users: users };
 }
 
 function jsonResponse(obj) {
@@ -971,10 +978,20 @@ function checkAndInitAkun(ss) {
   let sheet = ss.getSheetByName(SHEET_AKUN);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_AKUN);
-    sheet.getRange(1, 1, 1, 2).setValues([['Username', 'Password']]).setFontWeight('bold');
+    sheet.getRange(1, 1, 1, 3).setValues([['Username', 'Password', 'Permissions']]).setFontWeight('bold');
     const defaultUsernames = ['fariz', 'andika', 'irsyadil', 'ari', 'shuva', 'aria', 'zain'];
-    const rows = defaultUsernames.map(u => [u, '12345']);
-    sheet.getRange(2, 1, rows.length, 2).setValues(rows);
+    const rows = defaultUsernames.map(u => {
+      const perms = (u === 'fariz' || u === 'irsyadil') ? 'absen, cuti, pelanggaran, dashboard, tip, users' : 'absen, cuti, pelanggaran, dashboard, tip';
+      return [u, '12345', perms];
+    });
+    sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+  } else {
+    // Migrate to add Permissions column if it doesn't exist
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    if (headers.indexOf('Permissions') === -1) {
+      const lastCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, lastCol).setValue('Permissions').setFontWeight('bold');
+    }
   }
   return sheet;
 }
@@ -1014,6 +1031,64 @@ function handleChangePassword(ss, payload) {
     }
   }
   return jsonResponse({ result: 'error', message: 'Username tidak ditemukan.' });
+}
+
+function getUsersData(ss) {
+  const sheet = checkAndInitAkun(ss);
+  const data = sheet.getDataRange().getValues();
+  const users = [];
+  
+  // Headers in row 1, data starts from row 2
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0]) {
+      const permsStr = String(data[i][2] || '').trim();
+      const perms = permsStr ? permsStr.split(',').map(p => p.trim()).filter(Boolean) : [];
+      users.push({
+        username: String(data[i][0]),
+        password: String(data[i][1]),
+        permissions: perms
+      });
+    }
+  }
+  return users;
+}
+
+function handleSaveUser(ss, payload) {
+  const { username, password, permissions } = payload;
+  if (!username || !password) {
+    return jsonResponse({ result: 'error', message: 'Username dan Password wajib diisi.' });
+  }
+  
+  const sheet = checkAndInitAkun(ss);
+  const data = sheet.getDataRange().getValues();
+  const permsStr = Array.isArray(permissions) ? permissions.join(', ') : '';
+  
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase()) {
+      sheet.getRange(i + 1, 2).setValue(password);
+      sheet.getRange(i + 1, 3).setValue(permsStr);
+      return jsonResponse({ result: 'success', message: 'User berhasil diupdate.' });
+    }
+  }
+  
+  sheet.appendRow([username, password, permsStr]);
+  return jsonResponse({ result: 'success', message: 'User berhasil ditambahkan.' });
+}
+
+function handleDeleteUser(ss, payload) {
+  const { username } = payload;
+  if (!username) return jsonResponse({ result: 'error', message: 'Username diperlukan.' });
+  
+  const sheet = checkAndInitAkun(ss);
+  const data = sheet.getDataRange().getValues();
+  
+  for (let i = data.length - 1; i >= 1; i--) {
+    if (String(data[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase()) {
+      sheet.deleteRow(i + 1);
+      return jsonResponse({ result: 'success', message: 'User berhasil dihapus.' });
+    }
+  }
+  return jsonResponse({ result: 'error', message: 'User tidak ditemukan.' });
 }
 
 // ================================================================

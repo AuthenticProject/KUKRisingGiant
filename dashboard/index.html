@@ -2168,6 +2168,7 @@
     let rawViolationsData = [];
     let rawAbsenData = [];
     let rawTipsData = [];
+    let rawUsersData = [];
 
     // State Modal Cuti Admin
     let mcSelected = [];
@@ -2236,6 +2237,12 @@
     ];
 
     function getUsersDB() {
+      // Prioritize cloud data if synced
+      if (rawUsersData && rawUsersData.length > 0) {
+        return rawUsersData;
+      }
+      
+      // Fallback to local or default if cloud not ready
       const stored = localStorage.getItem('kuk_users_db');
       if (stored) return JSON.parse(stored);
       
@@ -2244,7 +2251,6 @@
         if (oldPass) u.password = oldPass;
         return u;
       });
-      localStorage.setItem('kuk_users_db', JSON.stringify(migrated));
       return migrated;
     }
 
@@ -2392,6 +2398,7 @@
           rawViolationsData = dashRes.violations || [];
           rawAbsenData = absenRes.data || [];
           rawTipsData = dashRes.tips || [];
+          rawUsersData = dashRes.users || [];
 
           // Update Setup Deadline input field
           if (dashRes.batasWaktu) {
@@ -2411,6 +2418,7 @@
           renderPelanggaran();
           calculatePayroll();
           renderTipKaca();
+          renderUserTable();
 
           showToast('Sinkronisasi berhasil!', 'success');
         })
@@ -4251,31 +4259,54 @@
       const checkboxes = document.querySelectorAll('#userPermContainer input[type="checkbox"]:checked');
       const permissions = Array.from(checkboxes).map(cb => cb.value);
       
-      let users = getUsersDB();
+      showToast('Menyimpan data pengguna...', 'info');
       
-      if (editingUserIndex !== null) {
-        // check unique
-        const existing = users.findIndex(u => u.username === username);
-        if (existing !== -1 && existing !== editingUserIndex) return showToast('Username sudah ada!', 'error');
-        users[editingUserIndex] = { username, password, permissions };
-      } else {
-        if (users.some(u => u.username === username)) return showToast('Username sudah ada!', 'error');
-        users.push({ username, password, permissions });
-      }
+      const payload = {
+        action: 'save_user',
+        username: username,
+        password: password,
+        permissions: permissions
+      };
       
-      localStorage.setItem('kuk_users_db', JSON.stringify(users));
-      showToast('Data pengguna berhasil disimpan.', 'success');
-      closeModal('userManagementModal');
-      renderUserTable();
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.result === 'success') {
+          showToast('Data pengguna berhasil disimpan.', 'success');
+          closeModal('userManagementModal');
+          syncDataAll();
+        } else {
+          showToast(res.message || 'Gagal menyimpan data.', 'error');
+        }
+      })
+      .catch(e => showToast('Kesalahan jaringan saat menyimpan.', 'error'));
     }
 
     function deleteDbUser(index) {
       if (!confirm('Yakin ingin menghapus pengguna ini?')) return;
+      
       let users = getUsersDB();
-      users.splice(index, 1);
-      localStorage.setItem('kuk_users_db', JSON.stringify(users));
-      showToast('Pengguna dihapus.', 'success');
-      renderUserTable();
+      const username = users[index].username;
+      
+      showToast('Menghapus data pengguna...', 'info');
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'delete_user', username: username })
+      })
+      .then(r => r.json())
+      .then(res => {
+        if(res.result === 'success') {
+          showToast('Pengguna berhasil dihapus.', 'success');
+          syncDataAll();
+        } else {
+          showToast(res.message || 'Gagal menghapus pengguna.', 'error');
+        }
+      })
+      .catch(e => showToast('Kesalahan jaringan saat menghapus.', 'error'));
     }
   </script>
 
