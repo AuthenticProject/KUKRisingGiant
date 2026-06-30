@@ -3265,9 +3265,18 @@
     }
 
     // --- TAB: GAJI (PAYROLL SYSTEM) ---
-    const GAPOK = 850000;
     const POT_ABSEN_PER_HARI = 28500;
     const POT_POIN_PER_POIN = 2500;
+
+    function isPalenEmpByName(nama) {
+      if (!nama) return false;
+      const n = String(nama).toLowerCase().trim();
+      return n.includes('miftah') || n.includes('nukul');
+    }
+
+    function getGapok(nama) {
+      return isPalenEmpByName(nama) ? 700000 : 850000;
+    }
 
     // Pembulatan gaji: 0->0, 1-500->500, 501-999->1000
     function bulatkanGaji(nominal) {
@@ -3385,7 +3394,8 @@
 
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
-        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
+        const currentGapok = getGapok(k.nama);
+        const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
         const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
         const total = bulatkanGaji(totalRaw);
 
@@ -3412,7 +3422,7 @@
             <td style="color:var(--text-muted);font-size:13px;">${d.berkeluarga > 0 ? formatRupiah(d.berkeluarga) : '-'}</td>
             <td style="color:var(--primary);font-weight:600;font-size:13px;">${insentifCuti > 0 ? formatRupiah(insentifCuti) : '-'}</td>
             <td style="color:var(--danger);font-size:13px;">${kali > 0 ? formatRupiah(potTerlambat) + ' (' + kali + 'x terlambat)' : '-'}</td>
-            <td style="font-weight:700;color:${total >= GAPOK ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
+            <td style="font-weight:700;color:${total >= currentGapok ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
             <td style="text-align:right;">
               <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}', \`${k.nama.replace(/`/g, '')}\`, \`${k.bagian.replace(/`/g, '')}\`, '${fM}', '${fY}', ${kali}, ${insentifCuti})">✏️ Input</button>
             </td>
@@ -3508,7 +3518,8 @@
       const insentifCuti = _gajiCtx.insentifCuti || 0;
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
-      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
+      const currentGapok = getGapok(_gajiCtx.nama);
+      const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
       const totalRaw = gajiBulanIni + bagian + hadiah + tip + berkeluarga + insentifCuti - pengurangan;
       const total = bulatkanGaji(totalRaw);
       const pembulatan = total - totalRaw;
@@ -3542,7 +3553,8 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
       const insentif = insentifCuti || 0;
-      const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
+      const currentGapok = getGapok(nama);
+      const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
       const totalRaw = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga + insentif - pengurangan;
       const total = bulatkanGaji(totalRaw);
       const pembulatan = total - totalRaw;
@@ -3645,7 +3657,7 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: Ari Hermawan</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}</td></tr>
               <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
             </table>
             
@@ -3678,7 +3690,7 @@
                 <td style="width: 50%;">
                   Hormat Kami<br>
                   Bendahara TB. KUK La Tansa<br><br><br><br><br>
-                  Ari Hermawan
+                  ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}
                 </td>
               </tr>
             </table>
@@ -3770,7 +3782,8 @@
 
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
-        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
+        const currentGapok = getGapok(k.nama);
+        const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
         const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
         const total = bulatkanGaji(totalRaw);
 
@@ -3795,7 +3808,7 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: Ari Hermawan</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}</td></tr>
               <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
             </table>
             
@@ -3828,7 +3841,7 @@
                 <td style="width: 50%;">
                   Hormat Kami<br>
                   Bendahara TB. KUK La Tansa<br><br><br><br><br>
-                  Ari Hermawan
+                  ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}
                 </td>
               </tr>
             </table>
