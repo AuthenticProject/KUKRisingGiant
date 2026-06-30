@@ -3622,10 +3622,10 @@
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
 
       const isPalenEmp = String(nama).toLowerCase().trim().includes('miftah') || String(nama).toLowerCase().trim().includes('nukul');
-      const kopImg = isPalenEmp ? 'kop_palen.png' : 'kop_bangunan.png';
+      const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
 
       const slipHtml = `
-        <div style="position: relative; width: 210mm; min-height: 297mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
+        <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
           
           <!-- Background Kop Surat -->
           <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
@@ -3688,13 +3688,25 @@
 
     function printSlip() {
       const printableArea = document.getElementById('printableSlip').innerHTML;
-      const originalContent = document.body.innerHTML;
 
-      document.body.innerHTML = `<div style="padding: 40px; background:white;">${printableArea}</div>`;
-      window.print();
-
-      // Reload page state to restore JS handlers
-      window.location.reload();
+      document.body.innerHTML = `
+        <style>
+          @page { size: 215mm 330mm; margin: 0; }
+          body, html { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          }
+        </style>
+        <div style="margin: 0; padding: 0; width: 215mm; height: 330mm; overflow: hidden; position: relative;">
+          ${printableArea}
+        </div>
+      `;
+      
+      // Wait for image to fully render before print dialog
+      setTimeout(() => {
+        window.print();
+        window.location.reload();
+      }, 500);
     }
 
 
