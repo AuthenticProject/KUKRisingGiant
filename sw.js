@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v9';
+const CACHE_NAME = 'kuk-hr-cache-v10';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -10,7 +10,9 @@ const STATIC_ASSETS = [
   './dashboard/index.html',
   './manifest.json',
   './icon-192.png',
-  './icon-512.png'
+  './icon-512.png',
+  './kop_palen.png',
+  './kop_bangunan.png'
 ];
 
 // Install Event
