@@ -1562,6 +1562,13 @@
           <div class="card-header">
             <div class="card-title">💰 Kalkulasi Gaji Karyawan</div>
             <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" onclick="printAllSlips()" style="padding: 8px 12px; font-size: 13px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px;">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg> Cetak Semua
+              </button>
               <select id="payrollMonth" style="width:140px;" onchange="calculatePayroll()"></select>
               <select id="payrollYear" style="width:100px;" onchange="calculatePayroll()"></select>
             </div>
@@ -3653,13 +3660,11 @@
             </div>
             
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 20px; margin-top: 15px; text-align: left;">
-              <tr><td style="width: 250px;">Gaji pokok</td><td>: ${formatRupiah(GAPOK)}</td></tr>
+              <tr><td style="width: 250px;">Gaji pokok</td><td>: ${formatRupiah(gajiBulanIni)}</td></tr>
               ${bagianVal > 0 ? `<tr><td>Gaji bagian</td><td>: ${formatRupiah(bagianVal)}</td></tr>` : ''}
               ${(hadiah + berkeluarga + insentifCuti) > 0 ? `<tr><td>Hadiah dari pondok</td><td>: ${formatRupiah(hadiah + berkeluarga + insentifCuti)}</td></tr>` : ''}
               ${tip > 0 ? `<tr><td>Tip</td><td>: ${formatRupiah(tip)}</td></tr>` : ''}
               ${pengurangan > 0 ? `<tr><td>Pengurangan Lainnya</td><td>: -${formatRupiah(pengurangan)}</td></tr>` : ''}
-              ${absen > 0 ? `<tr><td>Potongan Tidak Masuk</td><td>: -${formatRupiah(potAbsen)} (${absen} hr)</td></tr>` : ''}
-              ${kaliTerlambat > 0 ? `<tr><td>Poin Pelanggaran</td><td>: -${formatRupiah(potTerlambat)} (${kaliTerlambat}x Terlambat)</td></tr>` : ''}
             </table>
             
             <div style="text-align: justify; margin-bottom: 40px;">
@@ -3709,6 +3714,147 @@
       }, 500);
     }
 
+
+    function printAllSlips() {
+      const fM = document.getElementById('payrollMonth').value;
+      const fY = parseInt(document.getElementById('payrollYear').value);
+      const activeKaryawan = dbKaryawan.filter(k => k.status.toLowerCase() === 'aktif');
+      
+      const terlambatCount = {};
+      activeKaryawan.forEach(k => { terlambatCount[k.id] = 0; });
+      rawViolationsData.forEach(v => {
+        try {
+          const tgl = new Date(v.waktu);
+          const y = tgl.getFullYear();
+          const m = String(tgl.getMonth() + 1).padStart(2, '0');
+          if (m === fM && String(y) === String(fY)) {
+            const emp = activeKaryawan.find(e => e.nama === v.nama);
+            if (emp && v.jenis && v.jenis.toLowerCase().includes('terlambat')) {
+              terlambatCount[emp.id] = (terlambatCount[emp.id] || 0) + 1;
+            }
+          }
+        } catch { }
+      });
+
+      let allSlipsHtml = '';
+      
+      activeKaryawan.forEach((k, index) => {
+        const defaultBagian = getDefaultBagian(k.nama);
+        const defaultBerkeluarga = getDefaultBerkeluarga(k.nama);
+        const d = getGajiData(k.id, fM, fY, defaultBagian, defaultBerkeluarga);
+        const kali = terlambatCount[k.id] || 0;
+        
+        // Auto-calculate tip kaca
+        const autoTipKaca = rawTipsData.filter(t => {
+          try {
+            if (!t.tanggal) return false;
+            const [y, m] = t.tanggal.split('-');
+            return String(m) === String(fM) && String(y) === String(fY) && t.nama === k.nama;
+          } catch { return false; }
+        }).reduce((sum, t) => sum + (Number(t.tip) || 0), 0);
+        d.tip = autoTipKaca;
+
+        // Auto-calculate insentif cuti
+        const countCuti = rawCutiData.filter(c => {
+          try {
+            if (!c.tanggal) return false;
+            const [y, m] = c.tanggal.split('-');
+            return String(m) === String(fM) && String(y) === String(fY) && String(c.idKaryawan) === String(k.id);
+          } catch { return false; }
+        }).length;
+        let sisaCuti = 3 - countCuti;
+        let insentifCuti = 0;
+        if (sisaCuti === 1) insentifCuti = 25000;
+        else if (sisaCuti === 2) insentifCuti = 50000;
+        else if (sisaCuti >= 3) insentifCuti = 100000;
+
+        const potAbsen = d.absen * POT_ABSEN_PER_HARI;
+        const potTerlambat = kali * POT_POIN_PER_POIN;
+        const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
+        const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
+        const total = bulatkanGaji(totalRaw);
+
+        const fMName = mNames[parseInt(fM) - 1];
+        const romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+        const fMRoman = romanMonths[parseInt(fM)-1];
+        const nomorSurat = `${Math.floor(Math.random() * 900) + 100}/HRD-Finance/${fMRoman}/${fY}`;
+        const lastDayOfMonth = new Date(fY, parseInt(fM), 0).getDate();
+        
+        const isPalenEmp = String(k.nama).toLowerCase().trim().includes('miftah') || String(k.nama).toLowerCase().trim().includes('nukul');
+        const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
+        
+        const pageBreak = index < activeKaryawan.length - 1 ? 'page-break-after: always;' : '';
+
+        allSlipsHtml += `
+        <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff; ${pageBreak}">
+          <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
+
+          <div style="position: relative; z-index: 1; padding: 170px 70px 100px 70px; text-align: left; font-size: 15px; line-height: 1.6;">
+            <div style="font-weight: bold; font-size: 16px; text-decoration: underline; text-align: center;">SURAT KETERANGAN GAJI</div>
+            <div style="text-align: center; margin-bottom: 25px;">No : ${nomorSurat}</div>
+            
+            <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
+            <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
+              <tr><td style="width: 250px;">Nama</td><td>: Ari Hermawan</td></tr>
+              <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
+            </table>
+            
+            <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
+            <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
+              <tr><td style="width: 250px;">Nama</td><td>: ${k.nama}</td></tr>
+            </table>
+            
+            <br>
+            <div style="text-align: justify;">
+              Hingga saat ini tanggal ${lastDayOfMonth} ${fMName} ${fY} yang bersangkutan masih aktif bekerja dan TB. KUK La Tansa memberikan penghasilan sebagai berikut:
+            </div>
+            
+            <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 20px; margin-top: 15px; text-align: left;">
+              <tr><td style="width: 250px;">Gaji pokok</td><td>: ${formatRupiah(gajiBulanIni)}</td></tr>
+              ${d.bagian > 0 ? `<tr><td>Gaji bagian</td><td>: ${formatRupiah(d.bagian)}</td></tr>` : ''}
+              ${(d.hadiah + d.berkeluarga + insentifCuti) > 0 ? `<tr><td>Hadiah dari pondok</td><td>: ${formatRupiah(d.hadiah + d.berkeluarga + insentifCuti)}</td></tr>` : ''}
+              ${d.tip > 0 ? `<tr><td>Tip</td><td>: ${formatRupiah(d.tip)}</td></tr>` : ''}
+              ${d.pengurangan > 0 ? `<tr><td>Pengurangan Lainnya</td><td>: -${formatRupiah(d.pengurangan)}</td></tr>` : ''}
+            </table>
+            
+            <div style="text-align: justify; margin-bottom: 40px;">
+              Sehingga total gaji yang diperoleh ialah sebesar <b>${formatRupiah(total)}</b> (${terbilang(total)} rupiah).<br>
+              Demikian Surat keterangan penghasilan ini, semoga dapat dipergunakan sebagai mana mestinya.
+            </div>
+            
+            <table style="width: 100%; font-size: 15px; border: none; text-align: center;">
+              <tr>
+                <td style="width: 50%;"></td>
+                <td style="width: 50%;">
+                  Hormat Kami<br>
+                  Bendahara TB. KUK La Tansa<br><br><br><br><br>
+                  Ari Hermawan
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        `;
+      });
+
+      document.body.innerHTML = `
+        <style>
+          @page { size: 215mm 330mm; margin: 0; }
+          body, html { margin: 0; padding: 0; background: white; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          @media print {
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+          }
+        </style>
+        <div style="margin: 0; padding: 0; width: 215mm; overflow: hidden; position: relative;">
+          ${allSlipsHtml}
+        </div>
+      `;
+      
+      setTimeout(() => {
+        window.print();
+        window.location.reload();
+      }, 500);
+    }
 
     // --- TAB: EDIT CALENDAR MODAL (CUTI) ---
     function openEditCutiModal(id, nama, bagian) {
