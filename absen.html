@@ -808,7 +808,7 @@
         caches.keys().then(function(names) {
           for (let name of names) caches.delete(name);
         });
-        localStorage.setItem('v9_absen_migrated', 'true');
+        localStorage.setItem('v10_absen_migrated', 'true');
         setTimeout(() => window.location.reload(true), 1500);
       }
     }
