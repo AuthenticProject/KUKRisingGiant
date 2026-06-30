@@ -2073,6 +2073,7 @@
               Berkeluarga</span><span>Rp 0</span></div>
           <div style="display:flex; justify-content:space-between; color:var(--danger);" id="prevPengurangan"><span>−
               Pengurangan Lain</span><span>Rp 0</span></div>
+          <div id="prevPembulatan" style="display:none; justify-content:space-between; color:var(--success);"><span>+ Pembulatan</span><span>Rp 0</span></div>
           <hr style="border-color:var(--primary); opacity:0.5; margin:6px 0;">
           <div style="display:flex; justify-content:space-between; font-size:15px;" id="prevTotal"><span><strong>TOTAL
                 GAJI</strong></span><span style="font-weight:700; color:var(--primary);">Rp 1.000.000</span></div>
@@ -3222,6 +3223,14 @@
     const POT_ABSEN_PER_HARI = 28500;
     const POT_POIN_PER_POIN = 2500;
 
+    // Pembulatan gaji: 0->0, 1-500->500, 501-999->1000
+    function bulatkanGaji(nominal) {
+      const sisa = nominal % 1000;
+      if (sisa === 0) return nominal;
+      if (sisa <= 500) return nominal - sisa + 500;
+      return nominal - sisa + 1000;
+    }
+
     // Default Gaji Bagian — cocokkan dengan sebagian nama (partial match)
     // Mendukung nama pendek ("Nur", "Wiba") maupun nama lengkap
     const DEFAULT_GAJI_BAGIAN = [
@@ -3317,7 +3326,8 @@
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
         const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-        const total = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga - d.pengurangan;
+        const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga - d.pengurangan;
+        const total = bulatkanGaji(totalRaw);
 
         html += `
           <tr>
@@ -3437,7 +3447,10 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const total = gajiBulanIni + bagian + hadiah + tip + berkeluarga - pengurangan;
+      const totalRaw = gajiBulanIni + bagian + hadiah + tip + berkeluarga - pengurangan;
+      const total = bulatkanGaji(totalRaw);
+      const pembulatan = total - totalRaw;
+      
       document.getElementById('prevPotAbsen').innerHTML = '<span>\u2212 Potongan Absen (' + absen + ' hari)</span><span>' + formatRupiah(potAbsen) + '</span>';
       document.getElementById('prevPotPoin').innerHTML = '<span>\u2212 Pot. Terlambat (' + kaliTerlambat + 'x)</span><span>' + formatRupiah(potTerlambat) + '</span>';
       document.getElementById('prevGajiBulanIni').innerHTML = '<span>= Gaji Bulan Ini</span><span style="font-weight:700;">' + formatRupiah(gajiBulanIni) + '</span>';
@@ -3446,6 +3459,15 @@
       document.getElementById('prevTip').innerHTML = '<span>+ Tip</span><span>' + formatRupiah(tip) + '</span>';
       document.getElementById('prevBerkeluarga').innerHTML = '<span>+ Tunj. Berkeluarga</span><span>' + formatRupiah(berkeluarga) + '</span>';
       document.getElementById('prevPengurangan').innerHTML = '<span>\u2212 Pengurangan Lain</span><span>' + formatRupiah(pengurangan) + '</span>';
+      
+      const prevPembulatan = document.getElementById('prevPembulatan');
+      if (pembulatan > 0) {
+        prevPembulatan.style.display = 'flex';
+        prevPembulatan.innerHTML = '<span>+ Pembulatan</span><span>' + formatRupiah(pembulatan) + '</span>';
+      } else {
+        prevPembulatan.style.display = 'none';
+      }
+
       document.getElementById('prevTotal').innerHTML = '<span><strong>TOTAL GAJI</strong></span><span style="font-weight:700;color:var(--primary);">' + formatRupiah(total) + '</span>';
     }
 
@@ -3463,7 +3485,9 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const total = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga - pengurangan;
+      const totalRaw = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga - pengurangan;
+      const total = bulatkanGaji(totalRaw);
+      const pembulatan = total - totalRaw;
 
       // Ambil semua pelanggaran karyawan ini untuk bulan/tahun ybs
       const pelanggaranBulanIni = rawViolationsData.filter(v => {
@@ -3476,7 +3500,7 @@
       });
 
       closeModal('gajiInputModal');
-      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pelanggaranBulanIni);
+      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranBulanIni);
       calculatePayroll();
     }
 
@@ -3537,7 +3561,7 @@
       return n;
     }
 
-    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pelanggaranList = []) {
+    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranList = []) {
       const fMName = mNames[parseInt(fM) - 1];
       const romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
       const fMRoman = romanMonths[parseInt(fM)-1];
@@ -3573,6 +3597,7 @@
             ${pengurangan > 0 ? `<tr><td>Pengurangan Lainnya</td><td>: -${formatRupiah(pengurangan)}</td></tr>` : ''}
             ${absen > 0 ? `<tr><td>Potongan Tidak Masuk</td><td>: -${formatRupiah(potAbsen)} (${absen} hr)</td></tr>` : ''}
             <tr><td>Poin Pelanggaran</td><td>: ${kaliTerlambat > 0 ? `-${formatRupiah(potTerlambat)} (${kaliTerlambat}x Terlambat)` : ' ()'}</td></tr>
+            ${pembulatan > 0 ? `<tr><td>Pembulatan</td><td>: ${formatRupiah(pembulatan)}</td></tr>` : ''}
           </table>
           <br>
           <div style="text-align: justify;">
