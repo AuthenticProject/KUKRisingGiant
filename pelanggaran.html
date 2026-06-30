@@ -552,9 +552,23 @@
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')
-          .then(reg => console.log('Service Worker registered successfully!', reg.scope))
-          .catch(err => console.error('Service Worker registration failed:', err));
+          .then(reg => {
+            console.log('SW registered', reg.scope);
+            reg.update();
+          })
+          .catch(err => console.error('SW failed', err));
       });
+      
+      if (!localStorage.getItem('v9_pelanggaran_migrated')) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for(let registration of registrations) { registration.unregister(); }
+        });
+        caches.keys().then(function(names) {
+          for (let name of names) caches.delete(name);
+        });
+        localStorage.setItem('v9_pelanggaran_migrated', 'true');
+        setTimeout(() => window.location.reload(true), 1500);
+      }
     }
   </script>
 </body>
