@@ -358,14 +358,17 @@
 
     function filterDataByRole(dataArray) {
       if (!Array.isArray(dataArray)) return dataArray;
-      const loggedUser = sessionStorage.getItem('kuk_user');
-      if (!loggedUser) return dataArray;
+      const rawUser = sessionStorage.getItem('kuk_user');
+      if (!rawUser) return dataArray;
+      
+      const loggedUser = String(rawUser).toLowerCase().trim();
+
       let hasUsersPerm = false;
       const storedDb = localStorage.getItem('kuk_users_db');
       if (storedDb) {
         try {
           const parsed = JSON.parse(storedDb);
-          const u = parsed.find(x => x.username === loggedUser);
+          const u = parsed.find(x => String(x.username).toLowerCase().trim() === loggedUser);
           if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
         } catch(e){}
       } else {
@@ -559,14 +562,14 @@
           .catch(err => console.error('SW failed', err));
       });
       
-      if (!localStorage.getItem('v9_pelanggaran_migrated')) {
+      if (!localStorage.getItem('v10_pelanggaran_migrated')) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) { registration.unregister(); }
         });
         caches.keys().then(function(names) {
           for (let name of names) caches.delete(name);
         });
-        localStorage.setItem('v9_pelanggaran_migrated', 'true');
+        localStorage.setItem('v10_pelanggaran_migrated', 'true');
         setTimeout(() => window.location.reload(true), 1500);
       }
     }

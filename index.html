@@ -653,7 +653,7 @@
       });
       
       // Auto clear cache once for v9 migration
-      if (!localStorage.getItem('v9_migrated')) {
+      if (!localStorage.getItem('v10_migrated')) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) {
             registration.unregister();
@@ -662,7 +662,7 @@
         caches.keys().then(function(names) {
           for (let name of names) caches.delete(name);
         });
-        localStorage.setItem('v9_migrated', 'true');
+        localStorage.setItem('v10_migrated', 'true');
         setTimeout(() => window.location.reload(true), 1000);
       }
     }
