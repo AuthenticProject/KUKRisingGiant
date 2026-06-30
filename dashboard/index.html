@@ -491,6 +491,9 @@
       border-radius: var(--radius-lg);
       width: 100%;
       max-width: 500px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
       overflow: hidden;
       animation: modalIn 0.2s ease-out;
@@ -518,6 +521,7 @@
 
     .modal-body {
       padding: 24px;
+      overflow-y: auto;
     }
 
     .modal-footer {
@@ -3299,6 +3303,17 @@
         const defaultBerkeluarga = getDefaultBerkeluarga(k.nama);
         const d = getGajiData(k.id, fM, fY, defaultBagian, defaultBerkeluarga);
         const kali = terlambatCount[k.id] || 0;
+        
+        // Auto-calculate tip kaca
+        const autoTipKaca = rawTipsData.filter(t => {
+          try {
+            if (!t.tanggal) return false;
+            const [y, m] = t.tanggal.split('-');
+            return String(m) === String(fM) && String(y) === String(fY) && t.nama === k.nama;
+          } catch { return false; }
+        }).reduce((sum, t) => sum + (Number(t.tip) || 0), 0);
+        d.tip = autoTipKaca;
+
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
         const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
@@ -3385,7 +3400,18 @@
       } else {
         document.getElementById('gajiHadiahCustomWrap').style.display = 'none';
       }
+
+      const autoTipKaca = rawTipsData.filter(t => {
+        try {
+          if (!t.tanggal) return false;
+          const [y, m] = t.tanggal.split('-');
+          return String(m) === String(fM) && String(y) === String(fY) && t.nama === nama;
+        } catch { return false; }
+      }).reduce((sum, t) => sum + (Number(t.tip) || 0), 0);
+      d.tip = autoTipKaca;
+
       document.getElementById('gajiTip').value = d.tip || 0;
+      document.getElementById('gajiTip').setAttribute('readonly', 'true');
       document.getElementById('gajiBerkeluarga').value = d.berkeluarga || 0;
       document.getElementById('gajiPengurangan').value = d.pengurangan || 0;
       updateGajiPreview();
@@ -3513,94 +3539,57 @@
 
     function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pelanggaranList = []) {
       const fMName = mNames[parseInt(fM) - 1];
+      const romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
+      const fMRoman = romanMonths[parseInt(fM)-1];
+      const nomorSurat = `${Math.floor(Math.random() * 900) + 100}/HRD-Finance/${fMRoman}/${fY}`;
+      const lastDayOfMonth = new Date(fY, parseInt(fM), 0).getDate();
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
-      const nomorSurat = 'SKG/' + fY + '/' + String(fM).padStart(2, '0') + '/' + nama.replace(/\s+/g, '').toUpperCase().slice(0, 4);
-
-      // Section catatan pelanggaran
-      let pelanggaranSection = '';
-      if (pelanggaranList.length > 0) {
-        const rows = pelanggaranList.map(v =>
-          `<tr>
-            <td style="padding:3px 0; font-size:12px;">${v.jenis}</td>
-            <td style="text-align:right; font-size:12px; color:#c00; font-weight:600; white-space:nowrap;">${v.poin} poin</td>
-          </tr>`
-        ).join('');
-        pelanggaranSection = `
-          <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px; margin-top:12px;">⚠️ Catatan Pelanggaran</div>
-          <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
-            <tr style="background:#fff5f5;">
-              <th style="text-align:left; padding:4px 0; font-size:11px; color:#888; font-weight:600;">Jenis Pelanggaran</th>
-              <th style="text-align:right; font-size:11px; color:#888; font-weight:600;">Poin</th>
-            </tr>
-            ${rows}
-            <tr style="border-top:1px dashed #aaa;">
-              <td style="padding:4px 0; font-weight:700; font-size:12px;">Total Poin Pelanggaran</td>
-              <td style="text-align:right; font-weight:700; font-size:12px; color:#c00;">${pelanggaranList.reduce((s, v) => s + Number(v.poin || 0), 0)} poin</td>
-            </tr>
-          </table>`;
-      }
 
       const slipHtml = `
-        <div style="text-align:center; margin-bottom:14px;">
-          <div style="font-size:17px; font-weight:900; letter-spacing:1px; text-transform:uppercase;">KUK La Tansa</div>
-          <div style="font-size:11px; color:#666;">Pondok Modern Darussalam Gontor</div>
-          <div style="border-top:2px solid #000; border-bottom:1px solid #000; margin:8px 0; padding:4px 0;">
-            <div style="font-size:14px; font-weight:700;">SURAT KETERANGAN GAJI</div>
-            <div style="font-size:11px;">No: ${nomorSurat}</div>
+        <div style="font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; line-height: 1.5; font-size: 15px; text-align: left;">
+          <div style="font-weight: bold; font-size: 16px; text-decoration: underline; text-align: left;">Surat Keterangan Gaji</div>
+          <div style="text-align: left;">No : ${nomorSurat}</div>
+          <br>
+          <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
+          <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; text-align: left;">
+            <tr><td style="width: 250px;">Nama</td><td>: Ari Hermawan</td></tr>
+            <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
+          </table>
+          <div style="text-align: left;">Menerangkan dengan sebenar-benarnya bahwa:</div>
+          <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; text-align: left;">
+            <tr><td style="width: 250px;">Nama</td><td>: ${nama}</td></tr>
+          </table>
+          <br>
+          <div style="text-align: justify;">
+            Hingga saat ini tanggal ${lastDayOfMonth} ${fMName} ${fY} yang bersangkutan masih aktif bekerja dan TB. KUK La Tansa memberikan penghasilan sebagai berikut:
           </div>
-        </div>
-
-        <table style="width:100%; font-size:13px; margin-bottom:14px; border-collapse:collapse;">
-          <tr><td style="width:42%; padding:3px 0;">Nama</td><td>: <strong>${nama}</strong></td></tr>
-          <tr><td style="padding:3px 0;">Bagian / Jabatan</td><td>: ${bagian}</td></tr>
-          <tr><td style="padding:3px 0;">Periode Gaji</td><td>: ${fMName} ${fY}</td></tr>
-          <tr><td style="padding:3px 0;">Tanggal Cetak</td><td>: ${getTodayStrIndo()}</td></tr>
-        </table>
-
-        <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Rincian Gaji</div>
-        <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
-          <tr><td style="padding:3px 0;">Gaji Pokok</td><td style="text-align:right;">${formatRupiah(GAPOK)}</td></tr>
-          ${absen > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Potongan Tdk Masuk (${absen} hr &times; Rp 28.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potAbsen)}</td></tr>` : ''}
-          ${kaliTerlambat > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pot. Terlambat (${kaliTerlambat}x &times; Rp 2.500)</td><td style="text-align:right; color:#c00;">- ${formatRupiah(potTerlambat)}</td></tr>` : ''}
-          <tr style="border-top:1px dashed #aaa;">
-            <td style="padding:4px 0; font-weight:700;">Gaji Bulan Ini</td>
-            <td style="text-align:right; font-weight:700;">${formatRupiah(gajiBulanIni)}</td>
-          </tr>
-        </table>
-
-        ${(bagianVal + hadiah + tip + berkeluarga + pengurangan) > 0 ? `
-        <div style="font-weight:700; font-size:12px; border-bottom:1.5px solid #000; padding-bottom:3px; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Tambahan &amp; Pengurangan</div>
-        <table style="width:100%; font-size:13px; margin-bottom:6px; border-collapse:collapse;">
-          ${bagianVal > 0 ? `<tr><td style="padding:3px 0;">Gaji Bagian</td><td style="text-align:right;">${formatRupiah(bagianVal)}</td></tr>` : ''}
-          ${hadiah > 0 ? `<tr><td style="padding:3px 0;">Hadiah dari Pondok</td><td style="text-align:right;">${formatRupiah(hadiah)}</td></tr>` : ''}
-          ${tip > 0 ? `<tr><td style="padding:3px 0;">Tip</td><td style="text-align:right;">${formatRupiah(tip)}</td></tr>` : ''}
-          ${berkeluarga > 0 ? `<tr><td style="padding:3px 0;">Tunjangan Berkeluarga</td><td style="text-align:right;">${formatRupiah(berkeluarga)}</td></tr>` : ''}
-          ${pengurangan > 0 ? `<tr><td style="padding:3px 0; color:#c00;">Pengurangan</td><td style="text-align:right; color:#c00;">- ${formatRupiah(pengurangan)}</td></tr>` : ''}
-        </table>` : ''}
-
-        ${pelanggaranSection}
-
-        <div style="border:1.5px solid #000; padding:10px 12px; margin-bottom:20px; background:#f9f9f9;">
-          <div style="display:flex; justify-content:space-between; font-size:15px; font-weight:700;">
-            <span>TOTAL GAJI</span><span>${formatRupiah(total)}</span>
+          <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; text-align: left;">
+            <tr><td style="width: 250px;">Gaji pokok</td><td>: ${formatRupiah(GAPOK)}</td></tr>
+            ${bagianVal > 0 ? `<tr><td>Gaji bagian</td><td>: ${formatRupiah(bagianVal)}</td></tr>` : ''}
+            ${hadiah > 0 ? `<tr><td>Hadiah dari pondok</td><td>: ${formatRupiah(hadiah)}</td></tr>` : ''}
+            ${tip > 0 ? `<tr><td>Tip</td><td>: ${formatRupiah(tip)}</td></tr>` : ''}
+            ${berkeluarga > 0 ? `<tr><td>Tunjangan Keluarga</td><td>: ${formatRupiah(berkeluarga)}</td></tr>` : ''}
+            ${pengurangan > 0 ? `<tr><td>Pengurangan Lainnya</td><td>: -${formatRupiah(pengurangan)}</td></tr>` : ''}
+            ${absen > 0 ? `<tr><td>Potongan Tidak Masuk</td><td>: -${formatRupiah(potAbsen)} (${absen} hr)</td></tr>` : ''}
+            <tr><td>Poin Pelanggaran</td><td>: ${kaliTerlambat > 0 ? `-${formatRupiah(potTerlambat)} (${kaliTerlambat}x Terlambat)` : ' ()'}</td></tr>
+          </table>
+          <br>
+          <div style="text-align: justify;">
+            Sehingga total gaji yang diperoleh ialah sebesar <b>${formatRupiah(total)}</b> (${terbilang(total)} rupiah).<br>
+            Demikian Surat keterangan penghasilan ini, semoga dapat dipergunakan sebagai mana mestinya.
           </div>
-          <div style="font-size:11px; margin-top:5px; color:#555; font-style:italic;">
-            Terbilang: ${terbilang(total)} rupiah
-          </div>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; text-align:center; font-size:12px; margin-top:10px;">
-          <div>
-            <div>Penerima,</div>
-            <div style="height:60px;"></div>
-            <div style="border-top:1px solid #000; display:inline-block; min-width:120px; padding-top:4px;"><strong>${nama}</strong></div>
-          </div>
-          <div>
-            <div>Bendahara TB. KUK La Tansa,</div>
-            <div style="height:60px;"></div>
-            <div style="border-top:1px solid #000; display:inline-block; min-width:120px; padding-top:4px;"><strong>Ari Hermawan</strong></div>
-          </div>
+          <br><br><br>
+          <table style="width: 100%; font-size: 15px; border: none; text-align: center;">
+            <tr>
+              <td style="width: 60%;"></td>
+              <td style="width: 40%;">
+                Hormat Kami<br>
+                Bendahara TB. KUK La Tansa<br><br><br><br><br>
+                Ari Hermawan
+              </td>
+            </tr>
+          </table>
         </div>
       `;
 
