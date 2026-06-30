@@ -108,6 +108,30 @@
       setTimeout(() => { t.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => t.remove(), 300); }, 3500);
     }
 
+    function filterDataByRole(dataArray) {
+      if (!Array.isArray(dataArray)) return dataArray;
+      const loggedUser = sessionStorage.getItem('kuk_user');
+      if (!loggedUser) return dataArray;
+      let hasUsersPerm = false;
+      const storedDb = localStorage.getItem('kuk_users_db');
+      if (storedDb) {
+        try {
+          const parsed = JSON.parse(storedDb);
+          const u = parsed.find(x => x.username === loggedUser);
+          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+        } catch(e){}
+      } else {
+        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
+      }
+      if (hasUsersPerm) return dataArray;
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
+      return dataArray.filter(item => {
+        const nameStr = String(item.nama || '').toLowerCase().trim();
+        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
+        return isPalen ? isEmpPalen : !isEmpPalen;
+      });
+    }
+
     function init() {
       // Set default date
       const now = new Date();
@@ -119,7 +143,8 @@
       fetch(`${SCRIPT_URL}?action=dashboard_data`)
         .then(r => r.json())
         .then(res => {
-          const dbKaryawan = (res.karyawan || []).filter(k => k.status.toLowerCase() !== 'nonaktif');
+          let tempKaryawan = (res.karyawan || []).filter(k => k.status.toLowerCase() !== 'nonaktif');
+          const dbKaryawan = filterDataByRole(tempKaryawan);
           const sel = document.getElementById('tkKaryawan');
           if (dbKaryawan.length === 0) {
             sel.innerHTML = '<option value="" disabled>Tidak ada karyawan aktif.</option>';

@@ -720,6 +720,30 @@
     const toKey = (y, m, d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     const formatLabel = (k) => { const [y, m, d] = k.split('-'); return `${+d} ${MONTHS[+m - 1]} ${y}`; };
 
+    function filterDataByRole(dataArray) {
+      if (!Array.isArray(dataArray)) return dataArray;
+      const loggedUser = sessionStorage.getItem('kuk_user');
+      if (!loggedUser) return dataArray;
+      let hasUsersPerm = false;
+      const storedDb = localStorage.getItem('kuk_users_db');
+      if (storedDb) {
+        try {
+          const parsed = JSON.parse(storedDb);
+          const u = parsed.find(x => x.username === loggedUser);
+          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+        } catch(e){}
+      } else {
+        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
+      }
+      if (hasUsersPerm) return dataArray;
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
+      return dataArray.filter(item => {
+        const nameStr = String(item.nama || '').toLowerCase().trim();
+        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
+        return isPalen ? isEmpPalen : !isEmpPalen;
+      });
+    }
+
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');
       const t = document.createElement('div');
@@ -732,7 +756,7 @@
     // --- INIT ---
     function init() {
       fetch(`${SCRIPT_URL}?action=init`).then(r => r.json()).then(res => {
-        dbKaryawan = res.karyawan || [];
+        dbKaryawan = filterDataByRole(res.karyawan || []);
 
         if (res.batasWaktu && new Date() > new Date(res.batasWaktu)) {
           isLocked = true;

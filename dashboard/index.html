@@ -1556,7 +1556,7 @@
             <path d="M12 8h.01" />
           </svg>
           <span><strong>Rumus:</strong> Gaji Pokok (Rp 850.000) − (28.500 × hari tidak masuk) − (2.500 × jumlah
-            keterlambatan) + Gaji Bagian + Hadiah Pondok + Tip + Berkeluarga</span>
+            keterlambatan) + Gaji Bagian + Hadiah Pondok + Tip + Berkeluarga + Insentif Cuti</span>
         </div>
         <div class="card">
           <div class="card-header">
@@ -1577,6 +1577,7 @@
                   <th>Hadiah Pondok</th>
                   <th>Tip</th>
                   <th>Berkeluarga</th>
+                  <th title="Bonus Tidak Cuti">Insentif</th>
                   <th>Pot. Terlambat</th>
                   <th style="font-weight:700;">Total Gaji</th>
                   <th style="text-align:right;">Aksi</th>
@@ -2259,6 +2260,41 @@
       return migrated;
     }
 
+    function filterDataByRole(dataArray, refKaryawan = []) {
+      if (!Array.isArray(dataArray)) return dataArray;
+      const loggedUser = sessionStorage.getItem('kuk_user');
+      if (!loggedUser) return dataArray;
+
+      let hasUsersPerm = false;
+      const storedDb = localStorage.getItem('kuk_users_db');
+      if (storedDb) {
+        try {
+          const parsed = JSON.parse(storedDb);
+          const u = parsed.find(x => x.username === loggedUser);
+          if (u && u.permissions && u.permissions.includes('users')) hasUsersPerm = true;
+        } catch(e){}
+      } else {
+        if (['fariz', 'irsyadil'].includes(loggedUser)) hasUsersPerm = true;
+      }
+
+      if (hasUsersPerm) return dataArray;
+
+      const isPalen = ['raju', 'agheea', 'basith', 'anshory', 'lintang'].includes(loggedUser);
+      
+      return dataArray.filter(item => {
+        let nameStr = '';
+        if (item.nama) {
+          nameStr = String(item.nama).toLowerCase().trim();
+        } else if (item.idKaryawan && refKaryawan.length > 0) {
+          const emp = refKaryawan.find(k => k.id == item.idKaryawan);
+          if (emp) nameStr = String(emp.nama).toLowerCase().trim();
+        }
+        
+        const isEmpPalen = nameStr.includes('miftah') || nameStr.includes('nukul');
+        return isPalen ? isEmpPalen : !isEmpPalen;
+      });
+    }
+
     function attemptLogin() {
       const user = document.getElementById('loginUser').value.trim().toLowerCase();
       const pass = document.getElementById('loginPassword').value;
@@ -2398,11 +2434,12 @@
         fetch(`${SCRIPT_URL}?action=rekapAbsen`).then(r => r.json())
       ])
         .then(([dashRes, absenRes]) => {
-          dbKaryawan = dashRes.karyawan || [];
-          rawCutiData = dashRes.data || [];
-          rawViolationsData = dashRes.violations || [];
-          rawAbsenData = absenRes.data || [];
-          rawTipsData = dashRes.tips || [];
+          let tempKaryawan = dashRes.karyawan || [];
+          dbKaryawan = filterDataByRole(tempKaryawan, tempKaryawan);
+          rawCutiData = filterDataByRole(dashRes.data || [], tempKaryawan);
+          rawViolationsData = filterDataByRole(dashRes.violations || [], tempKaryawan);
+          rawAbsenData = filterDataByRole(absenRes.data || [], tempKaryawan);
+          rawTipsData = filterDataByRole(dashRes.tips || [], tempKaryawan);
           rawUsersData = dashRes.users || [];
 
           // Update Setup Deadline input field
@@ -3323,10 +3360,24 @@
         }).reduce((sum, t) => sum + (Number(t.tip) || 0), 0);
         d.tip = autoTipKaca;
 
+        // Auto-calculate insentif cuti
+        const countCuti = rawCutiData.filter(c => {
+          try {
+            if (!c.tanggal) return false;
+            const [y, m] = c.tanggal.split('-');
+            return String(m) === String(fM) && String(y) === String(fY) && String(c.idKaryawan) === String(k.id);
+          } catch { return false; }
+        }).length;
+        let sisaCuti = 3 - countCuti;
+        let insentifCuti = 0;
+        if (sisaCuti === 1) insentifCuti = 25000;
+        else if (sisaCuti === 2) insentifCuti = 50000;
+        else if (sisaCuti >= 3) insentifCuti = 100000;
+
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
         const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-        const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga - d.pengurangan;
+        const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
         const total = bulatkanGaji(totalRaw);
 
         html += `
@@ -3341,7 +3392,7 @@
             <td style="font-size:13px;">
               <div style="display:flex;align-items:center;gap:6px;white-space:nowrap;">
                 <span style="font-weight:600;">${formatRupiah(d.bagian)}</span>
-                <button onclick="editGajiBagian('${k.id}','${k.nama}','${fM}','${fY}',${d.bagian})" title="Edit Gaji Bagian"
+                <button onclick="editGajiBagian('${k.id}', \`${k.nama.replace(/`/g, '')}\`, '${fM}', '${fY}', ${d.bagian})" title="Edit Gaji Bagian"
                   style="background:none;border:none;cursor:pointer;font-size:12px;padding:2px 4px;border-radius:4px;color:var(--text-muted);transition:0.15s;"
                   onmouseover="this.style.background='var(--primary-light)';this.style.color='var(--primary)'"
                   onmouseout="this.style.background='none';this.style.color='var(--text-muted)'">✏️</button>
@@ -3350,10 +3401,11 @@
             <td style="color:var(--text-muted);font-size:13px;">${d.hadiah > 0 ? formatRupiah(d.hadiah) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.tip > 0 ? formatRupiah(d.tip) : '-'}</td>
             <td style="color:var(--text-muted);font-size:13px;">${d.berkeluarga > 0 ? formatRupiah(d.berkeluarga) : '-'}</td>
+            <td style="color:var(--primary);font-weight:600;font-size:13px;">${insentifCuti > 0 ? formatRupiah(insentifCuti) : '-'}</td>
             <td style="color:var(--danger);font-size:13px;">${kali > 0 ? formatRupiah(potTerlambat) + ' (' + kali + 'x terlambat)' : '-'}</td>
             <td style="font-weight:700;color:${total >= GAPOK ? 'var(--success)' : 'var(--warning)'};">${formatRupiah(total)}</td>
             <td style="text-align:right;">
-              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}','${k.nama}','${k.bagian}','${fM}','${fY}',${kali})">✏️ Input</button>
+              <button class="btn btn-outline" style="padding:6px 10px;font-size:12px;" onclick="openGajiInput('${k.id}', \`${k.nama.replace(/`/g, '')}\`, \`${k.bagian.replace(/`/g, '')}\`, '${fM}', '${fY}', ${kali}, ${insentifCuti})">✏️ Input</button>
             </td>
           </tr>
         `;
@@ -3394,8 +3446,8 @@
     }
 
     let _gajiCtx = {};
-    function openGajiInput(id, nama, bagian, fM, fY, kaliTerlambat) {
-      _gajiCtx = { id, nama, bagian, fM, fY, kaliTerlambat: Number(kaliTerlambat) };
+    function openGajiInput(id, nama, bagian, fM, fY, kaliTerlambat, insentifCuti = 0) {
+      _gajiCtx = { id, nama, bagian, fM, fY, kaliTerlambat: Number(kaliTerlambat), insentifCuti: Number(insentifCuti) };
       const d = getGajiData(id, fM, fY);
       document.getElementById('gajiInputNama').textContent = nama;
       document.getElementById('gajiInputBagian').textContent = bagian;
@@ -3444,10 +3496,11 @@
       const berkeluarga = Number(document.getElementById('gajiBerkeluarga').value) || 0;
       const pengurangan = Number(document.getElementById('gajiPengurangan').value) || 0;
       const kaliTerlambat = _gajiCtx.kaliTerlambat || 0;
+      const insentifCuti = _gajiCtx.insentifCuti || 0;
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const totalRaw = gajiBulanIni + bagian + hadiah + tip + berkeluarga - pengurangan;
+      const totalRaw = gajiBulanIni + bagian + hadiah + tip + berkeluarga + insentifCuti - pengurangan;
       const total = bulatkanGaji(totalRaw);
       const pembulatan = total - totalRaw;
       
@@ -3455,24 +3508,19 @@
       document.getElementById('prevPotPoin').innerHTML = '<span>\u2212 Pot. Terlambat (' + kaliTerlambat + 'x)</span><span>' + formatRupiah(potTerlambat) + '</span>';
       document.getElementById('prevGajiBulanIni').innerHTML = '<span>= Gaji Bulan Ini</span><span style="font-weight:700;">' + formatRupiah(gajiBulanIni) + '</span>';
       document.getElementById('prevBagian').innerHTML = '<span>+ Gaji Bagian</span><span>' + formatRupiah(bagian) + '</span>';
-      document.getElementById('prevHadiah').innerHTML = '<span>+ Hadiah Pondok</span><span>' + formatRupiah(hadiah) + '</span>';
+      document.getElementById('prevHadiah').innerHTML = '<span>+ Hadiah Pondok</span><span>' + formatRupiah(hadiah + berkeluarga + insentifCuti) + '</span>';
       document.getElementById('prevTip').innerHTML = '<span>+ Tip</span><span>' + formatRupiah(tip) + '</span>';
-      document.getElementById('prevBerkeluarga').innerHTML = '<span>+ Tunj. Berkeluarga</span><span>' + formatRupiah(berkeluarga) + '</span>';
+      document.getElementById('prevBerkeluarga').style.display = 'none';
       document.getElementById('prevPengurangan').innerHTML = '<span>\u2212 Pengurangan Lain</span><span>' + formatRupiah(pengurangan) + '</span>';
       
       const prevPembulatan = document.getElementById('prevPembulatan');
-      if (pembulatan > 0) {
-        prevPembulatan.style.display = 'flex';
-        prevPembulatan.innerHTML = '<span>+ Pembulatan</span><span>' + formatRupiah(pembulatan) + '</span>';
-      } else {
-        prevPembulatan.style.display = 'none';
-      }
+      prevPembulatan.style.display = 'none';
 
       document.getElementById('prevTotal').innerHTML = '<span><strong>TOTAL GAJI</strong></span><span style="font-weight:700;color:var(--primary);">' + formatRupiah(total) + '</span>';
     }
 
     function openSlipFromInput() {
-      const { id, nama, bagian, fM, fY, kaliTerlambat } = _gajiCtx;
+      const { id, nama, bagian, fM, fY, kaliTerlambat, insentifCuti } = _gajiCtx;
       const absen = Number(document.getElementById('gajiAbsen').value) || 0;
       const bagianVal = Number(document.getElementById('gajiBagian').value) || 0;
       const hadiahSel = document.getElementById('gajiHadiah').value;
@@ -3484,8 +3532,9 @@
 
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
+      const insentif = insentifCuti || 0;
       const gajiBulanIni = Math.max(0, GAPOK - potAbsen - potTerlambat);
-      const totalRaw = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga - pengurangan;
+      const totalRaw = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga + insentif - pengurangan;
       const total = bulatkanGaji(totalRaw);
       const pembulatan = total - totalRaw;
 
@@ -3500,7 +3549,7 @@
       });
 
       closeModal('gajiInputModal');
-      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranBulanIni);
+      openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat || 0, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranBulanIni, insentif);
       calculatePayroll();
     }
 
@@ -3561,7 +3610,7 @@
       return n;
     }
 
-    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranList = []) {
+    function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranList = [], insentifCuti = 0) {
       const fMName = mNames[parseInt(fM) - 1];
       const romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
       const fMRoman = romanMonths[parseInt(fM)-1];
@@ -3591,13 +3640,11 @@
           <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; text-align: left;">
             <tr><td style="width: 250px;">Gaji pokok</td><td>: ${formatRupiah(GAPOK)}</td></tr>
             ${bagianVal > 0 ? `<tr><td>Gaji bagian</td><td>: ${formatRupiah(bagianVal)}</td></tr>` : ''}
-            ${hadiah > 0 ? `<tr><td>Hadiah dari pondok</td><td>: ${formatRupiah(hadiah)}</td></tr>` : ''}
+            ${(hadiah + berkeluarga + insentifCuti) > 0 ? `<tr><td>Hadiah dari pondok</td><td>: ${formatRupiah(hadiah + berkeluarga + insentifCuti)}</td></tr>` : ''}
             ${tip > 0 ? `<tr><td>Tip</td><td>: ${formatRupiah(tip)}</td></tr>` : ''}
-            ${berkeluarga > 0 ? `<tr><td>Tunjangan Keluarga</td><td>: ${formatRupiah(berkeluarga)}</td></tr>` : ''}
             ${pengurangan > 0 ? `<tr><td>Pengurangan Lainnya</td><td>: -${formatRupiah(pengurangan)}</td></tr>` : ''}
             ${absen > 0 ? `<tr><td>Potongan Tidak Masuk</td><td>: -${formatRupiah(potAbsen)} (${absen} hr)</td></tr>` : ''}
-            <tr><td>Poin Pelanggaran</td><td>: ${kaliTerlambat > 0 ? `-${formatRupiah(potTerlambat)} (${kaliTerlambat}x Terlambat)` : ' ()'}</td></tr>
-            ${pembulatan > 0 ? `<tr><td>Pembulatan</td><td>: ${formatRupiah(pembulatan)}</td></tr>` : ''}
+            ${kaliTerlambat > 0 ? `<tr><td>Poin Pelanggaran</td><td>: -${formatRupiah(potTerlambat)} (${kaliTerlambat}x Terlambat)</td></tr>` : ''}
           </table>
           <br>
           <div style="text-align: justify;">
