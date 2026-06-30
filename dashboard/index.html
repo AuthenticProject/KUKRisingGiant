@@ -3621,10 +3621,23 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
 
+      const isPalenEmp = String(nama).toLowerCase().trim().includes('miftah') || String(nama).toLowerCase().trim().includes('nukul');
+      
+      const kopSuratHtml = isPalenEmp 
+        ? `<div style="text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 25px;">
+             <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">KUK PALEN</h1>
+             <div style="font-size: 16px; margin-top: 5px; font-weight: bold;">TB. KUK LA TANSA</div>
+           </div>`
+        : `<div style="text-align: center; border-bottom: 3px double #000; padding-bottom: 15px; margin-bottom: 25px;">
+             <h1 style="margin: 0; font-size: 26px; font-weight: 900; letter-spacing: 1px;">KUK BANGUNAN</h1>
+             <div style="font-size: 16px; margin-top: 5px; font-weight: bold;">TB. KUK LA TANSA</div>
+           </div>`;
+
       const slipHtml = `
         <div style="font-family: 'Times New Roman', Times, serif; color: #000; padding: 20px; line-height: 1.5; font-size: 15px; text-align: left;">
-          <div style="font-weight: bold; font-size: 16px; text-decoration: underline; text-align: left;">Surat Keterangan Gaji</div>
-          <div style="text-align: left;">No : ${nomorSurat}</div>
+          ${kopSuratHtml}
+          <div style="font-weight: bold; font-size: 16px; text-decoration: underline; text-align: center;">SURAT KETERANGAN GAJI</div>
+          <div style="text-align: center; margin-bottom: 25px;">No : ${nomorSurat}</div>
           <br>
           <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
           <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; text-align: left;">
