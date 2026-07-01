@@ -3941,7 +3941,8 @@
 
       // Load logged-in user details for signatory
       const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
-      const currentUserJabatan = sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa';
+      // Strip trailing numbers from jabatan (e.g. "Bendahara 1" → "Bendahara")
+      const currentUserJabatan = (sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa').replace(/\s*\d+$/, '').trim();
 
       const slipHtml = `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
@@ -4052,7 +4053,8 @@
       
       // Load logged-in user details for signatory
       const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
-      const currentUserJabatan = sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa';
+      // Strip trailing numbers from jabatan (e.g. "Bendahara 1" → "Bendahara")
+      const currentUserJabatan = (sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa').replace(/\s*\d+$/, '').trim();
 
       activeKaryawan.forEach((k, index) => {
         const defaultBagian = getDefaultBagian(k.nama, k.bagian);
@@ -4233,7 +4235,9 @@
       
       const employeeStore = isPalenEmp ? 'palen' : 'bangunan';
       const namaHrd = findUserByJabatanAndToko('HRD', employeeStore);
-      const namaKoordinator = findUserByJabatanAndToko('Koordinator', employeeStore);
+      // Palen: second signatory is Kepala Toko; Bangunan: Koordinator
+      const jabatanKedua = isPalenEmp ? 'Kepala Toko' : 'Koordinator';
+      const namaKoordinator = findUserByJabatanAndToko(jabatanKedua, employeeStore);
       
       const today = new Date();
       const mNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -4271,8 +4275,10 @@
             
             <div style="text-align: left; font-family: 'Times New Roman', Times, serif !important;">Yang bertanda tangan di bawah ini atas nama manajemen TB. KUK La Tansa:</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left; font-family: 'Times New Roman', Times, serif !important;">
-              <tr><td style="width: 200px; font-family: 'Times New Roman', Times, serif !important;">1. Nama / Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${namaHrd} / HRD</td></tr>
-              <tr><td style="font-family: 'Times New Roman', Times, serif !important;">2. Nama / Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${namaKoordinator} / Koordinator</td></tr>
+              <tr>
+                <td style="width: 200px; font-family: 'Times New Roman', Times, serif !important;">HRD</td>
+                <td style="font-family: 'Times New Roman', Times, serif !important;">: ${namaHrd}</td>
+              </tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px; font-family: 'Times New Roman', Times, serif !important;">Menerangkan dengan sebenarnya bahwa karyawan di bawah ini:</div>
@@ -4286,7 +4292,7 @@
               ${spContent}
             </div>
             
-            <div style="text-align: justify; margin-bottom: 40px; font-family: 'Times New Roman', Times, serif !important;">
+            <div style="text-align: justify; margin-bottom: 20px; font-family: 'Times New Roman', Times, serif !important;">
               Demikian surat peringatan ini dibuat untuk menjadi perhatian dan dilaksanakan sebagaimana mestinya.
             </div>
             
@@ -4294,13 +4300,13 @@
               <tr>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Mengetahui,<br>
-                  HRD KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
-                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaHrd}</b>
+                  ${jabatanKedua} KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaKoordinator}</b>
                 </td>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Ponorogo, ${formattedDate}<br>
-                  Koordinator KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
-                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaKoordinator}</b>
+                  HRD KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaHrd}</b>
                 </td>
               </tr>
             </table>

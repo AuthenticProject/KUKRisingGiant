@@ -978,20 +978,30 @@ function checkAndInitAkun(ss) {
   let sheet = ss.getSheetByName(SHEET_AKUN);
   if (!sheet) {
     sheet = ss.insertSheet(SHEET_AKUN);
-    sheet.getRange(1, 1, 1, 3).setValues([['Username', 'Password', 'Permissions']]).setFontWeight('bold');
-    const defaultUsernames = ['fariz', 'andika', 'irsyadil', 'ari', 'shuva', 'aria', 'zain'];
-    const rows = defaultUsernames.map(u => {
-      const perms = (u === 'fariz' || u === 'irsyadil') ? 'absen, cuti, pelanggaran, dashboard, tip, users' : 'absen, cuti, pelanggaran, dashboard, tip';
-      return [u, '12345', perms];
-    });
-    sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+    sheet.getRange(1, 1, 1, 6).setValues([['Username', 'Password', 'Permissions', 'Jabatan', 'Toko', 'Nama Lengkap']]).setFontWeight('bold');
+    
+    // Default users
+    const defaultRows = [
+      ['fariz', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji, users', 'Koordinator', 'bangunan', 'Fariz Ridwani,S.Kom.'],
+      ['andika', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'HRD', 'bangunan', 'Andika'],
+      ['irsyadil', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji, users', 'Koordinator', 'semua', 'Irsyadil'],
+      ['ari', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'Bendahara', 'bangunan', 'Ari'],
+      ['shuva', '12345', 'absen, cuti, pelanggaran, dashboard, tip', '', 'bangunan', 'Shuva'],
+      ['aria', '12345', 'absen, cuti, pelanggaran, dashboard, tip', '', 'bangunan', 'Aria'],
+      ['zain', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'Kepala Toko KUK Palen', 'palen', 'Ahmad Syirajuddin Rabbani']
+    ];
+    sheet.getRange(2, 1, defaultRows.length, 6).setValues(defaultRows);
   } else {
-    // Migrate to add Permissions column if it doesn't exist
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
-    if (headers.indexOf('Permissions') === -1) {
-      const lastCol = sheet.getLastColumn() + 1;
-      sheet.getRange(1, lastCol).setValue('Permissions').setFontWeight('bold');
-    }
+    // Ensure all 6 columns exist
+    let headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => String(h).trim());
+    const required = ['Permissions', 'Jabatan', 'Toko', 'Nama Lengkap'];
+    required.forEach(colName => {
+      if (headers.indexOf(colName) === -1) {
+        const lastCol = sheet.getLastColumn() + 1;
+        sheet.getRange(1, lastCol).setValue(colName).setFontWeight('bold');
+        headers.push(colName);
+      }
+    });
   }
   return sheet;
 }
@@ -1035,18 +1045,22 @@ function handleChangePassword(ss, payload) {
 
 function getUsersData(ss) {
   const sheet = checkAndInitAkun(ss);
+  const map = getColMap(sheet);
   const data = sheet.getDataRange().getValues();
   const users = [];
   
   // Headers in row 1, data starts from row 2
   for (let i = 1; i < data.length; i++) {
-    if (data[i][0]) {
-      const permsStr = String(data[i][2] || '').trim();
+    if (data[i][map['Username']]) {
+      const permsStr = String(data[i][map['Permissions']] || '').trim();
       const perms = permsStr ? permsStr.split(',').map(p => p.trim()).filter(Boolean) : [];
       users.push({
-        username: String(data[i][0]),
-        password: String(data[i][1]),
-        permissions: perms
+        username: String(data[i][map['Username']]),
+        password: String(data[i][map['Password']]),
+        permissions: perms,
+        jabatan: map['Jabatan'] !== undefined ? String(data[i][map['Jabatan']]) : '',
+        toko: map['Toko'] !== undefined ? String(data[i][map['Toko']]) : 'bangunan',
+        namaLengkap: map['Nama Lengkap'] !== undefined ? String(data[i][map['Nama Lengkap']]) : String(data[i][map['Username']])
       });
     }
   }
@@ -1054,25 +1068,42 @@ function getUsersData(ss) {
 }
 
 function handleSaveUser(ss, payload) {
-  const { username, password, permissions } = payload;
+  const { username, password, permissions, jabatan, toko, namaLengkap } = payload;
   if (!username || !password) {
     return jsonResponse({ result: 'error', message: 'Username dan Password wajib diisi.' });
   }
   
   const sheet = checkAndInitAkun(ss);
+  const map = getColMap(sheet);
   const data = sheet.getDataRange().getValues();
   const permsStr = Array.isArray(permissions) ? permissions.join(', ') : '';
   
+  let rowIdx = -1;
   for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]).trim().toLowerCase() === String(username).trim().toLowerCase()) {
-      sheet.getRange(i + 1, 2).setValue(password);
-      sheet.getRange(i + 1, 3).setValue(permsStr);
-      return jsonResponse({ result: 'success', message: 'User berhasil diupdate.' });
+    if (String(data[i][map['Username']]).trim().toLowerCase() === String(username).trim().toLowerCase()) {
+      rowIdx = i + 1;
+      break;
     }
   }
   
-  sheet.appendRow([username, password, permsStr]);
-  return jsonResponse({ result: 'success', message: 'User berhasil ditambahkan.' });
+  if (rowIdx > 0) {
+    sheet.getRange(rowIdx, map['Password'] + 1).setValue(password);
+    sheet.getRange(rowIdx, map['Permissions'] + 1).setValue(permsStr);
+    if (map['Jabatan'] !== undefined) sheet.getRange(rowIdx, map['Jabatan'] + 1).setValue(jabatan || '');
+    if (map['Toko'] !== undefined) sheet.getRange(rowIdx, map['Toko'] + 1).setValue(toko || 'bangunan');
+    if (map['Nama Lengkap'] !== undefined) sheet.getRange(rowIdx, map['Nama Lengkap'] + 1).setValue(namaLengkap || username);
+    return jsonResponse({ result: 'success', message: 'User berhasil diupdate.' });
+  } else {
+    const newRow = new Array(sheet.getLastColumn()).fill('');
+    newRow[map['Username']] = username;
+    newRow[map['Password']] = password;
+    newRow[map['Permissions']] = permsStr;
+    if (map['Jabatan'] !== undefined) newRow[map['Jabatan']] = jabatan || '';
+    if (map['Toko'] !== undefined) newRow[map['Toko']] = toko || 'bangunan';
+    if (map['Nama Lengkap'] !== undefined) newRow[map['Nama Lengkap']] = namaLengkap || username;
+    sheet.appendRow(newRow);
+    return jsonResponse({ result: 'success', message: 'User berhasil ditambahkan.' });
+  }
 }
 
 function handleDeleteUser(ss, payload) {
