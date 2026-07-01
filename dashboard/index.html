@@ -1956,7 +1956,20 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
           <div class="form-group">
             <label>Jabatan / Posisi</label>
-            <input type="text" id="userInputJabatan" placeholder="Contoh: Bendahara, HRD, Koordinator">
+            <select id="userInputJabatan">
+              <option value="">-- Pilih Jabatan --</option>
+              <option value="Koordinator">Koordinator</option>
+              <option value="Kepala Toko">Kepala Toko</option>
+              <option value="Sekretaris">Sekretaris</option>
+              <option value="Bendahara 1">Bendahara 1</option>
+              <option value="Bendahara 2">Bendahara 2</option>
+              <option value="Bendahara 3">Bendahara 3</option>
+              <option value="Gudang">Gudang</option>
+              <option value="HRD">HRD</option>
+              <option value="Marketing">Marketing</option>
+              <option value="Inventaris">Inventaris</option>
+              <option value="Staff">Staff</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Toko</label>
@@ -5112,8 +5125,8 @@
       setTimeout(migrateLocalTips, 3000); // delay so it doesn't interrupt syncDataAll
     });
     
-    // Auto clear cache once for v9 migration
-    if (!localStorage.getItem('v10_dash_migrated')) {
+    // Auto clear cache once for v12 migration
+    if (!localStorage.getItem('v12_dash_migrated')) {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistrations().then(function(registrations) {
           for(let registration of registrations) {
@@ -5126,7 +5139,7 @@
           for (let name of names) caches.delete(name);
         });
       }
-      localStorage.setItem('v10_dash_migrated', 'true');
+      localStorage.setItem('v12_dash_migrated', 'true');
       setTimeout(() => window.location.reload(true), 1500);
     }
   </script>
