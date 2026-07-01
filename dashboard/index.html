@@ -3950,10 +3950,10 @@
       const isPalenEmp = String(nama).toLowerCase().trim().includes('miftah') || String(nama).toLowerCase().trim().includes('nukul') || String(bagian).toLowerCase().trim() === 'palen';
       const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
 
-      // Load logged-in user details for signatory
-      const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
-      // Strip trailing numbers from jabatan (e.g. "Bendahara 1" → "Bendahara")
-      const currentUserJabatan = (sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa').replace(/\s*\d+$/, '').trim();
+      // Cari Bendahara dari toko karyawan ini
+      const empStore = isPalenEmp ? 'palen' : 'bangunan';
+      const currentUserName = findUserByJabatanAndToko('Bendahara 1', empStore);
+      const currentUserJabatan = 'Bendahara';
 
       const slipHtml = `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
@@ -4061,11 +4061,6 @@
       });
 
       let allSlipsHtml = '';
-      
-      // Load logged-in user details for signatory
-      const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
-      // Strip trailing numbers from jabatan (e.g. "Bendahara 1" → "Bendahara")
-      const currentUserJabatan = (sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa').replace(/\s*\d+$/, '').trim();
 
       activeKaryawan.forEach((k, index) => {
         const defaultBagian = getDefaultBagian(k.nama, k.bagian);
@@ -4116,6 +4111,11 @@
         const pageBreak = index < activeKaryawan.length - 1 ? 'page-break-after: always;' : '';
 
         const fullNameSlip = getFullNameForSlip(k.nama);
+        
+        // Cari Bendahara dari toko karyawan ini
+        const empStore = isPalenEmp ? 'palen' : 'bangunan';
+        const currentUserName = findUserByJabatanAndToko('Bendahara 1', empStore);
+        const currentUserJabatan = 'Bendahara';
         
         allSlipsHtml += `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff; ${pageBreak}">
