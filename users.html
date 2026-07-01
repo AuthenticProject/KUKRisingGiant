@@ -71,6 +71,19 @@
     .toast.success { border-left-color: var(--success); }
     @keyframes toastIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
+
+    @media (max-width: 480px) {
+      body { padding: 20px 10px 100px; }
+      .app-container { gap: 16px; }
+      .header h1 { font-size: 22px; }
+      .header p { font-size: 13px; }
+      .card { padding: 16px 12px; }
+      .user-item { padding: 12px; }
+      .user-info h3 { font-size: 15px; }
+      .btn { padding: 10px 12px; font-size: 13px; }
+      .modal { padding: 20px 16px; }
+      .perm-item { font-size: 13px; }
+    }
   </style>
 </head>
 <body>

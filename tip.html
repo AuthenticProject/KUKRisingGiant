@@ -43,6 +43,16 @@
     .toast.success { border-left-color: var(--success); }
     @keyframes toastIn { 0% { transform: translateY(-100%); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
     @keyframes toastOut { to { transform: translateY(-20px); opacity: 0; } }
+    @media (max-width: 480px) {
+      body { padding: 20px 10px 100px; }
+      .app-container { gap: 16px; }
+      .header h1 { font-size: 22px; }
+      .header p { font-size: 13px; }
+      .card { padding: 20px 16px; border-radius: 12px; }
+      .form-group label { font-size: 11px; }
+      input[type="number"], input[type="date"], input[type="text"], select { padding: 10px 12px; font-size: 14px; }
+      .btn-submit { padding: 14px; font-size: 14px; border-radius: 12px; }
+    }
   </style>
 </head>
 <body>
