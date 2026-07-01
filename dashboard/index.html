@@ -3915,8 +3915,8 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}</td></tr>
-              <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}</td></tr>
+              <tr><td>Jabatan</td><td>: ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
@@ -3947,8 +3947,8 @@
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                   Hormat Kami<br>
-                  Bendahara TB. KUK La Tansa<br><br><br><br><br>
-                  ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}
+                  ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}<br><br><br><br><br>
+                  ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}
                 </td>
               </tr>
             </table>
@@ -4068,8 +4068,8 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}</td></tr>
-              <tr><td>Jabatan</td><td>: Bendahara TB. KUK La Tansa</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}</td></tr>
+              <tr><td>Jabatan</td><td>: ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
@@ -4100,8 +4100,8 @@
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                   Hormat Kami<br>
-                  Bendahara TB. KUK La Tansa<br><br><br><br><br>
-                  ${isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan'}
+                  ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}<br><br><br><br><br>
+                  ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}
                 </td>
               </tr>
             </table>
@@ -4165,7 +4165,8 @@
       const namaLengkap = getFullNameForSlip(nama);
       const isPalenEmp = isPalenEmpByName(nama);
       const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
-      const pimpinan = isPalenEmp ? 'Lintang Abimanyu' : 'Ari Hermawan';
+      const pimpinan = isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.';
+      const jabatanPimpinan = isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa';
       
       const today = new Date();
       const mNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -4204,7 +4205,7 @@
             <div style="text-align: left; font-family: 'Times New Roman', Times, serif !important;">Yang bertanda tangan di bawah ini atas nama manajemen TB. KUK La Tansa:</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left; font-family: 'Times New Roman', Times, serif !important;">
               <tr><td style="width: 200px; font-family: 'Times New Roman', Times, serif !important;">Nama</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${pimpinan}</td></tr>
-              <tr><td style="font-family: 'Times New Roman', Times, serif !important;">Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: Pimpinan / Bendahara TB. KUK La Tansa</td></tr>
+              <tr><td style="font-family: 'Times New Roman', Times, serif !important;">Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${jabatanPimpinan}</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px; font-family: 'Times New Roman', Times, serif !important;">Menerangkan dengan sebenarnya bahwa karyawan di bawah ini:</div>
@@ -4224,13 +4225,10 @@
             
             <table style="width: 100%; font-size: 15px; border: none; text-align: center; font-family: 'Times New Roman', Times, serif !important;">
               <tr>
-                <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
-                  Penerima,<br><br><br><br><br>
-                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaLengkap}</b>
-                </td>
+                <td style="width: 50%;"></td>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Pasuruan, ${formattedDate}<br>
-                  Pimpinan TB. KUK La Tansa<br><br><br><br><br>
+                  ${jabatanPimpinan}<br><br><br><br><br>
                   <b style="font-family: 'Times New Roman', Times, serif !important;">${pimpinan}</b>
                 </td>
               </tr>
