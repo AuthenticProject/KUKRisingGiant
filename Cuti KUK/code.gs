@@ -985,7 +985,7 @@ function checkAndInitAkun(ss) {
       ['fariz', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji, users', 'Koordinator', 'bangunan', 'Fariz Ridwani,S.Kom.'],
       ['andika', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'HRD', 'bangunan', 'Andika'],
       ['irsyadil', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji, users', 'Koordinator', 'semua', 'Irsyadil'],
-      ['ari', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'Bendahara', 'bangunan', 'Ari'],
+      ['ari', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'Bendahara 1', 'bangunan', 'Ari'],
       ['shuva', '12345', 'absen, cuti, pelanggaran, dashboard, tip', '', 'bangunan', 'Shuva'],
       ['aria', '12345', 'absen, cuti, pelanggaran, dashboard, tip', '', 'bangunan', 'Aria'],
       ['zain', '12345', 'absen, cuti, pelanggaran, dashboard, tip, gaji', 'Kepala Toko KUK Palen', 'palen', 'Ahmad Syirajuddin Rabbani']
