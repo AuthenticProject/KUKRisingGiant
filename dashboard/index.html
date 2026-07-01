@@ -2708,6 +2708,17 @@
           rawTipsData = filterDataByRole(dashRes.tips || [], tempKaryawan);
           rawUsersData = dashRes.users || [];
 
+          // Refresh sessionStorage dengan data user terbaru dari cloud
+          const currentLoggedUser = sessionStorage.getItem('kuk_user');
+          if (currentLoggedUser && rawUsersData.length > 0) {
+            const freshUser = rawUsersData.find(u => u.username === currentLoggedUser);
+            if (freshUser) {
+              sessionStorage.setItem('kuk_jabatan', freshUser.jabatan || '');
+              sessionStorage.setItem('kuk_toko', freshUser.toko || 'bangunan');
+              sessionStorage.setItem('kuk_namaLengkap', freshUser.namaLengkap || currentLoggedUser);
+            }
+          }
+
           // Update Setup Deadline input field
           if (dashRes.batasWaktu) {
             document.getElementById('setupDeadline').value = dashRes.batasWaktu.substring(0, 16);
