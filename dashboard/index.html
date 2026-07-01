@@ -1320,7 +1320,7 @@
           <div class="avatar" id="userAvatar">U</div>
           <div class="user-details">
             <h4 id="userNameTxt">Admin</h4>
-            <p>Management</p>
+            <p id="userJabatanTxt">Management</p>
           </div>
         </div>
         <button class="btn btn-outline"
@@ -1856,6 +1856,8 @@
               <thead>
                 <tr>
                   <th>Username</th>
+                  <th>Jabatan</th>
+                  <th>Toko</th>
                   <th>Akses Menu</th>
                   <th style="text-align:right;">Aksi</th>
                 </tr>
@@ -1951,6 +1953,24 @@
           <label>Kata Sandi</label>
           <input type="text" id="userInputPassword" placeholder="Masukkan kata sandi">
         </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div class="form-group">
+            <label>Jabatan / Posisi</label>
+            <input type="text" id="userInputJabatan" placeholder="Contoh: Bendahara, HRD, Koordinator">
+          </div>
+          <div class="form-group">
+            <label>Toko</label>
+            <select id="userInputToko">
+              <option value="bangunan">KUK Bangunan</option>
+              <option value="palen">KUK Palen</option>
+              <option value="semua">Semua Toko</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Nama Lengkap (untuk Surat)</label>
+          <input type="text" id="userInputNamaLengkap" placeholder="Nama yang tertera di kop surat, mis: Ari Setiawan, S.E.">
+        </div>
         <div class="form-group">
           <label>Akses Menu</label>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="userPermContainer">
@@ -1959,6 +1979,7 @@
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="pelanggaran"> Pelanggaran</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="dashboard"> Dashboard</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="tip"> Tip Kaca</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="gaji"> Gaji/Payroll</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="users"> User Admin</label>
           </div>
         </div>
@@ -2455,13 +2476,13 @@
 
     // Daftar akun yang valid
     const DEFAULT_USERS = [
-      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
-      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users'] },
-      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] }
+      { username: 'fariz', password: '12345', jabatan: 'Koordinator', toko: 'bangunan', namaLengkap: 'Fariz Ridwani,S.Kom.', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'users'] },
+      { username: 'andika', password: '12345', jabatan: 'HRD', toko: 'bangunan', namaLengkap: 'Andika', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] },
+      { username: 'irsyadil', password: '12345', jabatan: 'Koordinator', toko: 'semua', namaLengkap: 'Irsyadil', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'users'] },
+      { username: 'ari', password: '12345', jabatan: 'Bendahara', toko: 'bangunan', namaLengkap: 'Ari', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] },
+      { username: 'shuva', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Shuva', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'aria', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Aria', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
+      { username: 'zain', password: '12345', jabatan: 'Kepala Toko KUK Palen', toko: 'palen', namaLengkap: 'Ahmad Syirajuddin Rabbani', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] }
     ];
 
     function getUsersDB() {
@@ -2554,6 +2575,17 @@
       const users = getUsersDB();
       const userObj = users.find(u => u.username === username);
       const perms = userObj ? (userObj.permissions || []) : [];
+      
+      // Store jabatan and toko in sessionStorage for use in documents
+      if (userObj) {
+        sessionStorage.setItem('kuk_jabatan', userObj.jabatan || '');
+        sessionStorage.setItem('kuk_toko', userObj.toko || 'bangunan');
+        sessionStorage.setItem('kuk_namaLengkap', userObj.namaLengkap || username);
+      }
+
+      // Update sidebar user-details to show jabatan
+      const jabatanEl = document.getElementById('userJabatanTxt');
+      if (jabatanEl && userObj) jabatanEl.textContent = userObj.jabatan || 'Staff';
       
       const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
       menuItems.forEach(el => {
@@ -3510,8 +3542,9 @@
       return n.includes('miftah') || n.includes('nukul');
     }
 
-    function getGapok(nama) {
-      return isPalenEmpByName(nama) ? 700000 : 850000;
+    function getGapok(nama, bagian) {
+      const isPalen = isPalenEmpByName(nama) || (bagian && String(bagian).toLowerCase().trim() === 'palen');
+      return isPalen ? 700000 : 850000;
     }
 
     // Pembulatan gaji: 0->0, 1-500->500, 501-999->1000
@@ -3536,9 +3569,10 @@
       { kata: ['irvan'], nilai: 650000 },
       { kata: ['lailur', 'rohman', 'lailurro'], nilai: 200000 }
     ];
-    function getDefaultBagian(nama) {
+    function getDefaultBagian(nama, bagian) {
       if (!nama) return 0;
-      if (isPalenEmpByName(nama)) return 300000;
+      const isPalen = isPalenEmpByName(nama) || (bagian && String(bagian).toLowerCase().trim() === 'palen');
+      if (isPalen) return 300000;
       const n = nama.toLowerCase();
       for (const entry of DEFAULT_GAJI_BAGIAN) {
         if (entry.kata.some(k => n.includes(k))) return entry.nilai;
@@ -3600,7 +3634,7 @@
 
       let html = '';
       activeKaryawan.forEach(k => {
-        const defaultBagian = getDefaultBagian(k.nama);
+        const defaultBagian = getDefaultBagian(k.nama, k.bagian);
         const defaultBerkeluarga = getDefaultBerkeluarga(k.nama);
         const d = getGajiData(k.id, fM, fY, defaultBagian, defaultBerkeluarga);
         const kali = terlambatCount[k.id] || 0;
@@ -3631,7 +3665,7 @@
 
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
-        const currentGapok = getGapok(k.nama);
+        const currentGapok = getGapok(k.nama, k.bagian);
         const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
         const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
         const total = bulatkanGaji(totalRaw);
@@ -3790,7 +3824,7 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = (kaliTerlambat || 0) * POT_POIN_PER_POIN;
       const insentif = insentifCuti || 0;
-      const currentGapok = getGapok(nama);
+      const currentGapok = getGapok(nama, bagian);
       const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
       const totalRaw = gajiBulanIni + bagianVal + hadiah + tip + berkeluarga + insentif - pengurangan;
       const total = bulatkanGaji(totalRaw);
@@ -3902,8 +3936,12 @@
       const potAbsen = absen * POT_ABSEN_PER_HARI;
       const potTerlambat = kaliTerlambat * POT_POIN_PER_POIN;
 
-      const isPalenEmp = String(nama).toLowerCase().trim().includes('miftah') || String(nama).toLowerCase().trim().includes('nukul');
+      const isPalenEmp = String(nama).toLowerCase().trim().includes('miftah') || String(nama).toLowerCase().trim().includes('nukul') || String(bagian).toLowerCase().trim() === 'palen';
       const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
+
+      // Load logged-in user details for signatory
+      const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
+      const currentUserJabatan = sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa';
 
       const slipHtml = `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
@@ -3919,8 +3957,8 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}</td></tr>
-              <tr><td>Jabatan</td><td>: ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${currentUserName}</td></tr>
+              <tr><td>Jabatan</td><td>: ${currentUserJabatan}</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
@@ -3930,7 +3968,7 @@
             
             <br>
             <div style="text-align: justify;">
-              Hingga saat ini tanggal ${lastDayOfMonth} ${fMName} ${fY} yang bersangkutan masih aktif bekerja dan TB. KUK La Tansa memberikan penghasilan sebagai berikut:
+               Hingga saat ini tanggal ${lastDayOfMonth} ${fMName} ${fY} yang bersangkutan masih aktif bekerja dan TB. KUK La Tansa memberikan penghasilan sebagai berikut:
             </div>
             
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 20px; margin-top: 15px; text-align: left;">
@@ -3951,8 +3989,8 @@
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                   Hormat Kami<br>
-                  ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}<br><br><br><br><br>
-                  ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}
+                  ${currentUserJabatan}<br><br><br><br><br>
+                  ${currentUserName}
                 </td>
               </tr>
             </table>
@@ -4012,8 +4050,12 @@
 
       let allSlipsHtml = '';
       
+      // Load logged-in user details for signatory
+      const currentUserName = sessionStorage.getItem('kuk_namaLengkap') || 'Fariz Ridwani,S.Kom.';
+      const currentUserJabatan = sessionStorage.getItem('kuk_jabatan') || 'Koordinator KUK La Tansa';
+
       activeKaryawan.forEach((k, index) => {
-        const defaultBagian = getDefaultBagian(k.nama);
+        const defaultBagian = getDefaultBagian(k.nama, k.bagian);
         const defaultBerkeluarga = getDefaultBerkeluarga(k.nama);
         const d = getGajiData(k.id, fM, fY, defaultBagian, defaultBerkeluarga);
         const kali = terlambatCount[k.id] || 0;
@@ -4044,7 +4086,7 @@
 
         const potAbsen = d.absen * POT_ABSEN_PER_HARI;
         const potTerlambat = kali * POT_POIN_PER_POIN;
-        const currentGapok = getGapok(k.nama);
+        const currentGapok = getGapok(k.nama, k.bagian);
         const gajiBulanIni = Math.max(0, currentGapok - potAbsen - potTerlambat);
         const totalRaw = gajiBulanIni + d.bagian + d.hadiah + d.tip + d.berkeluarga + insentifCuti - d.pengurangan;
         const total = bulatkanGaji(totalRaw);
@@ -4055,7 +4097,7 @@
         const nomorSurat = `${Math.floor(Math.random() * 900) + 100}/HRD-Finance/${fMRoman}/${fY}`;
         const lastDayOfMonth = new Date(fY, parseInt(fM), 0).getDate();
         
-        const isPalenEmp = String(k.nama).toLowerCase().trim().includes('miftah') || String(k.nama).toLowerCase().trim().includes('nukul');
+        const isPalenEmp = String(k.nama).toLowerCase().trim().includes('miftah') || String(k.nama).toLowerCase().trim().includes('nukul') || String(k.bagian).toLowerCase().trim() === 'palen';
         const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
         
         const pageBreak = index < activeKaryawan.length - 1 ? 'page-break-after: always;' : '';
@@ -4072,8 +4114,8 @@
             
             <div style="text-align: left;">Yang bertanda tangan di bawah ini</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}</td></tr>
-              <tr><td>Jabatan</td><td>: ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${currentUserName}</td></tr>
+              <tr><td>Jabatan</td><td>: ${currentUserJabatan}</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
@@ -4104,8 +4146,8 @@
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                   Hormat Kami<br>
-                  ${isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa'}<br><br><br><br><br>
-                  ${isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.'}
+                  ${currentUserJabatan}<br><br><br><br><br>
+                  ${currentUserName}
                 </td>
               </tr>
             </table>
@@ -4161,16 +4203,37 @@
       generateSpContent(selectedLevel);
     }
 
+    function findUserByJabatanAndToko(jabatan, targetToko) {
+      const users = getUsersDB();
+      // First try to find an exact match for the store and jabatan
+      const match = users.find(u => 
+        String(u.jabatan).toLowerCase().trim() === jabatan.toLowerCase() && 
+        (String(u.toko).toLowerCase() === targetToko.toLowerCase() || String(u.toko).toLowerCase() === 'semua')
+      );
+      if (match) return match.namaLengkap || match.username;
+      
+      // Fallback: just match by jabatan
+      const fallback = users.find(u => String(u.jabatan).toLowerCase().trim() === jabatan.toLowerCase());
+      if (fallback) return fallback.namaLengkap || fallback.username;
+
+      // Extreme fallback
+      if (jabatan.toLowerCase() === 'hrd') return 'Andika';
+      if (jabatan.toLowerCase() === 'koordinator') return 'Fariz Ridwani,S.Kom.';
+      return '-';
+    }
+
     function generateSpContent(level) {
       const nama = currentSpNama;
       const bagian = currentSpBagian;
       const currentPoints = currentSpPoints;
 
       const namaLengkap = getFullNameForSlip(nama);
-      const isPalenEmp = isPalenEmpByName(nama);
+      const isPalenEmp = isPalenEmpByName(nama) || String(bagian).toLowerCase().trim() === 'palen';
       const kopImg = isPalenEmp ? '../kop_palen.png' : '../kop_bangunan.png';
-      const pimpinan = isPalenEmp ? 'Ahmad Syirajuddin Rabbani' : 'Fariz Ridwani,S.Kom.';
-      const jabatanPimpinan = isPalenEmp ? 'Kepala Toko KUK Palen' : 'Koordinator KUK La Tansa';
+      
+      const employeeStore = isPalenEmp ? 'palen' : 'bangunan';
+      const namaHrd = findUserByJabatanAndToko('HRD', employeeStore);
+      const namaKoordinator = findUserByJabatanAndToko('Koordinator', employeeStore);
       
       const today = new Date();
       const mNames = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -4208,8 +4271,8 @@
             
             <div style="text-align: left; font-family: 'Times New Roman', Times, serif !important;">Yang bertanda tangan di bawah ini atas nama manajemen TB. KUK La Tansa:</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left; font-family: 'Times New Roman', Times, serif !important;">
-              <tr><td style="width: 200px; font-family: 'Times New Roman', Times, serif !important;">Nama</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${pimpinan}</td></tr>
-              <tr><td style="font-family: 'Times New Roman', Times, serif !important;">Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${jabatanPimpinan}</td></tr>
+              <tr><td style="width: 200px; font-family: 'Times New Roman', Times, serif !important;">1. Nama / Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${namaHrd} / HRD</td></tr>
+              <tr><td style="font-family: 'Times New Roman', Times, serif !important;">2. Nama / Jabatan</td><td style="font-family: 'Times New Roman', Times, serif !important;">: ${namaKoordinator} / Koordinator</td></tr>
             </table>
             
             <div style="text-align: left; margin-top: 20px; font-family: 'Times New Roman', Times, serif !important;">Menerangkan dengan sebenarnya bahwa karyawan di bawah ini:</div>
@@ -4229,11 +4292,15 @@
             
             <table style="width: 100%; font-size: 15px; border: none; text-align: center; font-family: 'Times New Roman', Times, serif !important;">
               <tr>
-                <td style="width: 50%;"></td>
+                <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
+                  Mengetahui,<br>
+                  HRD KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaHrd}</b>
+                </td>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Ponorogo, ${formattedDate}<br>
-                  ${jabatanPimpinan}<br><br><br><br><br>
-                  <b style="font-family: 'Times New Roman', Times, serif !important;">${pimpinan}</b>
+                  Koordinator KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  <b style="font-family: 'Times New Roman', Times, serif !important;">${namaKoordinator}</b>
                 </td>
               </tr>
             </table>
@@ -4902,12 +4969,15 @@
 
       users.forEach((u, i) => {
         const perms = (u.permissions || []).join(', ');
+        const tokoLabel = u.toko === 'palen' ? '🏬 KUK Palen' : u.toko === 'semua' ? '🌐 Semua Toko' : '🏗️ KUK Bangunan';
         tbody.innerHTML += `
           <tr>
-            <td><strong>${u.username}</strong></td>
+            <td><strong>${u.username}</strong><br><small style="color:var(--text-muted);">${u.namaLengkap || '-'}</small></td>
+            <td><span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;font-weight:600;">${u.jabatan || '-'}</span></td>
+            <td><span style="font-size:12px;color:var(--text-muted);">${tokoLabel}</span></td>
             <td style="font-size:13px; color:var(--text-muted);">${perms || 'Tidak ada akses'}</td>
             <td style="text-align:right;">
-              <button class="btn btn-outline btn-sm" onclick="editDbUser(${i})">Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="editDbUser(${i})" style="margin-right:4px;">Edit</button>
               <button class="btn btn-danger btn-sm" onclick="deleteDbUser(${i})">Hapus</button>
             </td>
           </tr>
@@ -4920,6 +4990,9 @@
       document.getElementById('userModalTitle').textContent = 'Tambah Pengguna';
       document.getElementById('userInputUsername').value = '';
       document.getElementById('userInputPassword').value = '';
+      document.getElementById('userInputJabatan').value = '';
+      document.getElementById('userInputToko').value = 'bangunan';
+      document.getElementById('userInputNamaLengkap').value = '';
       document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
       openModal('userManagementModal');
     }
@@ -4932,6 +5005,9 @@
       document.getElementById('userModalTitle').textContent = 'Edit Pengguna';
       document.getElementById('userInputUsername').value = u.username;
       document.getElementById('userInputPassword').value = u.password;
+      document.getElementById('userInputJabatan').value = u.jabatan || '';
+      document.getElementById('userInputToko').value = u.toko || 'bangunan';
+      document.getElementById('userInputNamaLengkap').value = u.namaLengkap || '';
       
       document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => {
         cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
@@ -4942,6 +5018,9 @@
     function saveDbUser() {
       const username = document.getElementById('userInputUsername').value.trim();
       const password = document.getElementById('userInputPassword').value.trim();
+      const jabatan = document.getElementById('userInputJabatan').value.trim();
+      const toko = document.getElementById('userInputToko').value;
+      const namaLengkap = document.getElementById('userInputNamaLengkap').value.trim();
       
       if (!username || !password) return showToast('Username dan kata sandi wajib diisi!', 'error');
       
@@ -4954,6 +5033,9 @@
         action: 'save_user',
         username: username,
         password: password,
+        jabatan: jabatan,
+        toko: toko,
+        namaLengkap: namaLengkap,
         permissions: permissions
       };
       
