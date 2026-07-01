@@ -937,31 +937,128 @@
       /* Removed min-width for general tables to let them fit on screen */
 
       th {
-        padding: 12px 14px;
-        font-size: 12px;
+        padding: 10px 8px;
+        font-size: 11px;
       }
 
       td {
-        padding: 14px 14px;
-        font-size: 14px;
+        padding: 10px 8px;
+        font-size: 13px;
       }
 
-      /* Gantt filter wrap */
-      .card-header select {
-        width: 110px !important;
+      /* === GAJI table: compact + horizontal scroll === */
+      #tab-gaji .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      #tab-gaji .table-responsive table {
+        min-width: 650px;
+        font-size: 12px;
+      }
+      #tab-gaji .table-responsive th {
+        padding: 8px 6px;
+        font-size: 10px;
+      }
+      #tab-gaji .table-responsive td {
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+      #tab-gaji .table-responsive input[type="number"] {
+        width: 50px !important;
+        padding: 4px !important;
+        font-size: 12px !important;
+      }
+
+      /* === GAJI card-header — stack vertically === */
+      #tab-gaji .card-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 10px;
+      }
+      #tab-gaji .card-header > div:last-child {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      #tab-gaji .card-header select {
+        flex: 1;
+        min-width: 80px;
+        width: auto !important;
+      }
+      #tab-gaji .card-header .btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      /* Info banner gaji — font smaller */
+      #tab-gaji > div:first-child {
+        font-size: 11px !important;
+        padding: 10px 12px !important;
+      }
+
+      /* === PELANGGARAN Log: filter bar stack === */
+      #subContent-pelanggaran-log > div:first-child {
+        flex-direction: column !important;
+        gap: 8px !important;
+      }
+      #subContent-pelanggaran-log > div:first-child input,
+      #subContent-pelanggaran-log > div:first-child select {
+        width: 100% !important;
+      }
+      /* Pelanggaran log table: compact + scroll */
+      #subContent-pelanggaran-log .table-responsive table {
+        min-width: 550px;
         font-size: 12px;
       }
 
-      /* Sub-tabs compact */
-      .sub-tab {
-        padding: 14px 14px;
-        font-size: 14px;
+      /* === CUTI gantt — scrollable === */
+      .gantt-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      /* Cuti filter header — wrap */
+      #tab-cuti .card-header > div:last-child {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+        width: 100%;
+      }
+      #tab-cuti .card-header select {
+        flex: 1;
+        min-width: 80px;
+        width: auto !important;
+      }
+      #tab-cuti .card-header .btn {
+        flex: 1;
+        text-align: center;
+        justify-content: center;
       }
 
-      /* Payroll table min-width larger because many cols */
-      #payrollTableBody tr td:first-child {
-        min-width: 110px;
+      /* === TIP KACA: filter stack + compact table === */
+      #tab-tipkaca .card > div:first-child > div:first-child {
+        flex-direction: column !important;
+        gap: 8px !important;
       }
+      #tab-tipkaca .card > div:first-child > div:last-child {
+        flex-direction: column !important;
+        gap: 6px !important;
+      }
+      #tab-tipkaca .card > div:first-child select {
+        width: 100% !important;
+      }
+      #tab-tipkaca .table-responsive table {
+        min-width: 480px;
+        font-size: 12px;
+      }
+
+
+
+      /* Sub-tabs compact */
+      .sub-tab {
+        padding: 12px 12px;
+        font-size: 13px;
+      }
+
 
       /* Modal full-screen on mobile */
       .modal-overlay {
