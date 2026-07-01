@@ -1004,7 +1004,7 @@
         padding: 10px 12px !important;
       }
 
-      /* === PELANGGARAN Log: hide Bagian + Tempat + Staf cols === */
+      /* === PELANGGARAN Log: hide cols for mobile fit === */
       #subContent-pelanggaran-log > div:first-child {
         flex-direction: column !important;
         gap: 8px !important;
@@ -1013,7 +1013,9 @@
       #subContent-pelanggaran-log > div:first-child select {
         width: 100% !important;
       }
-      /* Hide Bagian (col 3), Tempat (col 6), Staf (col 7) */
+      /* Hide Waktu(1), Bagian(3), Tempat(6), Staf(7) → remaining: Nama(2), Pelanggaran(4), Poin(5), Aksi(8) */
+      #subContent-pelanggaran-log table th:nth-child(1),
+      #subContent-pelanggaran-log table td:nth-child(1),
       #subContent-pelanggaran-log table th:nth-child(3),
       #subContent-pelanggaran-log table td:nth-child(3),
       #subContent-pelanggaran-log table th:nth-child(6),
@@ -1021,6 +1023,24 @@
       #subContent-pelanggaran-log table th:nth-child(7),
       #subContent-pelanggaran-log table td:nth-child(7) {
         display: none;
+      }
+      /* Truncate long jenis pelanggaran text */
+      #subContent-pelanggaran-log table td:nth-child(4) {
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      /* Poin column center + compact */
+      #subContent-pelanggaran-log table th:nth-child(5),
+      #subContent-pelanggaran-log table td:nth-child(5) {
+        text-align: center;
+        width: 40px;
+      }
+      /* Table fits screen */
+      #subContent-pelanggaran-log .table-responsive table {
+        min-width: 0;
+        width: 100%;
       }
 
       /* === CUTI gantt — scrollable === */
@@ -3791,7 +3811,32 @@
       return n;
     }
 
+    // Nama panjang khusus untuk slip gaji saja
+    const SLIP_NAMA_MAP = [
+      { kata: ['nurhadi', 'nur'],              namaLengkap: 'Nurhadi Prasetya' },
+      { kata: ['agus'],                        namaLengkap: 'Agus Prakoso' },
+      { kata: ['wiba'],                        namaLengkap: 'Wiba Sepdioko' },
+      { kata: ['ariyan', 'riyan'],             namaLengkap: 'Ariyan Muhammad' },
+      { kata: ['irfan', 'ulin', 'ulinnuha'],   namaLengkap: 'Irfan Ulinnuha' },
+      { kata: ['hiba'],                        namaLengkap: 'Hiba Ali Syahbana' },
+      { kata: ['alip'],                        namaLengkap: 'Alip Rejeki' },
+      { kata: ['kahf', 'kahfi', 'shirojul'],   namaLengkap: 'Muhammad Shirojul Kahfi' },
+      { kata: ['irvan'],                       namaLengkap: 'Muhammad Irvan' },
+      { kata: ['lailur', 'rohman', 'lailurrohman'], namaLengkap: 'Muhammad Lailurrohman' },
+    ];
+    function getFullNameForSlip(nama) {
+      if (!nama) return nama;
+      const n = nama.toLowerCase().trim();
+      for (const entry of SLIP_NAMA_MAP) {
+        if (entry.kata.some(k => n.includes(k))) return entry.namaLengkap;
+      }
+      return nama; // fallback: nama asli
+    }
+
     function openSlipModal(nama, bagian, fM, fY, absen, kaliTerlambat, bagianVal, hadiah, tip, berkeluarga, pengurangan, gajiBulanIni, total, pembulatan, pelanggaranList = [], insentifCuti = 0) {
+      // Gunakan nama panjang hanya untuk slip
+      const namaSlip = getFullNameForSlip(nama);
+
       const fMName = mNames[parseInt(fM) - 1];
       const romanMonths = ['I','II','III','IV','V','VI','VII','VIII','IX','X','XI','XII'];
       const fMRoman = romanMonths[parseInt(fM)-1];
@@ -3823,7 +3868,7 @@
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${nama}</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${namaSlip}</td></tr>
             </table>
             
             <br>
@@ -3958,6 +4003,8 @@
         
         const pageBreak = index < activeKaryawan.length - 1 ? 'page-break-after: always;' : '';
 
+        const fullNameSlip = getFullNameForSlip(k.nama);
+        
         allSlipsHtml += `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff; ${pageBreak}">
           <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
@@ -3974,7 +4021,7 @@
             
             <div style="text-align: left; margin-top: 20px;">Menerangkan dengan sebenar-benarnya bahwa:</div>
             <table style="width: 100%; font-size: 15px; border: none; margin-bottom: 10px; margin-top: 10px; text-align: left;">
-              <tr><td style="width: 250px;">Nama</td><td>: ${k.nama}</td></tr>
+              <tr><td style="width: 250px;">Nama</td><td>: ${fullNameSlip}</td></tr>
             </table>
             
             <br>
