@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>KUK HR Portal</title>
   <link rel="manifest" href="../manifest.json">
   <meta name="theme-color" content="#2563eb">
@@ -50,11 +50,12 @@
       font-family: 'Outfit', sans-serif;
     }
 
-    body {
+    html, body {
       background-color: var(--bg);
       color: var(--text);
       min-height: 100vh;
       overflow-x: hidden;
+      width: 100vw;
     }
 
     /* TOAST */
@@ -762,6 +763,8 @@
     .sub-tabs {
       display: flex;
       border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      white-space: nowrap;
     }
 
     .sub-tab {
@@ -1001,10 +1004,16 @@
         padding: 4px 0;
         padding-bottom: env(safe-area-inset-bottom, 4px);
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+        overflow-x: auto;
+      }
+
+      .mobile-nav::-webkit-scrollbar {
+        display: none;
       }
 
       .mobile-nav-item {
-        flex: 1;
+        flex: 1 0 auto;
+        min-width: 60px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -1748,6 +1757,15 @@
         </svg>
         <span>Tip Kaca</span>
       </div>
+      <div class="mobile-nav-item" id="mn-users" onclick="syncMobileNav('users'); navigateMobile('users')" style="display: none;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Users</span>
+      </div>
     </nav>
   </div>
 
@@ -2356,6 +2374,16 @@
           }
         }
       });
+
+      // Update mobile nav for 'users'
+      const mobileNavUsers = document.getElementById('mn-users');
+      if (mobileNavUsers) {
+        if (!perms.includes('users')) {
+          mobileNavUsers.style.display = 'none';
+        } else {
+          mobileNavUsers.style.display = 'flex';
+        }
+      }
 
       syncDataAll();
     }
