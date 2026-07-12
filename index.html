@@ -517,16 +517,23 @@
 
     function getUsersDB() {
       const stored = localStorage.getItem('kuk_users_db');
+      let result;
       if (stored) {
-        return JSON.parse(stored);
+        try { result = JSON.parse(stored); } catch(e) { result = DEFAULT_USERS; }
       } else {
-        const migrated = DEFAULT_USERS.map(u => {
+        result = DEFAULT_USERS.map(u => {
           const oldPass = localStorage.getItem('kuk_pass_' + u.username);
           if (oldPass) u.password = oldPass;
           return u;
         });
-        return migrated;
       }
+      // Pastikan semua user memiliki permission peminjaman dan peminjaman_admin
+      result.forEach(u => {
+        u.permissions = u.permissions || [];
+        if (!u.permissions.includes('peminjaman')) u.permissions.push('peminjaman');
+        if (!u.permissions.includes('peminjaman_admin')) u.permissions.push('peminjaman_admin');
+      });
+      return result;
     }
 
     function initUserDropdown() {
@@ -634,7 +641,8 @@
       for (let key in menuMap) {
         const el = document.getElementById(menuMap[key]);
         if (el) {
-          el.style.display = perms.includes(key) ? 'flex' : 'none';
+          const alwaysShow = (key === 'peminjaman' || key === 'peminjaman_admin');
+          el.style.display = (alwaysShow || perms.includes(key)) ? 'flex' : 'none';
         }
       }
 
