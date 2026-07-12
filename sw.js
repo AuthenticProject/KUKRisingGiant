@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v12';
+const CACHE_NAME = 'kuk-hr-cache-v13';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -6,6 +6,9 @@ const STATIC_ASSETS = [
   './cuti.html',
   './pelanggaran.html',
   './tip.html',
+  './peminjaman.html',
+  './peminjaman_admin.html',
+  './peminjaman_db.js',
   './dashboard/',
   './dashboard/index.html',
   './manifest.json',

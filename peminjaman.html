@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Form Peminjaman Kendaraan - KUK HR Portal</title>
+  <meta name="theme-color" content="#0f172a">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #273549;
+      --surface-card: rgba(30, 41, 59, 0.82);
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --primary-glow: rgba(59, 130, 246, 0.35);
+      --accent: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.1);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Outfit', sans-serif; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 30px 20px 80px;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glow Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -150px; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 500px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 640px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      background: rgba(30, 41, 59, 0.65);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      padding: 16px 22px;
+      border-radius: 20px;
+    }
+    .top-nav .brand-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .top-nav .brand-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #06b6d4);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px;
+      box-shadow: 0 8px 20px var(--primary-glow);
+    }
+    .top-nav h1 {
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .top-nav p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .btn-nav {
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+    .btn-nav:hover {
+      background: var(--surface-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Card Form Panel */
+    .panel {
+      background: var(--surface-card);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .panel-header h2 {
+      font-size: 19px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+    @media (max-width: 520px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .panel { padding: 22px; }
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+    input[type="text"],
+    input[type="tel"],
+    input[type="datetime-local"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 14px 16px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      background: rgba(15, 23, 42, 0.95);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 95px;
+    }
+    select {
+      cursor: pointer;
+    }
+    select option {
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 8px;
+    }
+    select option:disabled {
+      color: #f87171;
+      font-style: italic;
+    }
+
+    /* Submit Button */
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: #ffffff;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      margin-top: 6px;
+    }
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(59, 130, 246, 0.55);
+    }
+    .btn-submit:disabled {
+      background: #334155;
+      color: #94a3b8;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    /* Toast Notification */
+    .toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 14px 22px;
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      border: 1px solid var(--border);
+      border-left: 5px solid var(--primary);
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    .toast.success { border-left-color: var(--success); }
+    .toast.error { border-left-color: var(--danger); }
+    @keyframes toastIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="container">
+    <!-- Top Navigation -->
+    <header class="top-nav">
+      <div class="brand-info">
+        <div class="brand-icon">🚘</div>
+        <div>
+          <h1>Pengajuan Peminjaman Kendaraan</h1>
+          <p>KUK HR Portal &bull; Internal Operasional</p>
+        </div>
+      </div>
+      <div>
+        <a href="index.html" class="btn-nav">
+          <span>← Kembali ke Portal</span>
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Card Form -->
+    <div class="panel">
+      <div class="panel-header">
+        <h2>📝 Form Input Peminjaman Kendaraan</h2>
+        <span style="font-size: 12px; color: #34d399; font-weight: 600;">● Online</span>
+      </div>
+
+      <form id="formPeminjaman" onsubmit="handleAjukanPeminjaman(event)">
+        <div class="form-grid">
+          <!-- Nama Peminjam -->
+          <div class="form-group">
+            <label class="form-label">Nama Peminjam *</label>
+            <input type="text" id="inNama" placeholder="Contoh: Fariz Akbar" required>
+          </div>
+
+          <!-- Divisi / Instansi -->
+          <div class="form-group">
+            <label class="form-label">Divisi / Instansi *</label>
+            <input type="text" id="inDivisi" placeholder="Contoh: Logistik & Gudang" required>
+          </div>
+
+          <!-- Kontak / No. HP -->
+          <div class="form-group">
+            <label class="form-label">Kontak / No. HP *</label>
+            <input type="tel" id="inKontak" placeholder="Contoh: 081234567890" required>
+          </div>
+
+          <!-- Pilih Kendaraan -->
+          <div class="form-group">
+            <label class="form-label">Pilih Kendaraan *</label>
+            <select id="inKendaraan" required>
+              <option value="" disabled selected>Memuat pilihan kendaraan...</option>
+            </select>
+          </div>
+
+          <!-- Tanggal & Jam Mulai Pinjam -->
+          <div class="form-group">
+            <label class="form-label">Tgl & Jam Mulai Pinjam *</label>
+            <input type="datetime-local" id="inMulai" required>
+          </div>
+
+          <!-- Tanggal & Jam Rencana Kembali -->
+          <div class="form-group">
+            <label class="form-label">Tgl & Jam Rencana Kembali *</label>
+            <input type="datetime-local" id="inKembali" required>
+          </div>
+
+          <!-- Keperluan / Tujuan -->
+          <div class="form-group full">
+            <label class="form-label">Keperluan / Tujuan Peminjaman *</label>
+            <textarea id="inKeperluan" placeholder="Jelaskan keperluan operasional/tujuan pengiriman secara spesifik..." required></textarea>
+          </div>
+
+          <!-- Tombol Ajukan -->
+          <div class="form-group full">
+            <button type="submit" class="btn-submit" id="btnSubmit">
+              <span>Ajukan Peminjaman</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="peminjaman_db.js"></script>
+  <script>
+    function showToast(message, type = 'success') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = (type === 'success' ? '✓ ' : '⚠️ ') + message;
+      c.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(100%)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    function loadUserData() {
+      const user = sessionStorage.getItem('kuk_user');
+      if (user) {
+        document.getElementById('inNama').value = user.toUpperCase();
+      }
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      const localNow = new Date(now - offset).toISOString().slice(0, 16);
+      document.getElementById('inMulai').value = localNow;
+
+      const returnTime = new Date(now.getTime() + 4 * 3600 * 1000);
+      const localReturn = new Date(returnTime - offset).toISOString().slice(0, 16);
+      document.getElementById('inKembali').value = localReturn;
+    }
+
+    // Render dropdown kendaraan (L300, Engkel, Viar, Forklift)
+    // Jika sedang dipinjam, diberi keterangan & tidak bisa dipilih
+    function renderKendaraanDropdown() {
+      const list = PeminjamanDB.getKendaraanList();
+      const select = document.getElementById('inKendaraan');
+
+      select.innerHTML = '<option value="" disabled selected>-- Pilih Kendaraan --</option>';
+
+      list.forEach(item => {
+        const sedangDipinjam = PeminjamanDB.isKendaraanDipinjam(item.id);
+
+        const opt = document.createElement('option');
+        opt.value = item.id;
+
+        if (sedangDipinjam) {
+          opt.textContent = `${item.nama} - (Sedang Dipinjam)`;
+          opt.disabled = true;
+        } else {
+          opt.textContent = `${item.nama}`;
+        }
+
+        select.appendChild(opt);
+      });
+    }
+
+    function handleAjukanPeminjaman(e) {
+      e.preventDefault();
+
+      const nama = document.getElementById('inNama').value;
+      const divisi = document.getElementById('inDivisi').value;
+      const kontak = document.getElementById('inKontak').value;
+      const kendaraanId = document.getElementById('inKendaraan').value;
+      const waktuMulai = document.getElementById('inMulai').value;
+      const waktuRencanaKembali = document.getElementById('inKembali').value;
+      const keperluan = document.getElementById('inKeperluan').value;
+
+      if (!kendaraanId) {
+        return showToast('Silakan pilih kendaraan yang tersedia.', 'error');
+      }
+
+      if (new Date(waktuRencanaKembali) < new Date(waktuMulai)) {
+        return showToast('Waktu rencana kembali tidak boleh lebih awal dari waktu mulai.', 'error');
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerHTML = `<span>Memproses Peminjaman...</span>`;
+
+      setTimeout(() => {
+        const saved = PeminjamanDB.savePeminjaman({
+          namaPeminjam: nama,
+          divisi: divisi,
+          kontak: kontak,
+          kendaraanId: kendaraanId,
+          waktuMulai: waktuMulai,
+          waktuRencanaKembali: waktuRencanaKembali,
+          keperluan: keperluan
+        });
+
+        showToast(`Berhasil! Peminjaman untuk ${saved.namaKendaraan} berhasil diajukan.`, 'success');
+
+        document.getElementById('inKeperluan').value = '';
+        btn.disabled = false;
+        btn.innerHTML = `
+          <span>Ajukan Peminjaman</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        `;
+
+        renderKendaraanDropdown();
+      }, 400);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadUserData();
+      renderKendaraanDropdown();
+    });
+  </script>
+</body>
+</html>
