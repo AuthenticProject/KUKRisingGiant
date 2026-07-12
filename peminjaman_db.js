@@ -215,6 +215,33 @@ const PeminjamanDB = (() => {
     return list.find(k => k.id === id) || null;
   }
 
+  function saveKendaraan(data) {
+    let list = getKendaraanList();
+    const existingIdx = list.findIndex(k => k.id === data.id);
+    if (existingIdx >= 0) {
+      list[existingIdx] = { ...list[existingIdx], ...data };
+    } else {
+      list.push({
+        id: data.id || ('KND-' + Date.now()),
+        nama: data.nama || 'Kendaraan Baru',
+        plat: data.plat || '-',
+        jenis: data.jenis || 'Operasional',
+        icon: data.icon || '🚗',
+        qrCode: data.qrCode || '',
+        status: 'Tersedia'
+      });
+    }
+    localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+    return list;
+  }
+
+  function deleteKendaraan(id) {
+    let list = getKendaraanList();
+    list = list.filter(k => k.id !== id);
+    localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+    return list;
+  }
+
   // Cek apakah kendaraan sedang aktif dipinjam
   function isKendaraanDipinjam(kendaraanId) {
     const pinjamList = getPeminjamanList();
@@ -341,6 +368,8 @@ const PeminjamanDB = (() => {
     getDaftarKamar: () => DAFTAR_KAMAR,
     getKendaraanList,
     getKendaraanById,
+    saveKendaraan,
+    deleteKendaraan,
     isKendaraanDipinjam,
     getPeminjamanList,
     getAllPeminjaman: getPeminjamanList,

@@ -1313,7 +1313,7 @@
             <path d="M9 17h6"/>
             <circle cx="17" cy="17" r="2"/>
           </svg>
-          <span>Peminjaman Kendaraan</span>
+          <span>Kendaraan</span>
         </div>
         <div class="menu-item" id="nav-users" onclick="navigate('users', this)" style="display:none;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1878,8 +1878,9 @@
 
         <div class="card">
           <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
-            <div class="card-title">🚘 Rekapan & Manajemen Peminjaman Kendaraan</div>
+            <div class="card-title">🚘 Rekapan & Manajemen Kendaraan</div>
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <button class="btn btn-primary btn-sm" onclick="openKendaraanManagerModal()">🛠️ Kelola Armada Kendaraan</button>
               <input type="text" id="pmSearchInput" placeholder="Cari nama, plat, divisi..." oninput="renderPeminjamanTable()"
                 style="width: 200px; padding: 8px 12px; font-size:13px;">
               <button class="btn btn-outline btn-sm" onclick="refreshPeminjamanCloud()">🔄 Refresh</button>
@@ -2548,6 +2549,76 @@
     </div>
   </div>
 
+  <!-- MODAL: MANAJEMEN ARMADA KENDARAAN -->
+  <div class="modal-overlay" id="kendaraanManagerModal">
+    <div class="modal-container" style="max-width: 680px;">
+      <div class="modal-header">
+        <h3>🚘 Pengaturan Armada Kendaraan</h3>
+        <button class="btn-link" onclick="closeModal('kendaraanManagerModal')">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 20px;">
+        <!-- Form Tambah / Edit Kendaraan -->
+        <div style="background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+          <h4 id="kndFormTitle" style="margin: 0 0 12px 0; font-size: 15px; color: var(--primary);">➕ Tambah / Edit Kendaraan</h4>
+          <input type="hidden" id="kndEditId">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label>Nama Kendaraan *</label>
+              <input type="text" id="kndNama" placeholder="Contoh: Mitsubishi L300">
+            </div>
+            <div class="form-group">
+              <label>Plat Nomor *</label>
+              <input type="text" id="kndPlat" placeholder="Contoh: L300 / B 1234 KUK">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label>ID / Barcode SPBU Pertamina</label>
+              <input type="text" id="kndQrCode" placeholder="Contoh: MYP-KUK-L300-2026">
+            </div>
+            <div class="form-group">
+              <label>Ikon / Jenis</label>
+              <select id="kndIcon">
+                <option value="🚚">🚚 Pick Up / Truk Logistik</option>
+                <option value="🚛">🚛 Truk Engkel / Muatan</option>
+                <option value="🛺">🛺 Viar Roda Tiga</option>
+                <option value="🏗️">🏗️ Forklift / Alat Berat</option>
+                <option value="🚗">🚗 Mobil Operasional</option>
+                <option value="🏍️">🏍️ Sepeda Motor</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 10px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="resetKendaraanForm()">Batal</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="simpanKendaraanMod()">💾 Simpan Kendaraan</button>
+          </div>
+        </div>
+
+        <!-- Tabel Kendaraan -->
+        <h4 style="margin: 0 0 10px 0; font-size: 15px;">Daftar Kendaraan Operasional</h4>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Kendaraan</th>
+                <th>Plat Nomor</th>
+                <th>Barcode Pertamina</th>
+                <th>Status</th>
+                <th style="text-align:center;">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="kndManagerTableBody">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('kendaraanManagerModal')">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: SURAT PERINGATAN (SP) -->
   <div class="modal-overlay" id="spModal">
     <div class="modal-container" style="max-width:680px;">
@@ -2857,7 +2928,7 @@
       'pelanggaran': 'Pelanggaran',
       'gaji': 'Gaji / Payroll',
       'tipkaca': 'Tip Pemotongan Kaca',
-      'peminjaman': 'Peminjaman Kendaraan',
+      'peminjaman': 'Kendaraan',
       'users': 'Manajemen Pengguna'
     };
 
@@ -5580,6 +5651,101 @@
       }
       localStorage.setItem('v12_dash_migrated', 'true');
       setTimeout(() => window.location.reload(true), 1500);
+    }
+
+    // --- MANAJEMEN ARMADA KENDARAAN ---
+    function openKendaraanManagerModal() {
+      resetKendaraanForm();
+      renderKendaraanManagerList();
+      openModal('kendaraanManagerModal');
+    }
+
+    function resetKendaraanForm() {
+      document.getElementById('kndEditId').value = '';
+      document.getElementById('kndNama').value = '';
+      document.getElementById('kndPlat').value = '';
+      document.getElementById('kndQrCode').value = '';
+      document.getElementById('kndIcon').value = '🚚';
+      document.getElementById('kndFormTitle').textContent = '➕ Tambah Kendaraan Baru';
+    }
+
+    function renderKendaraanManagerList() {
+      const tbody = document.getElementById('kndManagerTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      const list = typeof PeminjamanService !== 'undefined' ? PeminjamanService.getKendaraanList() : [];
+      if (list.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--text-muted);">Belum ada data armada kendaraan.</td></tr>';
+        return;
+      }
+
+      list.forEach(k => {
+        const isPinjam = typeof PeminjamanService !== 'undefined' && PeminjamanService.isKendaraanDipinjam(k.id);
+        const statusBadge = isPinjam 
+          ? '<span style="background:#ef4444; color:#fff; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">Sedang Dipinjam</span>'
+          : '<span style="background:#10b981; color:#fff; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">Tersedia</span>';
+
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${k.icon || '🚗'} ${k.nama}</strong></td>
+            <td><span style="background:#e2e8f0; padding:2px 8px; border-radius:6px; font-weight:600;">${k.plat || '-'}</span></td>
+            <td><code style="font-size:12px; color:var(--primary);">${k.qrCode || 'MYP-KUK-' + (k.plat||'SUBSIDI').toUpperCase()}</code></td>
+            <td>${statusBadge}</td>
+            <td style="text-align:center;">
+              <button class="btn btn-outline btn-sm" onclick="editKendaraanMod('${k.id}')" style="padding:4px 8px;">✏️ Edit</button>
+              <button class="btn btn-outline btn-sm" onclick="hapusKendaraanMod('${k.id}')" style="padding:4px 8px; color:#ef4444; border-color:#fca5a5;">🗑️ Hapus</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function editKendaraanMod(id) {
+      const k = typeof PeminjamanService !== 'undefined' ? PeminjamanService.getKendaraanById(id) : null;
+      if (!k) return;
+      document.getElementById('kndEditId').value = k.id;
+      document.getElementById('kndNama').value = k.nama || '';
+      document.getElementById('kndPlat').value = k.plat || '';
+      document.getElementById('kndQrCode').value = k.qrCode || '';
+      document.getElementById('kndIcon').value = k.icon || '🚚';
+      document.getElementById('kndFormTitle').textContent = '✏️ Edit Kendaraan: ' + k.nama;
+    }
+
+    function simpanKendaraanMod() {
+      const id = document.getElementById('kndEditId').value;
+      const nama = document.getElementById('kndNama').value.trim();
+      const plat = document.getElementById('kndPlat').value.trim();
+      const qrCode = document.getElementById('kndQrCode').value.trim();
+      const icon = document.getElementById('kndIcon').value;
+
+      if (!nama || !plat) {
+        return showToast('Nama Kendaraan dan Plat Nomor wajib diisi!', 'error');
+      }
+
+      if (typeof PeminjamanService !== 'undefined' && PeminjamanService.saveKendaraan) {
+        PeminjamanService.saveKendaraan({
+          id: id || undefined,
+          nama: nama,
+          plat: plat,
+          qrCode: qrCode || ('MYP-KUK-' + plat.toUpperCase()),
+          icon: icon
+        });
+        showToast('Armada kendaraan berhasil disimpan!', 'success');
+        resetKendaraanForm();
+        renderKendaraanManagerList();
+      } else {
+        showToast('Modul PeminjamanService belum siap.', 'error');
+      }
+    }
+
+    function hapusKendaraanMod(id) {
+      if (!confirm('Yakin ingin menghapus kendaraan ini dari daftar armada?')) return;
+      if (typeof PeminjamanService !== 'undefined' && PeminjamanService.deleteKendaraan) {
+        PeminjamanService.deleteKendaraan(id);
+        showToast('Kendaraan berhasil dihapus.', 'success');
+        renderKendaraanManagerList();
+      }
     }
   </script>
 </body>
