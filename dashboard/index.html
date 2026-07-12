@@ -2880,7 +2880,11 @@
       } else if (tabId === 'tipkaca') {
         renderTipKaca();
       } else if (tabId === 'peminjaman') {
-        renderPeminjamanTable();
+        if (typeof PeminjamanService !== 'undefined' && PeminjamanService.syncFromCloud) {
+          PeminjamanService.syncFromCloud().then(() => renderPeminjamanTable(null, true));
+        } else {
+          renderPeminjamanTable();
+        }
       } else if (tabId === 'users') {
         renderUserTable();
       }
@@ -2897,7 +2901,13 @@
       if (tabId === 'absen') { renderAbsenLogger(); renderRekapBulanan(); }
       else if (tabId === 'gaji') { calculatePayroll(); }
       else if (tabId === 'tipkaca') { renderTipKaca(); }
-      else if (tabId === 'peminjaman') { renderPeminjamanTable(); }
+      else if (tabId === 'peminjaman') {
+        if (typeof PeminjamanService !== 'undefined' && PeminjamanService.syncFromCloud) {
+          PeminjamanService.syncFromCloud().then(() => renderPeminjamanTable(null, true));
+        } else {
+          renderPeminjamanTable();
+        }
+      }
       else if (tabId === 'users') { renderUserTable(); }
     }
 
@@ -2939,6 +2949,9 @@
           rawAbsenData = filterDataByRole(absenRes.data || [], tempKaryawan);
           rawTipsData = filterDataByRole(dashRes.tips || [], tempKaryawan);
           rawUsersData = dashRes.users || [];
+          if (dashRes.peminjaman && Array.isArray(dashRes.peminjaman) && dashRes.peminjaman.length > 0) {
+            localStorage.setItem('kuk_peminjaman_db', JSON.stringify(dashRes.peminjaman));
+          }
 
           // Refresh sessionStorage dengan data user terbaru dari cloud
           const currentLoggedUser = sessionStorage.getItem('kuk_user');

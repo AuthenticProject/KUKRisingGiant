@@ -43,6 +43,9 @@ function doGet(e) {
   if (action === 'rekapAbsen') {
     return getRekapAbsen(ss);
   }
+  if (action === 'getPeminjaman') {
+    return getPeminjamanData(ss);
+  }
 
   return jsonResponse({ error: 'Action tidak valid.' });
 }
@@ -115,6 +118,12 @@ function doPost(e) {
       return handleSaveUser(ss, payload);
     } else if (action === 'delete_user') {
       return handleDeleteUser(ss, payload);
+    } else if (action === 'save_peminjaman') {
+      return handleSavePeminjaman(ss, payload);
+    } else if (action === 'update_status_peminjaman') {
+      return handleUpdateStatusPeminjaman(ss, payload);
+    } else if (action === 'laporkan_kerusakan_peminjaman') {
+      return handleLaporkanKerusakanPeminjaman(ss, payload);
     }
 
     return jsonResponse({ result: 'error', message: 'Unknown Action' });
@@ -519,10 +528,10 @@ function getDashboardData(ss) {
   // Ambil data tip kaca
   const tips = getTipKacaData(ss);
   
-  // Ambil data users
-  const users = getUsersData(ss);
+  // Ambil data peminjaman
+  const peminjaman = getPeminjamanRaw(ss);
   
-  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips, users: users };
+  return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips, users: users, peminjaman: peminjaman };
 }
 
 function jsonResponse(obj) {
@@ -1238,5 +1247,163 @@ function handleDeleteTip(ss, payload) {
     }
   } catch (error) {
     return jsonResponse({ result: 'error', message: 'Error: ' + error.toString() });
+  }
+}
+
+// ================================================================
+// SISTEM PEMINJAMAN KENDARAAN (BACKEND SHEET)
+// ================================================================
+function getOrCreatePeminjamanSheet(ss) {
+  let sheet = ss.getSheetByName("Peminjaman Kendaraan");
+  if (!sheet) {
+    sheet = ss.insertSheet("Peminjaman Kendaraan");
+    sheet.appendRow([
+      "ID Peminjaman",
+      "Nama Peminjam",
+      "Kamar / Divisi",
+      "Kontak",
+      "ID Kendaraan",
+      "Nama Kendaraan",
+      "Plat Nomor",
+      "Waktu Mulai",
+      "Waktu Rencana Kembali",
+      "Waktu Aktual Kembali",
+      "Keperluan",
+      "Status",
+      "Kerusakan Detail",
+      "Biaya Perbaikan",
+      "Created At"
+    ]);
+    const headerRange = sheet.getRange("A1:O1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#e0f2fe");
+    sheet.setFrozenRows(1);
+    sheet.autoResizeColumns(1, 15);
+  }
+  return sheet;
+}
+
+function getPeminjamanRaw(ss) {
+  try {
+    const sheet = getOrCreatePeminjamanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+    
+    const values = sheet.getRange(2, 1, lastRow - 1, 15).getValues();
+    const result = [];
+    const tz = Session.getScriptTimeZone();
+    
+    for (let i = values.length - 1; i >= 0; i--) {
+      const row = values[i];
+      if (!row[0]) continue;
+      
+      result.push({
+        id: String(row[0]),
+        namaPeminjam: String(row[1] || ''),
+        kamar: String(row[2] || ''),
+        divisi: String(row[2] || ''),
+        kontak: String(row[3] || ''),
+        kendaraanId: String(row[4] || ''),
+        namaKendaraan: String(row[5] || ''),
+        kendaraanNama: String(row[5] || ''),
+        platKendaraan: String(row[6] || ''),
+        platNomor: String(row[6] || ''),
+        waktuMulai: String(row[7] || ''),
+        waktuRencanaKembali: String(row[8] || ''),
+        waktuKembali: String(row[8] || ''),
+        waktuAktualKembali: row[9] ? String(row[9]) : null,
+        keperluan: String(row[10] || ''),
+        status: String(row[11] || 'Aktif/Dipinjam'),
+        kerusakanDetail: row[12] ? String(row[12]) : null,
+        kerusakan: row[12] ? String(row[12]) : null,
+        biayaPerbaikan: Number(row[13]) || 0,
+        createdAt: row[14] ? String(row[14]) : ''
+      });
+    }
+    return result;
+  } catch (e) {
+    Logger.log("Error getPeminjamanRaw: " + e.toString());
+    return [];
+  }
+}
+
+function getPeminjamanData(ss) {
+  return jsonResponse({
+    result: 'success',
+    data: getPeminjamanRaw(ss)
+  });
+}
+
+function handleSavePeminjaman(ss, payload) {
+  try {
+    const rec = payload.record || payload;
+    if (!rec || !rec.namaPeminjam) {
+      return jsonResponse({ result: 'error', message: 'Data peminjaman tidak valid.' });
+    }
+    const sheet = getOrCreatePeminjamanSheet(ss);
+    sheet.appendRow([
+      rec.id || ('PINJAM-' + Date.now()),
+      rec.namaPeminjam || '',
+      rec.kamar || rec.divisi || '',
+      rec.kontak || '',
+      rec.kendaraanId || '',
+      rec.namaKendaraan || rec.kendaraanNama || '',
+      rec.platKendaraan || rec.platNomor || '',
+      rec.waktuMulai || '',
+      rec.waktuRencanaKembali || rec.waktuKembali || '',
+      rec.waktuAktualKembali || '',
+      rec.keperluan || '',
+      rec.status || 'Aktif/Dipinjam',
+      rec.kerusakanDetail || rec.kerusakan || '',
+      rec.biayaPerbaikan || 0,
+      rec.createdAt || new Date().toISOString()
+    ]);
+    return jsonResponse({ result: 'success', message: 'Peminjaman berhasil dicatat di cloud.' });
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: error.toString() });
+  }
+}
+
+function handleUpdateStatusPeminjaman(ss, payload) {
+  try {
+    const { id, status, waktuAktualKembali } = payload;
+    const sheet = getOrCreatePeminjamanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return jsonResponse({ result: 'error', message: 'Data kosong.' });
+    
+    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(id)) {
+        sheet.getRange(i + 2, 12).setValue(status || 'Selesai');
+        if (waktuAktualKembali) {
+          sheet.getRange(i + 2, 10).setValue(waktuAktualKembali);
+        }
+        return jsonResponse({ result: 'success' });
+      }
+    }
+    return jsonResponse({ result: 'error', message: 'ID tidak ditemukan.' });
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: error.toString() });
+  }
+}
+
+function handleLaporkanKerusakanPeminjaman(ss, payload) {
+  try {
+    const { id, kerusakanDetail, biayaPerbaikan } = payload;
+    const sheet = getOrCreatePeminjamanSheet(ss);
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return jsonResponse({ result: 'error', message: 'Data kosong.' });
+    
+    const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (let i = 0; i < ids.length; i++) {
+      if (String(ids[i][0]) === String(id)) {
+        sheet.getRange(i + 2, 13).setValue(kerusakanDetail || '');
+        sheet.getRange(i + 2, 14).setValue(Number(biayaPerbaikan) || 0);
+        return jsonResponse({ result: 'success' });
+      }
+    }
+    return jsonResponse({ result: 'error', message: 'ID tidak ditemukan.' });
+  } catch (error) {
+    return jsonResponse({ result: 'error', message: error.toString() });
   }
 }
