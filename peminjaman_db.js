@@ -228,6 +228,7 @@ const PeminjamanDB = (() => {
         jenis: data.jenis || 'Operasional',
         icon: data.icon || '🚗',
         qrCode: data.qrCode || '',
+        qrImage: data.qrImage || '',
         status: 'Tersedia'
       });
     }

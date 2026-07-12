@@ -383,7 +383,7 @@
           <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 16px 0;">
             Tunjukkan QR Code di bawah ini kepada operator SPBU Pertamina saat pengisian Solar / BBM subsidi untuk kendaraan <strong id="qrKendaraanNama" style="color:#facc15;">L300 / Engkel</strong>.
           </p>
-          <div style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+          <div id="qrBoxInner" style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
             <svg id="qrPertaminaSvg" width="180" height="180" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="29" height="29" fill="white"/>
               <path d="M2 2H9V9H2V2ZM3 3V8H8V3H3ZM4 4H7V7H4V4Z" fill="#1E293B"/>
@@ -677,13 +677,24 @@
       document.getElementById('actWaktuMulai').textContent = formatIndoDateTime(loan.waktuMulai);
       document.getElementById('actWaktuKembali').textContent = formatIndoDateTime(loan.waktuRencanaKembali || loan.waktuKembali);
 
-      // Khusus L300 & Engkel -> Tampilkan QR Pertamina
+      // Tampilkan QR Pertamina jika kendaraan memiliki gambar barcode atau merupakan L300/Engkel
       const qrBox = document.getElementById('pertaminaQrContainer');
+      const kend = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanById) ? PeminjamanDB.getKendaraanById(loan.kendaraanId) : null;
+      const qrImgData = (kend && kend.qrImage) ? kend.qrImage : ((kend && kend.qrCode && kend.qrCode.startsWith('data:image')) ? kend.qrCode : null);
       const nameUpper = kendName.toUpperCase();
-      if (nameUpper.includes('L300') || nameUpper.includes('ENGKEL')) {
+
+      if (qrImgData || nameUpper.includes('L300') || nameUpper.includes('ENGKEL')) {
         qrBox.style.display = 'block';
         document.getElementById('qrKendaraanNama').textContent = kendName;
         document.getElementById('qrPlatNomor').textContent = plat;
+        const inner = document.getElementById('qrBoxInner');
+        if (inner) {
+          if (qrImgData) {
+            inner.innerHTML = `<img src="${qrImgData}" alt="Barcode Pertamina ${plat}" style="max-width: 100%; max-height: 260px; border-radius: 8px; display: block; margin: 0 auto;">`;
+          } else {
+            inner.innerHTML = `<svg id="qrPertaminaSvg" width="180" height="180" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="29" height="29" fill="white"/><path d="M2 2H9V9H2V2ZM3 3V8H8V3H3ZM4 4H7V7H4V4Z" fill="#1E293B"/><path d="M20 2H27V9H20V2ZM21 3V8H26V3H21ZM22 4H25V7H22V4Z" fill="#1E293B"/><path d="M2 20H9V27H2V20ZM3 21V26H8V21H3ZM4 22H7V25H4V22Z" fill="#1E293B"/><path d="M11 2H13V4H11V2ZM15 2H18V3H15V2ZM11 5H14V7H11V5ZM16 4H19V6H16V4ZM2 11H5V13H2V11ZM7 11H10V14H7V11ZM12 10H17V12H12V10ZM19 11H22V13H19V11ZM24 10H27V13H24V10ZM11 14H15V17H11V14ZM17 14H20V16H17V14ZM22 15H27V17H22V15ZM11 18H14V21H11V18ZM16 18H19V20H16V18ZM21 19H25V22H21V19ZM11 23H13V27H11V23ZM15 23H19V25H15V23ZM21 24H27V27H21V24ZM14 25H18V27H14V25Z" fill="#1E293B"/></svg>`;
+          }
+        }
       } else {
         qrBox.style.display = 'none';
       }

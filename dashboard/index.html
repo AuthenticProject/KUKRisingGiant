@@ -2065,6 +2065,22 @@
           <input type="text" id="userInputNamaLengkap" placeholder="Nama yang tertera di kop surat, mis: Ari Setiawan, S.E.">
         </div>
         <div class="form-group">
+          <label>Upload Tanda Tangan (TTD Otomatis di Surat)</label>
+          <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+            <div id="userInputTtdPreview" style="width:110px; height:55px; border:1px dashed var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; background:#f8fafc; overflow:hidden;">
+              <span style="font-size:11px; color:var(--text-muted);">Belum TTD</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <label class="btn btn-outline btn-sm" style="cursor:pointer; display:inline-block; text-align:center; margin:0;">
+                📤 Upload TTD
+                <input type="file" id="userInputTtdFile" accept="image/*" style="display:none;" onchange="handleUserTtdUploadDash(event)">
+              </label>
+              <button type="button" class="btn btn-outline btn-sm" style="color:#ef4444; border-color:#fca5a5; margin:0;" onclick="clearUserTtdDash()">🗑️ Hapus TTD</button>
+            </div>
+          </div>
+          <input type="hidden" id="userInputTtd">
+        </div>
+        <div class="form-group">
           <label>Akses Menu</label>
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;" id="userPermContainer">
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="absen"> Rekap Absen</label>
@@ -2350,14 +2366,14 @@
           <div style="text-align: center; width: 220px;">
             <p style="margin: 0;">Mengetahui,</p>
             <p style="margin: 4px 0 0;">Koordinator KUK</p>
-            <div style="height: 70px;"></div>
+            <div id="pmSuratTtdKoordBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
             <p style="font-weight: bold; text-decoration: underline; margin: 0;">( Koordinator KUK )</p>
           </div>
 
           <div style="text-align: center; width: 220px;">
             <p style="margin: 0;" id="pmSuratTempatTanggal">Jakarta, 12 Juli 2026</p>
             <p style="margin: 4px 0 0;">Yang Menyatakan (Peminjam)</p>
-            <div style="height: 70px;"></div>
+            <div id="pmSuratTtdPeminjamBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
             <p style="font-weight: bold; text-decoration: underline; margin: 0;" id="pmSuratTtdNama">( Nama Peminjam )</p>
           </div>
         </div>
@@ -2573,8 +2589,21 @@
           </div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             <div class="form-group">
-              <label>ID / Barcode SPBU Pertamina</label>
-              <input type="text" id="kndQrCode" placeholder="Contoh: MYP-KUK-L300-2026">
+              <label>Upload Gambar Barcode Pertamina (QR Subsidi)</label>
+              <div style="display:flex; align-items:center; gap:10px; margin-top:4px;">
+                <div id="kndQrImagePreview" style="width:75px; height:50px; border:1px dashed var(--border); border-radius:6px; display:flex; align-items:center; justify-content:center; background:#fff; overflow:hidden;">
+                  <span style="font-size:10px; color:#94a3b8;">Belum ada</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:4px;">
+                  <label class="btn btn-primary btn-sm" style="cursor:pointer; text-align:center; padding:4px 10px;">
+                    📤 Upload Barcode
+                    <input type="file" id="kndQrImageFile" accept="image/*" style="display:none;" onchange="handleKendaraanQrUpload(event)">
+                  </label>
+                  <button type="button" class="btn btn-outline btn-sm" style="padding:2px 8px; color:#ef4444; border-color:#fca5a5; font-size:11px;" onclick="clearKendaraanQrImage()">🗑️ Hapus</button>
+                </div>
+              </div>
+              <input type="hidden" id="kndQrCode">
+              <input type="hidden" id="kndQrImage">
             </div>
             <div class="form-group">
               <label>Ikon / Jenis</label>
@@ -4317,7 +4346,8 @@
                 <td style="width: 50%;"></td>
                 <td style="width: 50%;">
                   Hormat Kami<br>
-                  ${currentUserJabatan}<br><br><br><br><br>
+                  ${currentUserJabatan}<br>
+                  ${getUserTtdImgHtml(currentUserName)}
                   ${currentUserName}
                 </td>
               </tr>
@@ -4627,12 +4657,14 @@
               <tr>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Mengetahui,<br>
-                  ${jabatanKedua} KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  ${jabatanKedua} KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br>
+                  ${getUserTtdImgHtml(namaKoordinator)}
                   <b style="font-family: 'Times New Roman', Times, serif !important;">${namaKoordinator}</b>
                 </td>
                 <td style="width: 50%; font-family: 'Times New Roman', Times, serif !important;">
                   Ponorogo, ${formattedDate}<br>
-                  HRD KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br><br><br><br><br>
+                  HRD KUK ${employeeStore === 'palen' ? 'Palen' : 'Bangunan'}<br>
+                  ${getUserTtdImgHtml(namaHrd)}
                   <b style="font-family: 'Times New Roman', Times, serif !important;">${namaHrd}</b>
                 </td>
               </tr>
@@ -5305,7 +5337,7 @@
         const tokoLabel = u.toko === 'palen' ? '🏬 KUK Palen' : u.toko === 'semua' ? '🌐 Semua Toko' : '🏗️ KUK Bangunan';
         tbody.innerHTML += `
           <tr>
-            <td><strong>${u.username}</strong><br><small style="color:var(--text-muted);">${u.namaLengkap || '-'}</small></td>
+            <td><strong>${u.username}</strong><br><small style="color:var(--text-muted);">${u.namaLengkap || '-'}</small> ${u.ttd ? '<span style="background:#10b98125; color:#10b981; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:700;">✓ TTD</span>' : ''}</td>
             <td><span style="font-size:12px;background:var(--primary-light);color:var(--primary);padding:3px 8px;border-radius:6px;font-weight:600;">${u.jabatan || '-'}</span></td>
             <td><span style="font-size:12px;color:var(--text-muted);">${tokoLabel}</span></td>
             <td style="font-size:13px; color:var(--text-muted);">${perms || 'Tidak ada akses'}</td>
@@ -5326,6 +5358,8 @@
       document.getElementById('userInputJabatan').value = '';
       document.getElementById('userInputToko').value = 'bangunan';
       document.getElementById('userInputNamaLengkap').value = '';
+      document.getElementById('userInputTtd').value = '';
+      document.getElementById('userInputTtdPreview').innerHTML = '<span style="font-size:11px; color:var(--text-muted);">Belum TTD</span>';
       document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => cb.checked = false);
       openModal('userManagementModal');
     }
@@ -5341,11 +5375,53 @@
       document.getElementById('userInputJabatan').value = u.jabatan || '';
       document.getElementById('userInputToko').value = u.toko || 'bangunan';
       document.getElementById('userInputNamaLengkap').value = u.namaLengkap || '';
+      document.getElementById('userInputTtd').value = u.ttd || '';
+      if (u.ttd) {
+        document.getElementById('userInputTtdPreview').innerHTML = `<img src="${u.ttd}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+      } else {
+        document.getElementById('userInputTtdPreview').innerHTML = '<span style="font-size:11px; color:var(--text-muted);">Belum TTD</span>';
+      }
       
       document.querySelectorAll('#userPermContainer input[type="checkbox"]').forEach(cb => {
         cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
       });
       openModal('userManagementModal');
+    }
+
+    function handleUserTtdUploadDash(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('userInputTtd').value = base64;
+        document.getElementById('userInputTtdPreview').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearUserTtdDash() {
+      const fileIn = document.getElementById('userInputTtdFile');
+      if (fileIn) fileIn.value = '';
+      document.getElementById('userInputTtd').value = '';
+      document.getElementById('userInputTtdPreview').innerHTML = '<span style="font-size:11px; color:var(--text-muted);">Belum TTD</span>';
+    }
+
+    function getUserTtdImgHtml(nameOrUsernameOrRole, customStyle = 'max-height: 60px; max-width: 140px; object-fit: contain; display: block; margin: 4px auto;') {
+      if (!nameOrUsernameOrRole) return '<div style="height:65px;"></div>';
+      const users = getUsersDB();
+      const q = String(nameOrUsernameOrRole).toLowerCase().trim();
+      const match = users.find(u => {
+        if (!u.ttd) return false;
+        const uname = String(u.username || '').toLowerCase().trim();
+        const fname = String(u.namaLengkap || '').toLowerCase().trim();
+        const role = String(u.jabatan || '').toLowerCase().trim();
+        return uname === q || fname === q || role === q || fname.includes(q) || (uname && q.includes(uname));
+      });
+      if (match && match.ttd) {
+        return `<div style="margin: 4px 0;"><img src="${match.ttd}" style="${customStyle}" alt="TTD"></div>`;
+      }
+      return '<div style="height:65px;"></div>';
     }
 
     function saveDbUser() {
@@ -5354,12 +5430,22 @@
       const jabatan = document.getElementById('userInputJabatan').value.trim();
       const toko = document.getElementById('userInputToko').value;
       const namaLengkap = document.getElementById('userInputNamaLengkap').value.trim();
+      const ttd = document.getElementById('userInputTtd').value;
       
       if (!username || !password) return showToast('Username dan kata sandi wajib diisi!', 'error');
       
       const checkboxes = document.querySelectorAll('#userPermContainer input[type="checkbox"]:checked');
       const permissions = Array.from(checkboxes).map(cb => cb.value);
       
+      let users = getUsersDB();
+      if (editingUserIndex !== null) {
+        users[editingUserIndex] = { ...users[editingUserIndex], username, password, jabatan, toko, namaLengkap, ttd, permissions };
+      } else {
+        users.push({ username, password, jabatan, toko, namaLengkap, ttd, permissions });
+      }
+      localStorage.setItem('kuk_users_db', JSON.stringify(users));
+      renderUserTable();
+
       showToast('Menyimpan data pengguna...', 'info');
       
       const payload = {
@@ -5369,6 +5455,7 @@
         jabatan: jabatan,
         toko: toko,
         namaLengkap: namaLengkap,
+        ttd: ttd,
         permissions: permissions
       };
       
@@ -5595,6 +5682,12 @@
       document.getElementById('pmSuratTempatTanggal').textContent = `Jakarta, ${now.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}`;
       document.getElementById('pmSuratTtdNama').textContent = `( ${loan.namaPeminjam} )`;
 
+      const koordBox = document.getElementById('pmSuratTtdKoordBox');
+      if (koordBox) koordBox.innerHTML = getUserTtdImgHtml('Koordinator');
+
+      const peminjamBox = document.getElementById('pmSuratTtdPeminjamBox');
+      if (peminjamBox) peminjamBox.innerHTML = getUserTtdImgHtml(loan.namaPeminjam);
+
       openModal('modalSuratPeminjaman');
     }
 
@@ -5665,8 +5758,29 @@
       document.getElementById('kndNama').value = '';
       document.getElementById('kndPlat').value = '';
       document.getElementById('kndQrCode').value = '';
+      document.getElementById('kndQrImage').value = '';
+      document.getElementById('kndQrImagePreview').innerHTML = '<span style="font-size:10px; color:#94a3b8;">Belum ada</span>';
       document.getElementById('kndIcon').value = '🚚';
       document.getElementById('kndFormTitle').textContent = '➕ Tambah Kendaraan Baru';
+    }
+
+    function handleKendaraanQrUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('kndQrImage').value = base64;
+        document.getElementById('kndQrImagePreview').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearKendaraanQrImage() {
+      const fileIn = document.getElementById('kndQrImageFile');
+      if (fileIn) fileIn.value = '';
+      document.getElementById('kndQrImage').value = '';
+      document.getElementById('kndQrImagePreview').innerHTML = '<span style="font-size:10px; color:#94a3b8;">Belum ada</span>';
     }
 
     function renderKendaraanManagerList() {
@@ -5686,11 +5800,15 @@
           ? '<span style="background:#ef4444; color:#fff; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">Sedang Dipinjam</span>'
           : '<span style="background:#10b981; color:#fff; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:700;">Tersedia</span>';
 
+        const qrPreview = k.qrImage 
+          ? `<img src="${k.qrImage}" style="max-height:42px; max-width:85px; object-fit:contain; border-radius:4px; border:1px solid #cbd5e1;">`
+          : `<code style="font-size:11px; color:var(--primary);">${k.qrCode || 'MYP-KUK-' + (k.plat||'SUBSIDI').toUpperCase()}</code>`;
+
         tbody.innerHTML += `
           <tr>
             <td><strong>${k.icon || '🚗'} ${k.nama}</strong></td>
             <td><span style="background:#e2e8f0; padding:2px 8px; border-radius:6px; font-weight:600;">${k.plat || '-'}</span></td>
-            <td><code style="font-size:12px; color:var(--primary);">${k.qrCode || 'MYP-KUK-' + (k.plat||'SUBSIDI').toUpperCase()}</code></td>
+            <td>${qrPreview}</td>
             <td>${statusBadge}</td>
             <td style="text-align:center;">
               <button class="btn btn-outline btn-sm" onclick="editKendaraanMod('${k.id}')" style="padding:4px 8px;">✏️ Edit</button>
@@ -5708,6 +5826,12 @@
       document.getElementById('kndNama').value = k.nama || '';
       document.getElementById('kndPlat').value = k.plat || '';
       document.getElementById('kndQrCode').value = k.qrCode || '';
+      document.getElementById('kndQrImage').value = k.qrImage || '';
+      if (k.qrImage) {
+        document.getElementById('kndQrImagePreview').innerHTML = `<img src="${k.qrImage}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+      } else {
+        document.getElementById('kndQrImagePreview').innerHTML = '<span style="font-size:10px; color:#94a3b8;">Belum ada</span>';
+      }
       document.getElementById('kndIcon').value = k.icon || '🚚';
       document.getElementById('kndFormTitle').textContent = '✏️ Edit Kendaraan: ' + k.nama;
     }
@@ -5717,6 +5841,7 @@
       const nama = document.getElementById('kndNama').value.trim();
       const plat = document.getElementById('kndPlat').value.trim();
       const qrCode = document.getElementById('kndQrCode').value.trim();
+      const qrImage = document.getElementById('kndQrImage').value;
       const icon = document.getElementById('kndIcon').value;
 
       if (!nama || !plat) {
@@ -5729,6 +5854,7 @@
           nama: nama,
           plat: plat,
           qrCode: qrCode || ('MYP-KUK-' + plat.toUpperCase()),
+          qrImage: qrImage,
           icon: icon
         });
         showToast('Armada kendaraan berhasil disimpan!', 'success');

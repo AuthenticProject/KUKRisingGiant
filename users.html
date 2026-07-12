@@ -124,6 +124,26 @@
         <input type="text" id="passwordInput" placeholder="Masukkan kata sandi">
       </div>
       <div class="form-group">
+        <label>Nama Lengkap (Untuk Surat)</label>
+        <input type="text" id="namaLengkapInput" placeholder="Contoh: Ari Setiawan, S.E.">
+      </div>
+      <div class="form-group">
+        <label>Upload Tanda Tangan (TTD)</label>
+        <div style="display:flex; align-items:center; gap:12px; margin-top:4px;">
+          <div id="ttdPreviewBox" style="width:110px; height:55px; border:1px dashed var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; background:#0f172a; overflow:hidden;">
+            <span style="font-size:11px; color:#94a3b8;">Belum TTD</span>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            <label class="btn btn-primary" style="cursor:pointer; font-size:12px; padding:6px 10px; text-align:center;">
+              📤 Upload TTD
+              <input type="file" id="ttdFileInput" accept="image/*" style="display:none;" onchange="handleTtdFileChange(event)">
+            </label>
+            <button type="button" class="btn btn-danger" style="font-size:12px; padding:4px 8px;" onclick="clearTtdFile()">🗑️ Hapus TTD</button>
+          </div>
+        </div>
+        <input type="hidden" id="ttdBase64Input">
+      </div>
+      <div class="form-group">
         <label>Akses Menu</label>
         <div class="perm-grid" id="permContainer">
           <label class="perm-item"><input type="checkbox" value="absen"> Rekap Absen</label>
@@ -193,10 +213,12 @@
           ? u.permissions.join(', ') 
           : 'Tidak ada akses';
           
+        const ttdBadge = u.ttd ? '<span style="display:inline-block; margin-top:4px; font-size:11px; background:#10b98125; color:#10b981; padding:2px 8px; border-radius:6px; font-weight:600;">✓ TTD Tersedia</span>' : '<span style="display:inline-block; margin-top:4px; font-size:11px; color:#94a3b8;">Belum ada TTD</span>';
         div.innerHTML = `
           <div class="user-info">
-            <h3>${u.username}</h3>
+            <h3>${u.username} ${u.namaLengkap ? `<small style="font-weight:400; color:#94a3b8;">(${u.namaLengkap})</small>` : ''}</h3>
             <p>Akses: ${permsText}</p>
+            ${ttdBadge}
           </div>
           <div class="actions">
             <button class="btn" style="background: #e2e8f0;" onclick="editUser(${i})">Edit</button>
@@ -213,20 +235,31 @@
       
       const uInput = document.getElementById('usernameInput');
       const pInput = document.getElementById('passwordInput');
+      const nInput = document.getElementById('namaLengkapInput');
+      const ttdInput = document.getElementById('ttdBase64Input');
+      const ttdPrev = document.getElementById('ttdPreviewBox');
       const checkboxes = document.querySelectorAll('#permContainer input[type="checkbox"]');
       
       if (index !== null) {
         const u = usersDB[index];
         uInput.value = u.username;
         pInput.value = u.password;
-        // uInput.disabled = true; // Optional: prevent changing username
+        nInput.value = u.namaLengkap || '';
+        ttdInput.value = u.ttd || '';
+        if (u.ttd) {
+          ttdPrev.innerHTML = `<img src="${u.ttd}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+        } else {
+          ttdPrev.innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
+        }
         checkboxes.forEach(cb => {
           cb.checked = u.permissions ? u.permissions.includes(cb.value) : false;
         });
       } else {
         uInput.value = '';
         pInput.value = '';
-        // uInput.disabled = false;
+        nInput.value = '';
+        ttdInput.value = '';
+        ttdPrev.innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
         checkboxes.forEach(cb => cb.checked = false);
       }
       
@@ -237,9 +270,29 @@
       document.getElementById('userModal').classList.remove('show');
     }
 
+    function handleTtdFileChange(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        document.getElementById('ttdBase64Input').value = base64;
+        document.getElementById('ttdPreviewBox').innerHTML = `<img src="${base64}" style="max-width:100%; max-height:100%; object-fit:contain;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function clearTtdFile() {
+      document.getElementById('ttdFileInput').value = '';
+      document.getElementById('ttdBase64Input').value = '';
+      document.getElementById('ttdPreviewBox').innerHTML = `<span style="font-size:11px; color:#94a3b8;">Belum TTD</span>`;
+    }
+
     function saveUser() {
       const username = document.getElementById('usernameInput').value.trim();
       const password = document.getElementById('passwordInput').value.trim();
+      const namaLengkap = document.getElementById('namaLengkapInput').value.trim();
+      const ttd = document.getElementById('ttdBase64Input').value;
       
       if (!username || !password) {
         return showToast('Username dan kata sandi wajib diisi!', 'error');
@@ -254,13 +307,13 @@
         if (existing !== -1 && existing !== editingUser) {
           return showToast('Username sudah digunakan!', 'error');
         }
-        usersDB[editingUser] = { username, password, permissions };
+        usersDB[editingUser] = { ...usersDB[editingUser], username, password, namaLengkap, ttd, permissions };
         showToast('Data pengguna berhasil diubah.', 'success');
       } else {
         if (usersDB.some(u => u.username === username)) {
           return showToast('Username sudah ada!', 'error');
         }
-        usersDB.push({ username, password, permissions });
+        usersDB.push({ username, password, namaLengkap, ttd, permissions });
         showToast('Pengguna baru berhasil ditambahkan.', 'success');
       }
       

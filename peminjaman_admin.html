@@ -555,14 +555,14 @@
           <div style="text-align: center; width: 220px;">
             <p style="margin: 0;">Mengetahui,</p>
             <p style="margin: 4px 0 0;">Kepala Bagian Operasional / HR</p>
-            <div style="height: 70px;"></div>
-            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( ......................................... )</p>
+            <div id="admSuratTtdKoordBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( Koordinator KUK )</p>
           </div>
 
           <div style="text-align: center; width: 220px;">
             <p style="margin: 0;" id="suratTempatTanggal">Jakarta, 12 Juli 2026</p>
             <p style="margin: 4px 0 0;">Yang Menyatakan (Peminjam)</p>
-            <div style="height: 70px;"></div>
+            <div id="admSuratTtdPeminjamBox" style="min-height: 70px; display:flex; align-items:center; justify-content:center;"></div>
             <p style="font-weight: bold; text-decoration: underline; margin: 0;" id="suratTtdNama">( Nama Peminjam )</p>
           </div>
         </div>
@@ -917,6 +917,34 @@
 
       document.getElementById('suratTempatTanggal').textContent = `Jakarta, ${formatDateOnly(new Date().toISOString())}`;
       document.getElementById('suratTtdNama').textContent = `( ${item.namaPeminjam} )`;
+
+      // Coba cari TTD dari kuk_users_db
+      function getAdminTtdHtml(query) {
+        if (!query) return '<div style="height:70px;"></div>';
+        try {
+          const raw = localStorage.getItem('kuk_users_db');
+          if (!raw) return '<div style="height:70px;"></div>';
+          const users = JSON.parse(raw);
+          const q = String(query).toLowerCase().trim();
+          const match = users.find(u => {
+            if (!u.ttd) return false;
+            const uname = String(u.username || '').toLowerCase().trim();
+            const fname = String(u.namaLengkap || '').toLowerCase().trim();
+            const role = String(u.jabatan || '').toLowerCase().trim();
+            return uname === q || fname === q || role === q || fname.includes(q) || (uname && q.includes(uname));
+          });
+          if (match && match.ttd) {
+            return `<div style="margin: 4px 0;"><img src="${match.ttd}" style="max-height: 60px; max-width: 140px; object-fit: contain; display: block; margin: 4px auto;" alt="TTD"></div>`;
+          }
+        } catch(e) {}
+        return '<div style="height:70px;"></div>';
+      }
+
+      const koordBox = document.getElementById('admSuratTtdKoordBox');
+      if (koordBox) koordBox.innerHTML = getAdminTtdHtml('Koordinator');
+
+      const peminjamBox = document.getElementById('admSuratTtdPeminjamBox');
+      if (peminjamBox) peminjamBox.innerHTML = getAdminTtdHtml(item.namaPeminjam);
 
       document.getElementById('modalSurat').classList.add('show');
     }
