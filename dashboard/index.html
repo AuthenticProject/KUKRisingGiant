@@ -1882,7 +1882,7 @@
             <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
               <input type="text" id="pmSearchInput" placeholder="Cari nama, plat, divisi..." oninput="renderPeminjamanTable()"
                 style="width: 200px; padding: 8px 12px; font-size:13px;">
-              <button class="btn btn-outline btn-sm" onclick="renderPeminjamanTable()">🔄 Refresh</button>
+              <button class="btn btn-outline btn-sm" onclick="refreshPeminjamanCloud()">🔄 Refresh</button>
             </div>
           </div>
 
@@ -5350,8 +5350,23 @@
       renderPeminjamanTable();
     }
 
-    function renderPeminjamanTable(filterVal) {
+    function refreshPeminjamanCloud() {
+      showToast('Menarik data Peminjaman terbaru dari Cloud...', 'info');
+      if (typeof PeminjamanService !== 'undefined' && PeminjamanService.syncFromCloud) {
+        PeminjamanService.syncFromCloud().then(() => {
+          renderPeminjamanTable(null, true);
+          showToast('Data peminjaman sinkron dengan cloud!', 'success');
+        });
+      } else {
+        renderPeminjamanTable();
+      }
+    }
+
+    function renderPeminjamanTable(filterVal, skipCloudSync) {
       if (filterVal) currentPmFilter = filterVal;
+      if (!skipCloudSync && typeof PeminjamanService !== 'undefined' && PeminjamanService.syncFromCloud) {
+        PeminjamanService.syncFromCloud().then(() => renderPeminjamanTable(null, true));
+      }
       const list = typeof PeminjamanService !== 'undefined' ? PeminjamanService.getAllPeminjaman() : [];
 
       // Update KPI

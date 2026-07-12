@@ -472,6 +472,9 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadUserData();
       renderKendaraanDropdown();
+      if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.syncFromCloud) {
+        PeminjamanDB.syncFromCloud().then(() => renderKendaraanDropdown());
+      }
     });
   </script>
 </body>
