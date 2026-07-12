@@ -22,6 +22,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="../peminjaman_db.js"></script>
 
   <style>
     :root {
@@ -1305,14 +1306,14 @@
           </svg>
           <span>Tip Kaca</span>
         </div>
-        <div class="menu-item" onclick="window.location.href='../peminjaman_admin.html'">
+        <div class="menu-item" onclick="navigate('peminjaman', this)">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
             <circle cx="7" cy="17" r="2"/>
             <path d="M9 17h6"/>
             <circle cx="17" cy="17" r="2"/>
           </svg>
-          <span>Rekap Kendaraan</span>
+          <span>Peminjaman Kendaraan</span>
         </div>
         <div class="menu-item" id="nav-users" onclick="navigate('users', this)" style="display:none;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1853,6 +1854,66 @@
         </div>
       </section>
 
+      <!-- TAB: PEMINJAMAN KENDARAAN -->
+      <section id="tab-peminjaman" class="content-section">
+        <!-- KPI STATS -->
+        <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="stat-card" style="border-left-color: #3b82f6;">
+            <div class="stat-title">Total Peminjaman</div>
+            <div class="stat-val" id="pmStatTotal">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #06b6d4;">
+            <div class="stat-title">Aktif / Dipinjam</div>
+            <div class="stat-val" id="pmStatAktif" style="color:#06b6d4;">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #10b981;">
+            <div class="stat-title">Selesai</div>
+            <div class="stat-val" id="pmStatSelesai" style="color:#10b981;">0</div>
+          </div>
+          <div class="stat-card" style="border-left-color: #ef4444;">
+            <div class="stat-title">Rusak / Bermasalah</div>
+            <div class="stat-val" id="pmStatRusak" style="color:#ef4444;">0</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" style="flex-wrap: wrap; gap: 12px;">
+            <div class="card-title">🚘 Rekapan & Manajemen Peminjaman Kendaraan</div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+              <input type="text" id="pmSearchInput" placeholder="Cari nama, plat, divisi..." oninput="renderPeminjamanTable()"
+                style="width: 200px; padding: 8px 12px; font-size:13px;">
+              <button class="btn btn-outline btn-sm" onclick="renderPeminjamanTable()">🔄 Refresh</button>
+            </div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div style="padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline btn-sm pm-filter-btn active" data-filter="Semua" onclick="setPmFilter('Semua', this)" style="background:var(--primary); color:#fff; border-color:var(--primary);">Semua</button>
+            <button class="btn btn-outline btn-sm pm-filter-btn" data-filter="Aktif/Dipinjam" onclick="setPmFilter('Aktif/Dipinjam', this)">Aktif/Dipinjam</button>
+            <button class="btn btn-outline btn-sm pm-filter-btn" data-filter="Selesai" onclick="setPmFilter('Selesai', this)">Selesai</button>
+            <button class="btn btn-outline btn-sm pm-filter-btn" data-filter="Rusak/Bermasalah" onclick="setPmFilter('Rusak/Bermasalah', this)">Rusak/Bermasalah</button>
+          </div>
+
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>Peminjam & Divisi</th>
+                  <th>Kendaraan & Plat</th>
+                  <th>Waktu Pinjam & Kembali</th>
+                  <th>Keperluan</th>
+                  <th>Status</th>
+                  <th style="text-align:right;">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="pmTableBody">
+                <!-- JS Injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       <!-- TAB: PENGGUNA -->
       <section id="tab-users" class="content-section">
         <div class="card">
@@ -1933,6 +1994,15 @@
           <line x1="9" y1="21" x2="9" y2="9" />
         </svg>
         <span>Tip Kaca</span>
+      </div>
+      <div class="mobile-nav-item" id="mn-peminjaman" onclick="syncMobileNav('peminjaman'); navigateMobile('peminjaman')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
+          <circle cx="7" cy="17" r="2"/>
+          <path d="M9 17h6"/>
+          <circle cx="17" cy="17" r="2"/>
+        </svg>
+        <span>Kendaraan</span>
       </div>
       <div class="mobile-nav-item" id="mn-users" onclick="syncMobileNav('users'); navigateMobile('users')" style="display: none;">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2160,6 +2230,142 @@
       <div class="modal-footer">
         <button class="btn btn-outline" onclick="closeModal('editCutiModal')">Batal</button>
         <button class="btn btn-primary" onclick="saveEditCuti()">Simpan Jadwal Cuti</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LAPORKAN KERUSAKAN PEMINJAMAN -->
+  <div class="modal-overlay" id="modalKerusakanPeminjaman">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>⚠️ Laporkan Kerusakan Kendaraan</h3>
+        <button class="btn-link" onclick="closeModal('modalKerusakanPeminjaman')">✕</button>
+      </div>
+      <form id="pmFormKerusakan" onsubmit="submitPmKerusakan(event)">
+        <div class="modal-body">
+          <input type="hidden" id="pmModalLoanId">
+          <div class="form-group">
+            <label>Info Peminjaman</label>
+            <input type="text" id="pmModalLoanInfo" readonly style="background:#f1f5f9; font-weight:600;">
+          </div>
+          <div class="form-group">
+            <label>Tanggal Kejadian *</label>
+            <input type="date" id="pmModalTanggalKejadian" required>
+          </div>
+          <div class="form-group">
+            <label>Detail Kerusakan & Kronologi *</label>
+            <textarea id="pmModalDetailKerusakan" placeholder="Jelaskan detail kerusakan..." style="width:100%; padding:10px; border-radius:10px; border:1px solid var(--border); min-height:80px;" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Estimasi Biaya Perbaikan (Rp) *</label>
+            <input type="number" id="pmModalEstimasiBiaya" placeholder="Contoh: 1500000" min="0" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalKerusakanPeminjaman')">Batal</button>
+          <button type="submit" class="btn btn-danger">Simpan & Ubah Status</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CETAK SURAT PERNYATAAN GANTI RUGI PEMINJAMAN -->
+  <div class="modal-overlay" id="modalSuratPeminjaman">
+    <div class="modal-container" style="max-width:720px; max-height:92vh;">
+      <div class="modal-header">
+        <h3>📄 Surat Pernyataan Kesanggupan Ganti Rugi</h3>
+        <button class="btn-link" onclick="closeModal('modalSuratPeminjaman')">✕</button>
+      </div>
+      <div class="modal-body" id="pmPrintArea" style="background:#fff; color:#000; padding:32px; font-family:'Times New Roman', Times, serif;">
+        <div style="border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
+          <h2 style="font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase;">PT. KOPERASI ASURANSI INDONESIA (KUK HR PORTAL)</h2>
+          <p style="font-size: 13px; margin: 4px 0 0;">DIVISI MANAJEMEN ASET & OPERASIONAL KENDARAAN</p>
+          <p style="font-size: 12px; margin: 2px 0 0;">Gedung Kantor Utama &bull; Internal Use Record System</p>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+          <h3 style="font-size: 16px; font-weight: bold; text-decoration: underline; margin: 0;">SURAT PERNYATAAN KESANGGUPAN GANTI RUGI</h3>
+          <p style="font-size: 13px; margin: 4px 0 0;" id="pmSuratNomor">Nomor: SPGR/KUK/2026/07-001</p>
+        </div>
+
+        <p style="font-size: 14px; margin-bottom: 14px;">Yang bertanda tangan di bawah ini:</p>
+        <table style="width: 100%; font-size: 14px; margin-bottom: 18px; border-collapse: collapse;">
+          <tr>
+            <td style="width: 170px; padding: 4px 0;">Nama Lengkap</td>
+            <td style="width: 15px;">:</td>
+            <td style="font-weight: bold;" id="pmSuratNama">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Divisi / Instansi</td>
+            <td>:</td>
+            <td id="pmSuratDivisi">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">No. Kontak / HP</td>
+            <td>:</td>
+            <td id="pmSuratKontak">-</td>
+          </tr>
+        </table>
+
+        <p style="font-size: 14px; margin-bottom: 14px;">Sehubungan dengan peminjaman kendaraan dinas operasional sebagai berikut:</p>
+        <table style="width: 100%; font-size: 14px; margin-bottom: 18px; border-collapse: collapse;">
+          <tr>
+            <td style="width: 170px; padding: 4px 0;">Jenis Kendaraan</td>
+            <td style="width: 15px;">:</td>
+            <td style="font-weight: bold;" id="pmSuratKendaraan">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Plat Nomor</td>
+            <td>:</td>
+            <td id="pmSuratPlat">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Waktu Peminjaman</td>
+            <td>:</td>
+            <td id="pmSuratWaktuPinjam">-</td>
+          </tr>
+          <tr>
+            <td style="padding: 4px 0;">Keperluan / Tujuan</td>
+            <td>:</td>
+            <td id="pmSuratKeperluan">-</td>
+          </tr>
+        </table>
+
+        <p style="font-size: 14px; margin-bottom: 14px;">
+          Menyatakan bahwa pada tanggal <b id="pmSuratTglKejadian">-</b> telah terjadi insiden / kendala operasional yang menyebabkan kerusakan pada kendaraan tersebut dengan rincian sebagai berikut:
+        </p>
+
+        <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 14px; border-radius: 8px; margin-bottom: 18px; font-size: 14px;">
+          <p style="margin: 0 0 8px;"><b>Detail Kerusakan & Kronologi:</b></p>
+          <p style="margin: 0 0 12px; font-style: italic;" id="pmSuratDetailKerusakan">-</p>
+          <p style="margin: 0; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+            <b>Estimasi Biaya Perbaikan:</b> <span id="pmSuratEstimasiBiaya" style="color: #dc2626; font-weight: bold;">Rp 0</span>
+          </p>
+        </div>
+
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 30px;">
+          Dengan ini menyatakan bertanggung jawab penuh atas kerusakan yang terjadi pada kendaraan dinas tersebut dan <b>bersedia menanggung sepenuhnya biaya perbaikan/ganti rugi</b> sesuai estimasi atau tagihan bengkel resmi yang ditunjuk oleh pihak KUK HR Portal.
+        </p>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 36px; font-size: 14px;">
+          <div style="text-align: center; width: 220px;">
+            <p style="margin: 0;">Mengetahui,</p>
+            <p style="margin: 4px 0 0;">Kepala Bagian Operasional / HR</p>
+            <div style="height: 70px;"></div>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( ......................................... )</p>
+          </div>
+
+          <div style="text-align: center; width: 220px;">
+            <p style="margin: 0;" id="pmSuratTempatTanggal">Jakarta, 12 Juli 2026</p>
+            <p style="margin: 4px 0 0;">Yang Menyatakan (Peminjam)</p>
+            <div style="height: 70px;"></div>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;" id="pmSuratTtdNama">( Nama Peminjam )</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalSuratPeminjaman')">Tutup</button>
+        <button class="btn btn-primary" onclick="cetakSuratPeminjamanDashboard()">🖨️ Cetak / Simpan PDF</button>
       </div>
     </div>
   </div>
@@ -2500,13 +2706,13 @@
 
     // Daftar akun yang valid
     const DEFAULT_USERS = [
-      { username: 'fariz', password: '12345', jabatan: 'Koordinator', toko: 'bangunan', namaLengkap: 'Fariz Ridwani,S.Kom.', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'users'] },
-      { username: 'andika', password: '12345', jabatan: 'HRD', toko: 'bangunan', namaLengkap: 'Andika', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] },
-      { username: 'irsyadil', password: '12345', jabatan: 'Koordinator', toko: 'semua', namaLengkap: 'Irsyadil', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'users'] },
-      { username: 'ari', password: '12345', jabatan: 'Bendahara 1', toko: 'bangunan', namaLengkap: 'Ari', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] },
-      { username: 'shuva', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Shuva', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'aria', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Aria', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip'] },
-      { username: 'zain', password: '12345', jabatan: 'Kepala Toko KUK Palen', toko: 'palen', namaLengkap: 'Ahmad Syirajuddin Rabbani', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji'] }
+      { username: 'fariz', password: '12345', jabatan: 'Koordinator', toko: 'bangunan', namaLengkap: 'Fariz Ridwani,S.Kom.', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'peminjaman', 'users'] },
+      { username: 'andika', password: '12345', jabatan: 'HRD', toko: 'bangunan', namaLengkap: 'Andika', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'peminjaman'] },
+      { username: 'irsyadil', password: '12345', jabatan: 'Koordinator', toko: 'semua', namaLengkap: 'Irsyadil', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'peminjaman', 'users'] },
+      { username: 'ari', password: '12345', jabatan: 'Bendahara 1', toko: 'bangunan', namaLengkap: 'Ari', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'peminjaman'] },
+      { username: 'shuva', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Shuva', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman'] },
+      { username: 'aria', password: '12345', jabatan: '', toko: 'bangunan', namaLengkap: 'Aria', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman'] },
+      { username: 'zain', password: '12345', jabatan: 'Kepala Toko KUK Palen', toko: 'palen', namaLengkap: 'Ahmad Syirajuddin Rabbani', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'gaji', 'peminjaman'] }
     ];
 
     function getUsersDB() {
@@ -2653,6 +2859,7 @@
       'pelanggaran': 'Pelanggaran',
       'gaji': 'Gaji / Payroll',
       'tipkaca': 'Tip Pemotongan Kaca',
+      'peminjaman': 'Peminjaman Kendaraan',
       'users': 'Manajemen Pengguna'
     };
 
@@ -2674,6 +2881,8 @@
         calculatePayroll();
       } else if (tabId === 'tipkaca') {
         renderTipKaca();
+      } else if (tabId === 'peminjaman') {
+        renderPeminjamanTable();
       } else if (tabId === 'users') {
         renderUserTable();
       }
@@ -2690,6 +2899,7 @@
       if (tabId === 'absen') { renderAbsenLogger(); renderRekapBulanan(); }
       else if (tabId === 'gaji') { calculatePayroll(); }
       else if (tabId === 'tipkaca') { renderTipKaca(); }
+      else if (tabId === 'peminjaman') { renderPeminjamanTable(); }
       else if (tabId === 'users') { renderUserTable(); }
     }
 
@@ -5119,6 +5329,198 @@
         }
       })
       .catch(e => showToast('Kesalahan jaringan saat menghapus.', 'error'));
+    }
+    // === PEMINJAMAN KENDARAAN (INTERNAL DASHBOARD TAB) ===
+    let currentPmFilter = 'Semua';
+
+    function setPmFilter(filter, el) {
+      currentPmFilter = filter;
+      document.querySelectorAll('.pm-filter-btn').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = '';
+        b.style.color = '';
+        b.style.borderColor = '';
+      });
+      if (el) {
+        el.classList.add('active');
+        el.style.background = 'var(--primary)';
+        el.style.color = '#fff';
+        el.style.borderColor = 'var(--primary)';
+      }
+      renderPeminjamanTable();
+    }
+
+    function renderPeminjamanTable(filterVal) {
+      if (filterVal) currentPmFilter = filterVal;
+      const list = typeof PeminjamanService !== 'undefined' ? PeminjamanService.getAllPeminjaman() : [];
+
+      // Update KPI
+      const total = list.length;
+      const aktif = list.filter(x => x.status === 'Aktif/Dipinjam').length;
+      const selesai = list.filter(x => x.status === 'Selesai').length;
+      const rusak = list.filter(x => x.status === 'Rusak/Bermasalah').length;
+
+      const elTotal = document.getElementById('pmStatTotal');
+      const elAktif = document.getElementById('pmStatAktif');
+      const elSelesai = document.getElementById('pmStatSelesai');
+      const elRusak = document.getElementById('pmStatRusak');
+
+      if (elTotal) elTotal.textContent = total;
+      if (elAktif) elAktif.textContent = aktif;
+      if (elSelesai) elSelesai.textContent = selesai;
+      if (elRusak) elRusak.textContent = rusak;
+
+      const searchInput = document.getElementById('pmSearchInput');
+      const searchQ = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+      const filtered = list.filter(item => {
+        const matchFilter = (currentPmFilter === 'Semua') || (item.status === currentPmFilter);
+        const matchSearch = !searchQ || 
+          item.namaPeminjam.toLowerCase().includes(searchQ) ||
+          item.divisi.toLowerCase().includes(searchQ) ||
+          item.kendaraanNama.toLowerCase().includes(searchQ) ||
+          (item.platNomor && item.platNomor.toLowerCase().includes(searchQ));
+        return matchFilter && matchSearch;
+      });
+
+      const tbody = document.getElementById('pmTableBody');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 24px; color: var(--text-muted);">Tidak ada data peminjaman kendaraan.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(item => {
+        let badgeBg = '#06b6d4';
+        if (item.status === 'Selesai') badgeBg = '#10b981';
+        else if (item.status === 'Rusak/Bermasalah') badgeBg = '#ef4444';
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <strong style="color:var(--text);">${item.namaPeminjam}</strong><br>
+              <small style="color:var(--text-muted);">${item.divisi} &bull; 📞 ${item.kontak || '-'}</small>
+            </td>
+            <td>
+              <strong>${item.kendaraanNama}</strong><br>
+              <small style="color:var(--text-muted);">${item.platNomor || ''}</small>
+            </td>
+            <td style="font-size:13px;">
+              <div>🟢 Mulai: ${item.waktuMulai}</div>
+              <div>🔴 Kembali: ${item.waktuKembali}</div>
+            </td>
+            <td style="max-width:200px; font-size:13px; color:var(--text-muted);">${item.keperluan}</td>
+            <td>
+              <span style="display:inline-block; padding:4px 10px; border-radius:8px; font-size:12px; font-weight:700; background:${badgeBg}26; color:${badgeBg}; border:1px solid ${badgeBg}4d;">
+                ${item.status}
+              </span>
+            </td>
+            <td style="text-align:right;">
+              <div style="display:inline-flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                ${item.status === 'Aktif/Dipinjam' ? `
+                  <button class="btn btn-outline btn-sm" onclick="updatePmStatus('${item.id}', 'Selesai')" style="border-color:#10b981; color:#10b981;">✅ Selesai</button>
+                  <button class="btn btn-outline btn-sm" onclick="openPmKerusakanModal('${item.id}')" style="border-color:#ef4444; color:#ef4444;">⚠️ Rusak</button>
+                ` : ''}
+                ${item.status === 'Rusak/Bermasalah' ? `
+                  <button class="btn btn-primary btn-sm" onclick="openPmSuratModal('${item.id}')" style="background:linear-gradient(135deg, #f59e0b, #d97706);">🖨️ Surat Ganti Rugi</button>
+                  <button class="btn btn-outline btn-sm" onclick="updatePmStatus('${item.id}', 'Selesai')" style="border-color:#10b981; color:#10b981;">Tandai Selesai</button>
+                ` : ''}
+                ${item.status === 'Selesai' ? `
+                  <span style="font-size:12px; color:var(--text-muted);">Selesai</span>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function updatePmStatus(id, newStatus) {
+      if (!confirm(`Ubah status peminjaman ini menjadi "${newStatus}"?`)) return;
+      if (typeof PeminjamanService !== 'undefined') {
+        PeminjamanService.updateStatus(id, newStatus);
+        renderPeminjamanTable();
+        showToast(`Status berhasil diubah menjadi ${newStatus}`, 'success');
+      }
+    }
+
+    function openPmKerusakanModal(id) {
+      if (typeof PeminjamanService === 'undefined') return;
+      const loan = PeminjamanService.getLoanById(id);
+      if (!loan) return;
+
+      document.getElementById('pmModalLoanId').value = loan.id;
+      document.getElementById('pmModalLoanInfo').value = `${loan.kendaraanNama} (${loan.platNomor}) - ${loan.namaPeminjam}`;
+      document.getElementById('pmModalTanggalKejadian').value = new Date().toISOString().split('T')[0];
+      document.getElementById('pmModalDetailKerusakan').value = loan.kerusakanDetail || '';
+      document.getElementById('pmModalEstimasiBiaya').value = loan.biayaPerbaikan || '';
+
+      openModal('modalKerusakanPeminjaman');
+    }
+
+    function submitPmKerusakan(e) {
+      e.preventDefault();
+      if (typeof PeminjamanService === 'undefined') return;
+      const id = document.getElementById('pmModalLoanId').value;
+      const tgl = document.getElementById('pmModalTanggalKejadian').value;
+      const detail = document.getElementById('pmModalDetailKerusakan').value;
+      const biaya = document.getElementById('pmModalEstimasiBiaya').value;
+
+      PeminjamanService.laporkanKerusakan(id, detail, biaya);
+      closeModal('modalKerusakanPeminjaman');
+      renderPeminjamanTable();
+      showToast('Laporan kerusakan berhasil disimpan!', 'success');
+    }
+
+    function openPmSuratModal(id) {
+      if (typeof PeminjamanService === 'undefined') return;
+      const loan = PeminjamanService.getLoanById(id);
+      if (!loan) return;
+
+      document.getElementById('pmSuratNomor').textContent = `Nomor: SPGR/KUK/2026/07-${String(Math.floor(Math.random()*900)+100)}`;
+      document.getElementById('pmSuratNama').textContent = loan.namaPeminjam || '-';
+      document.getElementById('pmSuratDivisi').textContent = loan.divisi || '-';
+      document.getElementById('pmSuratKontak').textContent = loan.kontak || '-';
+      document.getElementById('pmSuratKendaraan').textContent = loan.kendaraanNama || '-';
+      document.getElementById('pmSuratPlat').textContent = loan.platNomor || '-';
+      document.getElementById('pmSuratWaktuPinjam').textContent = `${loan.waktuMulai} s/d ${loan.waktuKembali}`;
+      document.getElementById('pmSuratKeperluan').textContent = loan.keperluan || '-';
+
+      const now = new Date();
+      document.getElementById('pmSuratTglKejadian').textContent = now.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
+      document.getElementById('pmSuratDetailKerusakan').textContent = loan.kerusakanDetail || 'Kerusakan operasional kendaraan.';
+
+      const numBiaya = Number(loan.biayaPerbaikan || 0);
+      document.getElementById('pmSuratEstimasiBiaya').textContent = `Rp ${numBiaya.toLocaleString('id-ID')}`;
+
+      document.getElementById('pmSuratTempatTanggal').textContent = `Jakarta, ${now.toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' })}`;
+      document.getElementById('pmSuratTtdNama').textContent = `( ${loan.namaPeminjam} )`;
+
+      openModal('modalSuratPeminjaman');
+    }
+
+    function cetakSuratPeminjamanDashboard() {
+      const el = document.getElementById('pmPrintArea');
+      const w = window.open('', '_blank', 'width=800,height=900');
+      w.document.write(`
+        <html>
+          <head>
+            <title>Surat Pernyataan Kesanggupan Ganti Rugi</title>
+            <style>
+              body { font-family: 'Times New Roman', Times, serif; padding: 40px; color: #000; background: #fff; }
+              table { border-collapse: collapse; }
+            </style>
+          </head>
+          <body>
+            ${el.innerHTML}
+          </body>
+        </html>
+      `);
+      w.document.close();
+      w.focus();
+      setTimeout(() => { w.print(); }, 400);
     }
   </script>
 
