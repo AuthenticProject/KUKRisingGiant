@@ -1898,7 +1898,7 @@
             <table>
               <thead>
                 <tr>
-                  <th>Peminjam & Divisi</th>
+                  <th>Peminjam & Kamar</th>
                   <th>Kendaraan & Plat</th>
                   <th>Waktu Pinjam & Kembali</th>
                   <th>Keperluan</th>
@@ -2278,9 +2278,7 @@
       </div>
       <div class="modal-body" id="pmPrintArea" style="background:#fff; color:#000; padding:32px; font-family:'Times New Roman', Times, serif;">
         <div style="border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
-          <h2 style="font-size: 18px; font-weight: bold; margin: 0; text-transform: uppercase;">PT. KOPERASI ASURANSI INDONESIA (KUK HR PORTAL)</h2>
-          <p style="font-size: 13px; margin: 4px 0 0;">DIVISI MANAJEMEN ASET & OPERASIONAL KENDARAAN</p>
-          <p style="font-size: 12px; margin: 2px 0 0;">Gedung Kantor Utama &bull; Internal Use Record System</p>
+          <img src="../kop_umum.png" alt="Kop Surat KUK" style="width: 100%; max-width: 680px; height: auto; display: block; margin: 0 auto;">
         </div>
 
         <div style="text-align: center; margin-bottom: 24px;">
@@ -2296,7 +2294,7 @@
             <td style="font-weight: bold;" id="pmSuratNama">-</td>
           </tr>
           <tr>
-            <td style="padding: 4px 0;">Divisi / Instansi</td>
+            <td style="padding: 4px 0;">Kamar / Instansi</td>
             <td>:</td>
             <td id="pmSuratDivisi">-</td>
           </tr>
@@ -2350,9 +2348,9 @@
         <div style="display: flex; justify-content: space-between; margin-top: 36px; font-size: 14px;">
           <div style="text-align: center; width: 220px;">
             <p style="margin: 0;">Mengetahui,</p>
-            <p style="margin: 4px 0 0;">Kepala Bagian Operasional / HR</p>
+            <p style="margin: 4px 0 0;">Koordinator KUK</p>
             <div style="height: 70px;"></div>
-            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( ......................................... )</p>
+            <p style="font-weight: bold; text-decoration: underline; margin: 0;">( Koordinator KUK )</p>
           </div>
 
           <div style="text-align: center; width: 220px;">
@@ -5416,15 +5414,15 @@
           <tr>
             <td>
               <strong style="color:var(--text);">${item.namaPeminjam}</strong><br>
-              <small style="color:var(--text-muted);">${item.divisi} &bull; 📞 ${item.kontak || '-'}</small>
+              <small style="color:var(--text-muted);">${item.kamar || item.divisi || '-'} &bull; 📞 ${item.kontak || '-'}</small>
             </td>
             <td>
-              <strong>${item.kendaraanNama}</strong><br>
-              <small style="color:var(--text-muted);">${item.platNomor || ''}</small>
+              <strong>${item.namaKendaraan || item.kendaraanNama || '-'}</strong><br>
+              <small style="color:var(--text-muted);">${item.platKendaraan || item.platNomor || ''}</small>
             </td>
             <td style="font-size:13px;">
-              <div>🟢 Mulai: ${item.waktuMulai}</div>
-              <div>🔴 Kembali: ${item.waktuKembali}</div>
+              <div>🟢 Mulai: ${item.waktuMulai || '-'}</div>
+              <div>🔴 Kembali: ${item.waktuRencanaKembali || item.waktuKembali || '-'}</div>
             </td>
             <td style="max-width:200px; font-size:13px; color:var(--text-muted);">${item.keperluan}</td>
             <td>
@@ -5496,11 +5494,11 @@
 
       document.getElementById('pmSuratNomor').textContent = `Nomor: SPGR/KUK/2026/07-${String(Math.floor(Math.random()*900)+100)}`;
       document.getElementById('pmSuratNama').textContent = loan.namaPeminjam || '-';
-      document.getElementById('pmSuratDivisi').textContent = loan.divisi || '-';
+      document.getElementById('pmSuratDivisi').textContent = loan.kamar || loan.divisi || '-';
       document.getElementById('pmSuratKontak').textContent = loan.kontak || '-';
-      document.getElementById('pmSuratKendaraan').textContent = loan.kendaraanNama || '-';
-      document.getElementById('pmSuratPlat').textContent = loan.platNomor || '-';
-      document.getElementById('pmSuratWaktuPinjam').textContent = `${loan.waktuMulai} s/d ${loan.waktuKembali}`;
+      document.getElementById('pmSuratKendaraan').textContent = loan.namaKendaraan || loan.kendaraanNama || '-';
+      document.getElementById('pmSuratPlat').textContent = loan.platKendaraan || loan.platNomor || '-';
+      document.getElementById('pmSuratWaktuPinjam').textContent = `${loan.waktuMulai || '-'} s/d ${loan.waktuRencanaKembali || loan.waktuKembali || '-'}`;
       document.getElementById('pmSuratKeperluan').textContent = loan.keperluan || '-';
 
       const now = new Date();

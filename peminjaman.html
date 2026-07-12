@@ -312,10 +312,13 @@
             <input type="text" id="inNama" placeholder="Contoh: Fariz Akbar" required>
           </div>
 
-          <!-- Divisi / Instansi -->
+          <!-- Kamar / Instansi -->
           <div class="form-group">
-            <label class="form-label">Divisi / Instansi *</label>
-            <input type="text" id="inDivisi" placeholder="Contoh: Logistik & Gudang" required>
+            <label class="form-label">Kamar / Instansi *</label>
+            <input type="text" id="inSearchKamar" placeholder="🔍 Ketik untuk cari kamar (cth: Rabithah, KMI...)" oninput="filterKamarDropdown()" style="margin-bottom: 6px;">
+            <select id="inKamar" required>
+              <option value="" disabled selected>-- Pilih Kamar --</option>
+            </select>
           </div>
 
           <!-- Kontak / No. HP -->
@@ -420,16 +423,52 @@
       });
     }
 
+    function renderKamarDropdown(filterQuery = '') {
+      const select = document.getElementById('inKamar');
+      if (!select) return;
+      const daftar = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getDaftarKamar) 
+        ? PeminjamanDB.getDaftarKamar() 
+        : [];
+      
+      const currentVal = select.value;
+      const q = filterQuery.toLowerCase().trim();
+
+      select.innerHTML = '<option value="" disabled ' + (!currentVal ? 'selected' : '') + '>-- Pilih Kamar --</option>';
+
+      const filtered = daftar.filter(k => !q || k.toLowerCase().includes(q));
+
+      if (filtered.length === 0) {
+        select.innerHTML += '<option value="" disabled>-- Kamar tidak ditemukan --</option>';
+      } else {
+        filtered.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          if (item === currentVal) opt.selected = true;
+          select.appendChild(opt);
+        });
+      }
+    }
+
+    function filterKamarDropdown() {
+      const q = document.getElementById('inSearchKamar').value;
+      renderKamarDropdown(q);
+    }
+
     function handleAjukanPeminjaman(e) {
       e.preventDefault();
 
       const nama = document.getElementById('inNama').value;
-      const divisi = document.getElementById('inDivisi').value;
+      const kamar = document.getElementById('inKamar').value;
       const kontak = document.getElementById('inKontak').value;
       const kendaraanId = document.getElementById('inKendaraan').value;
       const waktuMulai = document.getElementById('inMulai').value;
       const waktuRencanaKembali = document.getElementById('inKembali').value;
       const keperluan = document.getElementById('inKeperluan').value;
+
+      if (!kamar) {
+        return showToast('Silakan pilih kamar / instansi Anda.', 'error');
+      }
 
       if (!kendaraanId) {
         return showToast('Silakan pilih kendaraan yang tersedia.', 'error');
@@ -446,7 +485,8 @@
       setTimeout(() => {
         const saved = PeminjamanDB.savePeminjaman({
           namaPeminjam: nama,
-          divisi: divisi,
+          kamar: kamar,
+          divisi: kamar,
           kontak: kontak,
           kendaraanId: kendaraanId,
           waktuMulai: waktuMulai,
@@ -472,6 +512,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       loadUserData();
       renderKendaraanDropdown();
+      renderKamarDropdown();
       if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.syncFromCloud) {
         PeminjamanDB.syncFromCloud().then(() => renderKendaraanDropdown());
       }
