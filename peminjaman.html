@@ -344,8 +344,69 @@
       </div>
     </header>
 
+    <!-- Active Loan / Sukses Panel -->
+    <div id="activeLoanPanel" class="panel" style="display: none;">
+      <div class="panel-header" style="background: linear-gradient(135deg, #059669, #10b981);">
+        <h2>🎉 Peminjaman Berhasil Dicatat!</h2>
+        <span style="font-size: 12px; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; font-weight: 700;">Sedang Dipinjam</span>
+      </div>
+
+      <div style="padding: 24px; text-align: center;">
+        <div id="overdueAlertBanner" style="display: none; background: rgba(239, 68, 68, 0.18); border: 2px solid #ef4444; border-radius: 12px; padding: 16px; margin-bottom: 20px; color: #f87171; font-weight: 700; font-size: 14px; animation: pulse 1.5s infinite;">
+          ⚠️ WAKTU PEMINJAMAN TELAH MELEWATI BATAS PERKIRAAN KEMBALI! Mohon segera kembalikan kendaraan.
+        </div>
+
+        <div style="background: var(--card-bg, #1e293b); border: 1px solid var(--border, #334155); border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: left;">
+          <h3 style="margin: 0 0 10px 0; font-size: 18px; color: #38bdf8;">Terima kasih sudah mengisi form</h3>
+          <p id="activeLoanMessage" style="font-size: 15px; color: #f8fafc; line-height: 1.65; margin: 0 0 16px 0;">
+            Anda sedang meminjam kendaraan <strong id="actKendaraanName" style="color:#facc15;">-</strong> (<strong id="actPlat">-</strong>).
+          </p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; background: rgba(15, 23, 42, 0.6); padding: 16px; border-radius: 12px; border: 1px solid var(--border, #334155);">
+            <div style="flex: 1; min-width: 140px;">
+              <div style="font-size: 12px; color: #94a3b8;">Mulai Pinjam</div>
+              <div id="actWaktuMulai" style="font-size: 14px; font-weight: 700; color: #f8fafc; margin-top: 4px;">-</div>
+            </div>
+            <div style="flex: 1; min-width: 140px;">
+              <div style="font-size: 12px; color: #94a3b8;">Perkiraan Kembali</div>
+              <div id="actWaktuKembali" style="font-size: 14px; font-weight: 700; color: #f87171; margin-top: 4px;">-</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- QR Pertamina Card (Khusus L300 & Engkel) -->
+        <div id="pertaminaQrContainer" style="display: none; background: linear-gradient(145deg, #1e293b, #0f172a); border: 2px solid #ef4444; border-radius: 16px; padding: 24px; margin-bottom: 24px;">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 14px;">
+            <span style="background: #ef4444; color: #fff; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 800; letter-spacing: 0.5px;">SUBSIDI BBM PERTAMINA</span>
+            <span style="color: #38bdf8; font-weight: 700; font-size: 14px;">MyPertamina QR Pass</span>
+          </div>
+          <p style="font-size: 13px; color: #cbd5e1; margin: 0 0 16px 0;">
+            Tunjukkan QR Code di bawah ini kepada operator SPBU Pertamina saat pengisian Solar / BBM subsidi untuk kendaraan <strong id="qrKendaraanNama" style="color:#facc15;">L300 / Engkel</strong>.
+          </p>
+          <div style="background: #ffffff; padding: 18px; border-radius: 14px; display: inline-block; box-shadow: 0 8px 25px rgba(0,0,0,0.4);">
+            <svg id="qrPertaminaSvg" width="180" height="180" viewBox="0 0 29 29" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="29" height="29" fill="white"/>
+              <path d="M2 2H9V9H2V2ZM3 3V8H8V3H3ZM4 4H7V7H4V4Z" fill="#1E293B"/>
+              <path d="M20 2H27V9H20V2ZM21 3V8H26V3H21ZM22 4H25V7H22V4Z" fill="#1E293B"/>
+              <path d="M2 20H9V27H2V20ZM3 21V26H8V21H3ZM4 22H7V25H4V22Z" fill="#1E293B"/>
+              <path d="M11 2H13V4H11V2ZM15 2H18V3H15V2ZM11 5H14V7H11V5ZM16 4H19V6H16V4ZM2 11H5V13H2V11ZM7 11H10V14H7V11ZM12 10H17V12H12V10ZM19 11H22V13H19V11ZM24 10H27V13H24V10ZM11 14H15V17H11V14ZM17 14H20V16H17V14ZM22 15H27V17H22V15ZM11 18H14V21H11V18ZM16 18H19V20H16V18ZM21 19H25V22H21V19ZM11 23H13V27H11V23ZM15 23H19V25H15V23ZM21 24H27V27H21V24ZM14 25H18V27H14V25Z" fill="#1E293B"/>
+            </svg>
+          </div>
+          <div style="font-size: 11px; color: #94a3b8; margin-top: 12px;">
+            ID SPBU: <strong id="qrPlatNomor" style="color: #fff;">-</strong> &bull; BBM SUBSIDI
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+          <button type="button" class="btn-submit" onclick="selesaiAtauPinjamBaru()" style="background: #3b82f6; width: auto; padding: 12px 24px; margin-top:0;">
+            <span>Selesai / Ajukan Peminjaman Baru</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Main Card Form -->
-    <div class="panel">
+    <div id="formPanel" class="panel">
       <div class="panel-header">
         <h2>📝 Form Input Peminjaman Kendaraan</h2>
         <span style="font-size: 12px; color: #34d399; font-weight: 600;">● Online</span>
@@ -565,6 +626,9 @@
           keperluan: keperluan
         });
 
+        localStorage.setItem('kuk_active_loan', JSON.stringify(saved));
+        requestNotificationPermission();
+
         showToast(`Berhasil! Peminjaman untuk ${saved.namaKendaraan} berhasil diajukan.`, 'success');
 
         document.getElementById('inKeperluan').value = '';
@@ -576,16 +640,137 @@
           </svg>
         `;
 
-        renderKendaraanDropdown();
+        showActiveLoanScreen(saved);
       }, 400);
+    }
+
+    function formatIndoDateTime(dtStr) {
+      if (!dtStr) return '-';
+      try {
+        const d = new Date(dtStr);
+        if (isNaN(d.getTime())) return dtStr;
+        return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' +
+               d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+      } catch(e) { return dtStr; }
+    }
+
+    let overdueTimer = null;
+
+    function requestNotificationPermission() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    function showActiveLoanScreen(loan) {
+      const actPanel = document.getElementById('activeLoanPanel');
+      const formPanel = document.getElementById('formPanel');
+      if (!actPanel || !formPanel) return;
+
+      actPanel.style.display = 'block';
+      formPanel.style.display = 'none';
+
+      const kendName = loan.namaKendaraan || loan.kendaraanNama || '-';
+      const plat = loan.platKendaraan || loan.platNomor || '-';
+      document.getElementById('actKendaraanName').textContent = kendName;
+      document.getElementById('actPlat').textContent = plat;
+      document.getElementById('actWaktuMulai').textContent = formatIndoDateTime(loan.waktuMulai);
+      document.getElementById('actWaktuKembali').textContent = formatIndoDateTime(loan.waktuRencanaKembali || loan.waktuKembali);
+
+      // Khusus L300 & Engkel -> Tampilkan QR Pertamina
+      const qrBox = document.getElementById('pertaminaQrContainer');
+      const nameUpper = kendName.toUpperCase();
+      if (nameUpper.includes('L300') || nameUpper.includes('ENGKEL')) {
+        qrBox.style.display = 'block';
+        document.getElementById('qrKendaraanNama').textContent = kendName;
+        document.getElementById('qrPlatNomor').textContent = plat;
+      } else {
+        qrBox.style.display = 'none';
+      }
+
+      // Mulai monitor keterlambatan
+      startOverdueMonitor(loan);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startOverdueMonitor(loan) {
+      if (overdueTimer) clearInterval(overdueTimer);
+
+      const checkOverdue = () => {
+        const rencanaStr = loan.waktuRencanaKembali || loan.waktuKembali;
+        if (!rencanaStr) return;
+
+        const targetTime = new Date(rencanaStr).getTime();
+        const now = Date.now();
+
+        const banner = document.getElementById('overdueAlertBanner');
+        if (now > targetTime) {
+          if (banner) banner.style.display = 'block';
+
+          // Kirim notifikasi ke device yang meminjam
+          if ('Notification' in window && Notification.permission === 'granted') {
+            const notifKey = 'notif_sent_' + loan.id;
+            if (!sessionStorage.getItem(notifKey)) {
+              new Notification('⚠️ Waktu Peminjaman Habis!', {
+                body: `Waktu rencana kembali untuk ${loan.namaKendaraan} (${loan.platKendaraan || ''}) telah lewat. Mohon segera kembalikan kendaraan.`,
+                icon: 'icon-192.png',
+                requireInteraction: true
+              });
+              sessionStorage.setItem(notifKey, '1');
+              if (navigator.vibrate) navigator.vibrate([400, 200, 400, 200, 400]);
+            }
+          }
+        } else {
+          if (banner) banner.style.display = 'none';
+        }
+      };
+
+      checkOverdue();
+      overdueTimer = setInterval(checkOverdue, 10000);
+    }
+
+    function selesaiAtauPinjamBaru() {
+      if (overdueTimer) clearInterval(overdueTimer);
+      localStorage.removeItem('kuk_active_loan');
+      document.getElementById('activeLoanPanel').style.display = 'none';
+      document.getElementById('formPanel').style.display = 'block';
+      renderKendaraanDropdown();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       loadUserData();
       renderKendaraanDropdown();
       renderKamarDropdown();
+      requestNotificationPermission();
+
+      // Cek sesi peminjaman aktif
+      const storedActive = localStorage.getItem('kuk_active_loan');
+      if (storedActive) {
+        try {
+          const activeLoan = JSON.parse(storedActive);
+          if (activeLoan && activeLoan.status === 'Aktif/Dipinjam') {
+            showActiveLoanScreen(activeLoan);
+          }
+        } catch(e) {}
+      }
+
       if (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.syncFromCloud) {
-        PeminjamanDB.syncFromCloud().then(() => renderKendaraanDropdown());
+        PeminjamanDB.syncFromCloud().then(() => {
+          renderKendaraanDropdown();
+          // Cek kembali status aktif dari cloud
+          const storedActive = localStorage.getItem('kuk_active_loan');
+          if (storedActive) {
+            try {
+              const activeLoan = JSON.parse(storedActive);
+              const cloudLoan = PeminjamanDB.getPeminjamanById(activeLoan.id);
+              if (cloudLoan && cloudLoan.status !== 'Aktif/Dipinjam') {
+                localStorage.removeItem('kuk_active_loan');
+                selesaiAtauPinjamBaru();
+              }
+            } catch(e) {}
+          }
+        });
       }
     });
   </script>
