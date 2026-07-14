@@ -531,6 +531,9 @@ function getDashboardData(ss) {
   // Ambil data peminjaman
   const peminjaman = getPeminjamanRaw(ss);
   
+  // Ambil data users
+  const users = getUsersData(ss);
+  
   return { result: 'success', data: result, karyawan: allKaryawan, violations: violations, tips: tips, users: users, peminjaman: peminjaman };
 }
 

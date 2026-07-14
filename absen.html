@@ -578,8 +578,8 @@
       // Fetch karyawan list, leave data, AND today's absen in parallel
       Promise.all([
         fetch(`${SCRIPT_URL}?action=init`).then(r => r.json()),
-        fetch(`${SCRIPT_URL}?action=dashboard_data`).then(r => r.json()),
-        fetch(`${SCRIPT_URL}?action=rekapAbsen`).then(r => r.json())
+        fetch(`${SCRIPT_URL}?action=dashboard_data`).then(r => r.json()).catch(e => ({ result: 'error', data: [] })),
+        fetch(`${SCRIPT_URL}?action=rekapAbsen`).then(r => r.json()).catch(e => ({ result: 'error', data: [] }))
       ])
         .then(([initRes, dashRes, absenRes]) => {
           let tempKaryawan = (initRes.karyawan || []).filter(k =>
