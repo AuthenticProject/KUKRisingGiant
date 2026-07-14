@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v22';
+const CACHE_NAME = 'kuk-hr-cache-v23';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -56,11 +56,24 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Stale-While-Revalidate strategy for local static assets
+  // Network-First strategy for HTML and JS files so updates reflect immediately
+  if (requestUrl.pathname.endsWith('.html') || requestUrl.pathname.endsWith('.js') || requestUrl.pathname === '/' || requestUrl.pathname.endsWith('/')) {
+    event.respondWith(
+      fetch(event.request).then(networkResponse => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
+        }
+        return networkResponse;
+      }).catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Stale-While-Revalidate strategy for static assets (images, css)
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Cache the updated version if it is a valid local response
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
