@@ -21,6 +21,12 @@
   if (action === 'laporkan_kerusakan_peminjaman') {
     return laporkanKerusakanPeminjamanCloud(data);
   }
+  if (action === 'save_kendaraan') {
+    return saveKendaraanCloud(data.record);
+  }
+  if (action === 'delete_kendaraan') {
+    return deleteKendaraanCloud(data.id);
+  }
 */
 
 // -------------------------------------------------------------------------
@@ -29,6 +35,9 @@
 /*
   if (action === 'getPeminjaman') {
     return getPeminjamanCloud();
+  }
+  if (action === 'getKendaraan') {
+    return getKendaraanCloud();
   }
 */
 
@@ -195,6 +204,139 @@ function laporkanKerusakanPeminjamanCloud(data) {
     return ContentService.createTextOutput(JSON.stringify({
       result: 'success',
       message: 'Laporan kerusakan berhasil disimpan di cloud'
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getOrCreateKendaraanSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName("Armada Kendaraan");
+  if (!sheet) {
+    sheet = ss.insertSheet("Armada Kendaraan");
+    sheet.appendRow([
+      "ID Kendaraan",
+      "Nama Kendaraan",
+      "Plat Nomor",
+      "Jenis",
+      "Icon",
+      "QR Code",
+      "QR Image",
+      "Status",
+      "Updated At"
+    ]);
+    const headerRange = sheet.getRange("A1:I1");
+    headerRange.setFontWeight("bold");
+    headerRange.setBackground("#f1f5f9");
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function saveKendaraanCloud(record) {
+  try {
+    const sheet = getOrCreateKendaraanSheet();
+    const lastRow = sheet.getLastRow();
+    let foundRow = -1;
+    if (lastRow > 1) {
+      const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (let i = 0; i < ids.length; i++) {
+        if (String(ids[i][0]) === String(record.id)) {
+          foundRow = i + 2;
+          break;
+        }
+      }
+    }
+
+    const rowData = [
+      record.id || '',
+      record.nama || '',
+      record.plat || '',
+      record.jenis || '',
+      record.icon || '🚗',
+      record.qrCode || '',
+      record.qrImage || '',
+      record.status || 'Tersedia',
+      new Date().toISOString()
+    ];
+
+    if (foundRow > -1) {
+      sheet.getRange(foundRow, 1, 1, 9).setValues([rowData]);
+    } else {
+      sheet.appendRow(rowData);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      message: 'Armada kendaraan berhasil disimpan ke cloud'
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function deleteKendaraanCloud(id) {
+  try {
+    const sheet = getOrCreateKendaraanSheet();
+    const lastRow = sheet.getLastRow();
+    if (lastRow > 1) {
+      const ids = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (let i = 0; i < ids.length; i++) {
+        if (String(ids[i][0]) === String(id)) {
+          sheet.deleteRow(i + 2);
+          break;
+        }
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success'
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'error',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function getKendaraanCloud() {
+  try {
+    const sheet = getOrCreateKendaraanSheet();
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) {
+      return ContentService.createTextOutput(JSON.stringify({
+        result: 'success',
+        data: []
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    const values = sheet.getRange(2, 1, lastRow - 1, 9).getValues();
+    const result = [];
+    for (let i = 0; i < values.length; i++) {
+      const r = values[i];
+      if (!r[0]) continue;
+      result.push({
+        id: String(r[0]),
+        nama: String(r[1]),
+        plat: String(r[2]),
+        jenis: String(r[3]),
+        icon: String(r[4]),
+        qrCode: String(r[5]),
+        qrImage: String(r[6]),
+        status: String(r[7])
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      result: 'success',
+      data: result
     })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({

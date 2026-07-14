@@ -185,7 +185,8 @@ const PeminjamanDB = (() => {
 
   // --- CLOUD SYNC API ---
   function syncFromCloud() {
-    return fetch(`${SCRIPT_URL}?action=getPeminjaman`)
+    // Sinkronisasi data peminjaman & armada kendaraan dari cloud
+    const pPinjam = fetch(`${SCRIPT_URL}?action=getPeminjaman`)
       .then(r => r.json())
       .then(res => {
         if (res.result === 'success' && Array.isArray(res.data) && res.data.length > 0) {
@@ -198,6 +199,17 @@ const PeminjamanDB = (() => {
         console.warn('Gagal sinkron dari cloud, menggunakan local cache:', err);
         return getPeminjamanList();
       });
+
+    const pKendaraan = fetch(`${SCRIPT_URL}?action=getKendaraan`)
+      .then(r => r.json())
+      .then(res => {
+        if (res.result === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+          localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(res.data));
+        }
+      })
+      .catch(() => {});
+
+    return Promise.all([pPinjam, pKendaraan]).then(([pinjamData]) => pinjamData);
   }
 
   // --- KENDARAAN API ---
@@ -210,18 +222,34 @@ const PeminjamanDB = (() => {
     }
   }
 
-  function getKendaraanById(id) {
+  function getKendaraanById(idOrQuery) {
     const list = getKendaraanList();
-    return list.find(k => k.id === id) || null;
+    if (!idOrQuery) return null;
+    const q = String(idOrQuery).trim().toLowerCase();
+    return list.find(k => 
+      String(k.id).toLowerCase() === q ||
+      String(k.plat || '').toLowerCase() === q ||
+      String(k.nama || '').toLowerCase() === q ||
+      String(k.nama || '').toLowerCase().includes(q) ||
+      String(k.plat || '').toLowerCase().includes(q)
+    ) || null;
   }
 
   function saveKendaraan(data) {
     let list = getKendaraanList();
     const existingIdx = list.findIndex(k => k.id === data.id);
+    let updatedItem = null;
+
     if (existingIdx >= 0) {
-      list[existingIdx] = { ...list[existingIdx], ...data };
+      const existing = list[existingIdx];
+      updatedItem = {
+        ...existing,
+        ...data,
+        qrImage: (data.qrImage !== undefined && data.qrImage !== '') ? data.qrImage : existing.qrImage
+      };
+      list[existingIdx] = updatedItem;
     } else {
-      list.push({
+      updatedItem = {
         id: data.id || ('KND-' + Date.now()),
         nama: data.nama || 'Kendaraan Baru',
         plat: data.plat || '-',
@@ -230,9 +258,39 @@ const PeminjamanDB = (() => {
         qrCode: data.qrCode || '',
         qrImage: data.qrImage || '',
         status: 'Tersedia'
-      });
+      };
+      list.push(updatedItem);
     }
     localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+
+    // Sinkronkan barcode ke sesi peminjaman aktif jika kendaraan yang dipinjam sama
+    try {
+      const storedActive = localStorage.getItem('kuk_active_loan');
+      if (storedActive && updatedItem) {
+        const activeLoan = JSON.parse(storedActive);
+        if (
+          activeLoan &&
+          activeLoan.status === 'Aktif/Dipinjam' &&
+          (activeLoan.kendaraanId === updatedItem.id ||
+           String(activeLoan.platKendaraan || activeLoan.platNomor || '').toLowerCase() === String(updatedItem.plat || '').toLowerCase() ||
+           String(activeLoan.namaKendaraan || activeLoan.kendaraanNama || '').toLowerCase() === String(updatedItem.nama || '').toLowerCase())
+        ) {
+          activeLoan.qrImage = updatedItem.qrImage || activeLoan.qrImage || '';
+          activeLoan.qrCode = updatedItem.qrCode || activeLoan.qrCode || '';
+          localStorage.setItem('kuk_active_loan', JSON.stringify(activeLoan));
+        }
+      }
+    } catch (e) {}
+
+    // Kirim ke cloud
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'save_kendaraan',
+        record: updatedItem
+      })
+    }).catch(err => console.warn('Gagal simpan kendaraan ke cloud:', err));
+
     return list;
   }
 
@@ -240,6 +298,15 @@ const PeminjamanDB = (() => {
     let list = getKendaraanList();
     list = list.filter(k => k.id !== id);
     localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        action: 'delete_kendaraan',
+        id: id
+      })
+    }).catch(() => {});
+
     return list;
   }
 
@@ -278,6 +345,8 @@ const PeminjamanDB = (() => {
       kendaraanId: data.kendaraanId,
       namaKendaraan: kendaraan ? kendaraan.nama : data.namaKendaraan || '-',
       platKendaraan: kendaraan ? kendaraan.plat : data.platKendaraan || '-',
+      qrImage: kendaraan ? (kendaraan.qrImage || '') : '',
+      qrCode: kendaraan ? (kendaraan.qrCode || '') : '',
       waktuMulai: data.waktuMulai,
       waktuRencanaKembali: data.waktuRencanaKembali,
       keperluan: data.keperluan.trim(),

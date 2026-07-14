@@ -679,11 +679,23 @@
 
       // Tampilkan QR Pertamina jika kendaraan memiliki gambar barcode atau merupakan L300/Engkel
       const qrBox = document.getElementById('pertaminaQrContainer');
-      const kend = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanById) ? PeminjamanDB.getKendaraanById(loan.kendaraanId) : null;
-      const qrImgData = (kend && kend.qrImage) ? kend.qrImage : ((kend && kend.qrCode && kend.qrCode.startsWith('data:image')) ? kend.qrCode : null);
-      const nameUpper = kendName.toUpperCase();
+      const kendList = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanList) ? PeminjamanDB.getKendaraanList() : [];
+      const kend = (typeof PeminjamanDB !== 'undefined' && PeminjamanDB.getKendaraanById)
+        ? (PeminjamanDB.getKendaraanById(loan.kendaraanId || loan.platKendaraan || loan.platNomor || loan.namaKendaraan) ||
+           kendList.find(k => k.id === loan.kendaraanId || String(k.plat||'').toLowerCase() === String(loan.platKendaraan || loan.platNomor || '').toLowerCase() || String(k.nama||'').toLowerCase() === String(loan.namaKendaraan || loan.kendaraanNama || '').toLowerCase()))
+        : null;
 
-      if (qrImgData || nameUpper.includes('L300') || nameUpper.includes('ENGKEL')) {
+      const qrImgData = (kend && kend.qrImage) 
+        ? kend.qrImage 
+        : (loan.qrImage 
+            ? loan.qrImage 
+            : ((kend && kend.qrCode && (kend.qrCode.startsWith('data:image') || kend.qrCode.startsWith('http'))) 
+                ? kend.qrCode 
+                : ((loan.qrCode && (loan.qrCode.startsWith('data:image') || loan.qrCode.startsWith('http'))) ? loan.qrCode : null)));
+
+      const nameUpper = String(kendName || '').toUpperCase();
+
+      if (qrImgData || nameUpper.includes('L300') || nameUpper.includes('ENGKEL') || (kend && kend.qrImage)) {
         qrBox.style.display = 'block';
         document.getElementById('qrKendaraanNama').textContent = kendName;
         document.getElementById('qrPlatNomor').textContent = plat;
@@ -778,11 +790,27 @@
               if (cloudLoan && cloudLoan.status !== 'Aktif/Dipinjam') {
                 localStorage.removeItem('kuk_active_loan');
                 selesaiAtauPinjamBaru();
+              } else {
+                showActiveLoanScreen(activeLoan);
               }
             } catch(e) {}
           }
         });
       }
+
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'kuk_db_kendaraan_v2' || e.key === 'kuk_active_loan') {
+          const storedActive = localStorage.getItem('kuk_active_loan');
+          if (storedActive) {
+            try {
+              const activeLoan = JSON.parse(storedActive);
+              if (activeLoan && activeLoan.status === 'Aktif/Dipinjam') {
+                showActiveLoanScreen(activeLoan);
+              }
+            } catch(err) {}
+          }
+        }
+      });
     });
   </script>
 </body>
