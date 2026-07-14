@@ -204,19 +204,53 @@ const PeminjamanDB = (() => {
       .then(r => r.json())
       .then(res => {
         if (res.result === 'success' && Array.isArray(res.data) && res.data.length > 0) {
-          localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(res.data));
+          const localList = getKendaraanList();
+          const merged = res.data.map(c => {
+            const l = localList.find(x => x.id === c.id || String(x.plat||'').toLowerCase() === String(c.plat||'').toLowerCase() || String(x.nama||'').toLowerCase() === String(c.nama||'').toLowerCase());
+            const img = (c.qrImage && c.qrImage !== '') ? c.qrImage : (l ? (l.qrImage || '') : '');
+            const cachedImg = img || localStorage.getItem('kuk_qr_img_' + c.id) || localStorage.getItem('kuk_qr_img_' + String(c.plat||'').toUpperCase()) || '';
+            return {
+              ...l,
+              ...c,
+              qrImage: cachedImg
+            };
+          });
+          localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(merged));
         }
       })
       .catch(() => {});
 
-    return Promise.all([pPinjam, pKendaraan]).then(([pinjamData]) => pinjamData);
+    return Promise.all([pPinjam, pKendaraan]).then(([pinjamData]) => {
+      // Perbarui qrImage pada sesi peminjaman aktif jika kendaraan memiliki gambar QR
+      try {
+        const storedActive = localStorage.getItem('kuk_active_loan');
+        if (storedActive) {
+          const activeLoan = JSON.parse(storedActive);
+          const kend = getKendaraanById(activeLoan.kendaraanId || activeLoan.platKendaraan || activeLoan.namaKendaraan);
+          if (kend && kend.qrImage) {
+            activeLoan.qrImage = kend.qrImage;
+            activeLoan.platKendaraan = kend.plat || activeLoan.platKendaraan;
+            localStorage.setItem('kuk_active_loan', JSON.stringify(activeLoan));
+          }
+        }
+      } catch (e) {}
+      return pinjamData;
+    });
   }
 
   // --- KENDARAAN API ---
   function getKendaraanList() {
     initDB();
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || DEFAULT_KENDARAAN;
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || DEFAULT_KENDARAAN;
+      return list.map(item => {
+        if (!item.qrImage) {
+          item.qrImage = localStorage.getItem('kuk_qr_img_' + item.id) ||
+                         localStorage.getItem('kuk_qr_img_' + String(item.plat || '').toUpperCase()) ||
+                         (String(item.nama||'').toUpperCase().includes('L300') ? (localStorage.getItem('kuk_qr_img_L300') || '') : '');
+        }
+        return item;
+      });
     } catch (e) {
       return DEFAULT_KENDARAAN;
     }
@@ -231,7 +265,9 @@ const PeminjamanDB = (() => {
       String(k.plat || '').toLowerCase() === q ||
       String(k.nama || '').toLowerCase() === q ||
       String(k.nama || '').toLowerCase().includes(q) ||
-      String(k.plat || '').toLowerCase().includes(q)
+      String(k.plat || '').toLowerCase().includes(q) ||
+      (q.includes('l300') && String(k.nama||'').toLowerCase().includes('l300')) ||
+      (q.includes('engkel') && String(k.nama||'').toLowerCase().includes('engkel'))
     ) || null;
   }
 
@@ -261,6 +297,15 @@ const PeminjamanDB = (() => {
       };
       list.push(updatedItem);
     }
+
+    if (updatedItem.qrImage) {
+      localStorage.setItem('kuk_qr_img_' + updatedItem.id, updatedItem.qrImage);
+      if (updatedItem.plat) localStorage.setItem('kuk_qr_img_' + String(updatedItem.plat).toUpperCase(), updatedItem.qrImage);
+      if (String(updatedItem.nama||'').toUpperCase().includes('L300')) {
+        localStorage.setItem('kuk_qr_img_L300', updatedItem.qrImage);
+      }
+    }
+
     localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
 
     // Sinkronkan barcode ke sesi peminjaman aktif jika kendaraan yang dipinjam sama
@@ -273,10 +318,16 @@ const PeminjamanDB = (() => {
           activeLoan.status === 'Aktif/Dipinjam' &&
           (activeLoan.kendaraanId === updatedItem.id ||
            String(activeLoan.platKendaraan || activeLoan.platNomor || '').toLowerCase() === String(updatedItem.plat || '').toLowerCase() ||
-           String(activeLoan.namaKendaraan || activeLoan.kendaraanNama || '').toLowerCase() === String(updatedItem.nama || '').toLowerCase())
+           String(activeLoan.namaKendaraan || activeLoan.kendaraanNama || '').toLowerCase() === String(updatedItem.nama || '').toLowerCase() ||
+           (String(activeLoan.namaKendaraan || '').toLowerCase().includes('l300') && String(updatedItem.nama || '').toLowerCase().includes('l300')) ||
+           (String(activeLoan.namaKendaraan || '').toLowerCase().includes('engkel') && String(updatedItem.nama || '').toLowerCase().includes('engkel')))
         ) {
           activeLoan.qrImage = updatedItem.qrImage || activeLoan.qrImage || '';
           activeLoan.qrCode = updatedItem.qrCode || activeLoan.qrCode || '';
+          if (updatedItem.plat && updatedItem.plat !== '-') {
+            activeLoan.platKendaraan = updatedItem.plat;
+            activeLoan.platNomor = updatedItem.plat;
+          }
           localStorage.setItem('kuk_active_loan', JSON.stringify(activeLoan));
         }
       }
