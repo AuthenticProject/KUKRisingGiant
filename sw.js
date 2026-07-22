@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v23';
+const CACHE_NAME = 'kuk-hr-cache-v25';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const STATIC_ASSETS = [
   './peminjaman.html',
   './peminjaman_admin.html',
   './peminjaman_db.js',
+  './karyawan.html',
+  './karyawan_db.js',
   './dashboard/',
   './dashboard/index.html',
   './manifest.json',
@@ -86,6 +88,37 @@ self.addEventListener('fetch', event => {
       });
 
       return cachedResponse || fetchPromise;
+    })
+  );
+});
+
+// Message Listener from Clients (for triggering H-1 notifications across device/background)
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'SHOW_H1_NOTIFICATION') {
+    const { title, body, tag } = event.data;
+    self.registration.showNotification(title, {
+      body: body,
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      tag: tag || 'kuk-rekontrak-h1',
+      requireInteraction: true,
+      data: { url: './karyawan.html' }
+    });
+  }
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
+      for (let client of windowClients) {
+        if (client.url && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('./karyawan.html');
+      }
     })
   );
 });

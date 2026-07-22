@@ -488,6 +488,14 @@
         <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
       </a>
 
+      <!-- Rekrutmen & Kontrak Karyawan -->
+      <a href="karyawan.html" id="menu-karyawan" class="menu-card purple" style="display:none;">
+        <div class="menu-icon">👥</div>
+        <div class="menu-card-label">Karyawan & Kontrak</div>
+        <div class="menu-card-desc">Hire baru & rekontrak</div>
+        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+
     </div>
 
     <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
@@ -498,13 +506,13 @@
 
     // === AUTH CONFIG ===
     const DEFAULT_USERS = [
-      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin'] },
-      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin'] }
+      { username: 'fariz', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'andika', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'irsyadil', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'users', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'ari', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'shuva', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'aria', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] },
+      { username: 'zain', password: '12345', permissions: ['absen', 'cuti', 'pelanggaran', 'dashboard', 'tip', 'peminjaman', 'peminjaman_admin', 'karyawan'] }
     ];
 
     function getUsersDB() {
@@ -524,6 +532,7 @@
         u.permissions = u.permissions || [];
         if (!u.permissions.includes('peminjaman')) u.permissions.push('peminjaman');
         if (!u.permissions.includes('peminjaman_admin')) u.permissions.push('peminjaman_admin');
+        if (!u.permissions.includes('karyawan')) u.permissions.push('karyawan');
       });
       return result;
     }
@@ -626,13 +635,14 @@
         'pelanggaran': 'menu-pelanggaran',
         'dashboard': 'menu-dashboard',
         'tip': 'menu-tip',
-        'peminjaman': 'menu-peminjaman'
+        'peminjaman': 'menu-peminjaman',
+        'karyawan': 'menu-karyawan'
       };
 
       for (let key in menuMap) {
         const el = document.getElementById(menuMap[key]);
         if (el) {
-          const alwaysShow = (key === 'peminjaman' || key === 'peminjaman_admin');
+          const alwaysShow = (key === 'peminjaman' || key === 'peminjaman_admin' || key === 'karyawan');
           el.style.display = (alwaysShow || perms.includes(key)) ? 'flex' : 'none';
         }
       }
@@ -640,6 +650,11 @@
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('portalScreen').style.display = 'flex';
       document.getElementById('welcomeName').textContent = username;
+
+      // Jalankan pengecekan notifikasi H-1 rekontrak saat masuk ke portal
+      if (window.KaryawanDB && typeof window.KaryawanDB.checkAndNotifyH1Rekontrak === 'function') {
+        window.KaryawanDB.checkAndNotifyH1Rekontrak();
+      }
     }
 
     // === LOGOUT ===
@@ -689,5 +704,6 @@
       }
     }
   </script>
+  <script src="karyawan_db.js"></script>
 </body>
 </html>
