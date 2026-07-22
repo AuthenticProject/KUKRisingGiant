@@ -17,6 +17,7 @@ const PeminjamanDB = (() => {
       plat: 'L300',
       jenis: 'Pick Up / Angkutan Logistik',
       icon: '🚚',
+      qrImage: 'QR-L300.jpeg',
       status: 'Tersedia'
     },
     {
@@ -165,6 +166,7 @@ const PeminjamanDB = (() => {
       kendaraanId: 'KND-L300',
       namaKendaraan: 'Mitsubishi L300',
       platKendaraan: 'L300',
+      qrImage: 'QR-L300.jpeg',
       waktuMulai: '2026-07-12T08:00',
       waktuRencanaKembali: '2026-07-12T17:00',
       keperluan: 'Pengiriman barang pesanan kaca ke cabang pemasaran Bekasi.',
@@ -177,9 +179,26 @@ const PeminjamanDB = (() => {
   function initDB() {
     if (!localStorage.getItem(STORAGE_KEY_KENDARAAN)) {
       localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(DEFAULT_KENDARAAN));
+    } else {
+      // Pastikan L300 di localStorage memiliki qrImage default QR-L300.jpeg jika kosong
+      try {
+        let list = JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || [];
+        let changed = false;
+        list.forEach(k => {
+          const isL300 = String(k.nama||'').toUpperCase().includes('L300') || String(k.id||'').toUpperCase().includes('L300') || String(k.plat||'').toUpperCase().includes('L300');
+          if (isL300 && (!k.qrImage || k.qrImage === '')) {
+            k.qrImage = localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg';
+            changed = true;
+          }
+        });
+        if (changed) localStorage.setItem(STORAGE_KEY_KENDARAAN, JSON.stringify(list));
+      } catch(e) {}
     }
     if (!localStorage.getItem(STORAGE_KEY_PEMINJAMAN)) {
       localStorage.setItem(STORAGE_KEY_PEMINJAMAN, JSON.stringify(DEFAULT_PEMINJAMAN));
+    }
+    if (!localStorage.getItem('kuk_qr_img_L300') || localStorage.getItem('kuk_qr_img_L300') === '') {
+      localStorage.setItem('kuk_qr_img_L300', 'QR-L300.jpeg');
     }
   }
 
@@ -207,8 +226,9 @@ const PeminjamanDB = (() => {
           const localList = getKendaraanList();
           const merged = res.data.map(c => {
             const l = localList.find(x => x.id === c.id || String(x.plat||'').toLowerCase() === String(c.plat||'').toLowerCase() || String(x.nama||'').toLowerCase() === String(c.nama||'').toLowerCase());
+            const isL300 = String(c.nama||'').toUpperCase().includes('L300') || String(c.id||'').toUpperCase().includes('L300') || String(c.plat||'').toUpperCase().includes('L300');
             const img = (c.qrImage && c.qrImage !== '') ? c.qrImage : (l ? (l.qrImage || '') : '');
-            const cachedImg = img || localStorage.getItem('kuk_qr_img_' + c.id) || localStorage.getItem('kuk_qr_img_' + String(c.plat||'').toUpperCase()) || '';
+            const cachedImg = img || localStorage.getItem('kuk_qr_img_' + c.id) || localStorage.getItem('kuk_qr_img_' + String(c.plat||'').toUpperCase()) || (isL300 ? (localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg') : '');
             return {
               ...l,
               ...c,
@@ -244,10 +264,11 @@ const PeminjamanDB = (() => {
     try {
       const list = JSON.parse(localStorage.getItem(STORAGE_KEY_KENDARAAN)) || DEFAULT_KENDARAAN;
       return list.map(item => {
-        if (!item.qrImage) {
+        const isL300 = String(item.nama||'').toUpperCase().includes('L300') || String(item.id||'').toUpperCase().includes('L300') || String(item.plat||'').toUpperCase().includes('L300');
+        if (!item.qrImage || item.qrImage === '') {
           item.qrImage = localStorage.getItem('kuk_qr_img_' + item.id) ||
                          localStorage.getItem('kuk_qr_img_' + String(item.plat || '').toUpperCase()) ||
-                         (String(item.nama||'').toUpperCase().includes('L300') ? (localStorage.getItem('kuk_qr_img_L300') || '') : '');
+                         (isL300 ? (localStorage.getItem('kuk_qr_img_L300') || 'QR-L300.jpeg') : '');
         }
         return item;
       });
@@ -396,7 +417,7 @@ const PeminjamanDB = (() => {
       kendaraanId: data.kendaraanId,
       namaKendaraan: kendaraan ? kendaraan.nama : data.namaKendaraan || '-',
       platKendaraan: kendaraan ? kendaraan.plat : data.platKendaraan || '-',
-      qrImage: kendaraan ? (kendaraan.qrImage || '') : '',
+      qrImage: kendaraan ? (kendaraan.qrImage || (String(kendaraan.nama||'').toUpperCase().includes('L300') ? 'QR-L300.jpeg' : '')) : (String(data.namaKendaraan||'').toUpperCase().includes('L300') ? 'QR-L300.jpeg' : ''),
       qrCode: kendaraan ? (kendaraan.qrCode || '') : '',
       waktuMulai: data.waktuMulai,
       waktuRencanaKembali: data.waktuRencanaKembali,
