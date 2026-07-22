@@ -9,11 +9,11 @@
   <meta name="theme-color" content="#2563eb">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="../icon-192.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="../icon-192.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../icon-192.png">
-  <link rel="shortcut icon" href="../icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icon-192.png">
+  <link rel="shortcut icon" href="icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -531,11 +531,14 @@
     }
 
     .stat-title {
-      font-size: 13px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
       margin-bottom: 8px;
+      line-height: 1.3;
+      overflow-wrap: break-word;
+      word-break: break-word;
     }
 
     .stat-val {
@@ -952,28 +955,83 @@
         gap: 8px;
       }
 
-      /* Content sections */
-      .content-section {
-        padding: 14px;
+      /* Prevent horizontal viewport overflow on HP */
+      body, #appWrapper, .main-content, .content-section {
+        max-width: 100vw !important;
+        box-sizing: border-box !important;
+        overflow-x: hidden !important;
       }
 
-      /* Stats grid — 2 columns on mobile */
+      /* Content sections */
+      .content-section {
+        padding: 12px !important;
+      }
+
+      /* Sub-tabs stacked neatly on mobile */
+      .sub-tabs {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+
+      .sub-tab {
+        width: 100% !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        padding: 10px 12px !important;
+        font-size: 13px !important;
+        border-radius: 10px !important;
+      }
+
+      /* Stats grid — 2 columns clean grid on mobile */
       .stats-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 10px;
-        margin-bottom: 14px;
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+        width: 100% !important;
+        margin-bottom: 14px !important;
+        box-sizing: border-box !important;
       }
 
       .stat-card {
-        padding: 16px;
+        padding: 12px 10px !important;
+        box-sizing: border-box !important;
       }
 
       .stat-val {
-        font-size: 24px;
+        font-size: 22px !important;
       }
 
       .stat-title {
-        font-size: 12px;
+        font-size: 10px !important;
+        line-height: 1.2 !important;
+      }
+
+      /* Stack action buttons & input controls on mobile HP */
+      #tab-karyawan div[style*="display:flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 8px !important;
+      }
+
+      #tab-karyawan input[type="text"],
+      #tab-karyawan select,
+      #tab-karyawan .btn {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        justify-content: center !important;
+      }
+
+      #subContent-karyawan-rekontrak td:last-child div,
+      #subContent-karyawan-hire td:last-child div {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 4px !important;
+        align-items: stretch !important;
       }
 
       /* Dashboard 2-col → 1-col */
@@ -2031,9 +2089,12 @@
             </div>
 
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 16px;">
-              <button class="btn btn-primary btn-sm" onclick="openModalCalonBaru()">➕ Input Manual Calon</button>
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="text" id="rekSearch" placeholder="🔍 Cari nama / posisi..." oninput="renderRekrutmenTable()" style="width: 180px; padding: 8px 12px; font-size: 13px;">
+                <button class="btn btn-primary btn-sm" onclick="openModalCalonBaru()">➕ Input Manual Calon</button>
+                <button class="btn btn-success btn-sm" onclick="openModalSpreadsheetForm()" style="background:#10b981; color:white; border:none;">📥 Tarik / Import Spreadsheet Form</button>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <input type="text" id="rekSearch" placeholder="🔍 Cari nama / posisi..." oninput="debouncedRenderRekrutmen()" style="width: 180px; padding: 8px 12px; font-size: 13px;">
                 <select id="rekFilterStatus" onchange="renderRekrutmenTable()" style="padding: 8px 12px; font-size: 13px;">
                   <option value="ALL">Semua Status</option>
                   <option value="Seleksi Berkas / Wawancara">Seleksi Berkas / Wawancara</option>
@@ -2087,7 +2148,7 @@
             <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 16px;">
               <button class="btn btn-primary btn-sm" onclick="openModalRekontrakBaru()">➕ Tambah Karyawan Kontrak</button>
               <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <input type="text" id="konSearch" placeholder="🔍 Cari nama / jabatan..." oninput="renderRekontrakTable()" style="width: 180px; padding: 8px 12px; font-size: 13px;">
+                <input type="text" id="konSearch" placeholder="🔍 Cari nama / jabatan..." oninput="debouncedRenderRekontrak()" style="width: 180px; padding: 8px 12px; font-size: 13px;">
                 <select id="konFilterToko" onchange="renderRekontrakTable()" style="padding: 8px 12px; font-size: 13px;">
                   <option value="ALL">Semua Toko</option>
                   <option value="bangunan">KUK Bangunan</option>
@@ -2549,7 +2610,7 @@
       </div>
       <div class="modal-body" id="pmPrintArea" style="background:#fff; color:#000; padding:32px; font-family:'Times New Roman', Times, serif;">
         <div style="border-bottom: 3px double #000; padding-bottom: 12px; margin-bottom: 24px; text-align: center;">
-          <img src="../kop_umum.png" alt="Kop Surat KUK" style="width: 100%; max-width: 680px; height: auto; display: block; margin: 0 auto;">
+          <img src="kop_umum.png" onerror="this.onerror=null; this.src='../kop_umum.png';" alt="Kop Surat KUK" style="width: 100%; max-width: 680px; height: auto; display: block; margin: 0 auto;">
         </div>
 
         <div style="text-align: center; margin-bottom: 24px;">
@@ -3049,6 +3110,41 @@
     </div>
   </div>
 
+  <!-- Modal Importer Spreadsheet Form -->
+  <div class="modal-overlay" id="modalSpreadsheetForm">
+    <div class="modal-container" style="max-width: 550px;">
+      <div class="modal-header">
+        <h3>📥 Import Data Karyawan Baru dari Spreadsheet Form</h3>
+        <button class="btn-link" onclick="closeModal('modalSpreadsheetForm')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: rgba(59, 130, 246, 0.08); border-left: 4px solid var(--primary); padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; color: var(--text);">
+          ℹ️ <strong>Fitur Import Otomatis:</strong> Anda dapat menarik respons otomatis dari Formulir Rekrutmen Google Drive / Spreadsheet, atau melakukan copy-paste data tabel spreadsheet (CSV/Excel).
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+          <button type="button" class="btn btn-success" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; background: #10b981; color: white; border: none;" onclick="sinkronDriveFormOtomatis()">
+            🔄 Tarik Otomatis dari Cloud Drive
+          </button>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 16px 0;">
+
+        <form id="formImportSpreadsheet" onsubmit="prosesImportSpreadsheet(event)">
+          <div class="form-group full">
+            <label style="font-weight: 600;">Atau Copy-Paste Data Tabel Spreadsheet / CSV (Nama, Posisi, No HP, Email):</label>
+            <textarea id="inImportData" rows="5" placeholder="Contoh:&#10;Bagus Setyawan, Staf Operasional, 08123456789, bagus@gmail.com&#10;Siti Nurhaliza, Kasir Palen, 08198765432, siti@gmail.com" style="font-family: monospace; font-size: 12px; padding: 10px; width: 100%; box-sizing: border-box;"></textarea>
+            <small style="color: var(--text-muted); display: block; margin-top: 4px;">* Format kolom: Nama, Posisi, No HP, Email, Pendidikan (Bisa dipisah koma atau tab dari Excel/Spreadsheet)</small>
+          </div>
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+            <button type="button" class="btn btn-outline" onclick="closeModal('modalSpreadsheetForm')">Batal</button>
+            <button type="submit" class="btn btn-primary">📥 Import Data Ke Rekrutmen</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Evaluasi Masa Training -->
   <div class="modal-overlay" id="modalEvaluasi">
     <div class="modal-container">
@@ -3362,21 +3458,41 @@
     ];
 
     function getUsersDB() {
+      let list = null;
       // Prioritize cloud data if synced
       if (rawUsersData && rawUsersData.length > 0) {
-        return rawUsersData;
+        list = JSON.parse(JSON.stringify(rawUsersData));
+      } else {
+        // Fallback to local or default if cloud not ready
+        const stored = localStorage.getItem('kuk_users_db');
+        if (stored) {
+          try { list = JSON.parse(stored); } catch (e) { }
+        }
       }
-      
-      // Fallback to local or default if cloud not ready
-      const stored = localStorage.getItem('kuk_users_db');
-      if (stored) return JSON.parse(stored);
-      
-      const migrated = DEFAULT_USERS.map(u => {
-        const oldPass = localStorage.getItem('kuk_pass_' + u.username);
-        if (oldPass) u.password = oldPass;
+
+      if (!list || !Array.isArray(list) || list.length === 0) {
+        list = DEFAULT_USERS.map(u => {
+          const oldPass = localStorage.getItem('kuk_pass_' + u.username);
+          if (oldPass) u.password = oldPass;
+          return { ...u };
+        });
+      }
+
+      // Auto-migrate: pastikan default users / koordinator / hrd selalu punya hak akses karyawan & peminjaman
+      return list.map(u => {
+        const def = DEFAULT_USERS.find(d => d.username.toLowerCase() === String(u.username).toLowerCase().trim());
+        u.permissions = u.permissions || [];
+        if (def && def.permissions) {
+          def.permissions.forEach(p => {
+            if (!u.permissions.includes(p)) u.permissions.push(p);
+          });
+        }
+        const jab = (u.jabatan || '').toLowerCase();
+        if (jab.includes('koordinator') || jab.includes('hrd') || jab.includes('kepala toko') || ['fariz', 'irsyadil', 'andika', 'zain', 'ari', 'shuva', 'aria'].includes(String(u.username).toLowerCase().trim())) {
+          if (!u.permissions.includes('karyawan')) u.permissions.push('karyawan');
+        }
         return u;
       });
-      return migrated;
     }
 
     function filterDataByRole(dataArray, refKaryawan = []) {
@@ -3451,6 +3567,10 @@
       const users = getUsersDB();
       const userObj = users.find(u => u.username === username);
       const perms = userObj ? (userObj.permissions || []) : [];
+      const jab = userObj ? (userObj.jabatan || '').toLowerCase() : '';
+      const isAutoAdmin = ['fariz', 'irsyadil'].includes(username);
+      const hasKaryawanPerm = perms.includes('karyawan') || isAutoAdmin || ['andika', 'ari', 'shuva', 'aria', 'zain'].includes(username) || jab.includes('koordinator') || jab.includes('hrd') || jab.includes('kepala toko');
+      const hasUsersPerm = perms.includes('users') || isAutoAdmin;
       
       // Store jabatan and toko in sessionStorage for use in documents
       if (userObj) {
@@ -3471,9 +3591,9 @@
           if (match) {
             const tabId = match[1];
             // Admin only menus
-            if (tabId === 'users' && !perms.includes('users')) {
+            if (tabId === 'users' && !hasUsersPerm) {
               el.style.display = 'none';
-            } else if (tabId === 'karyawan' && !perms.includes('karyawan')) {
+            } else if (tabId === 'karyawan' && !hasKaryawanPerm) {
               el.style.display = 'none';
             } else {
               el.style.display = 'flex';
@@ -3485,11 +3605,11 @@
       // Update mobile nav for 'users' and 'karyawan'
       const mobileNavUsers = document.getElementById('mn-users');
       if (mobileNavUsers) {
-        mobileNavUsers.style.display = perms.includes('users') ? 'flex' : 'none';
+        mobileNavUsers.style.display = hasUsersPerm ? 'flex' : 'none';
       }
       const mobileNavKaryawan = document.getElementById('mn-karyawan');
       if (mobileNavKaryawan) {
-        mobileNavKaryawan.style.display = perms.includes('karyawan') ? 'flex' : 'none';
+        mobileNavKaryawan.style.display = hasKaryawanPerm ? 'flex' : 'none';
       }
 
       syncDataAll();
@@ -3609,17 +3729,55 @@
       });
     }
 
-    function sinkronDriveForm() {
+    // Debounce Helper untuk mencegah lag saat mengetik di pencarian
+    function debounce(func, wait = 150) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    const debouncedRenderRekontrak = debounce(() => renderRekontrakTable(), 150);
+    const debouncedRenderRekrutmen = debounce(() => renderRekrutmenTable(), 150);
+    const debouncedRenderKaryawan = debounce(() => renderKaryawan(), 150);
+
+    function openModalSpreadsheetForm() {
+      if (document.getElementById('inImportData')) {
+        document.getElementById('inImportData').value = '';
+      }
+      openModal('modalSpreadsheetForm');
+    }
+
+    function sinkronDriveFormOtomatis() {
       if (typeof KaryawanDB === 'undefined') return;
-      showToast('Menarik respons baru dari Formulir Google Drive...', 'info');
+      showToast('Menarik respons otomatis dari Google Drive / Spreadsheet Form...', 'info');
       KaryawanDB.tarikDataDriveForm().then(res => {
-        if (res.count > 0) {
-          showToast(`Berhasil menarik ${res.count} calon pelamar baru dari Drive Form!`, 'success');
-        } else {
-          showToast('Sinkronisasi selesai. Tidak ada formulir pelamar baru.', 'info');
-        }
+        showToast(res.message || 'Sinkronisasi selesai.', res.count > 0 ? 'success' : 'info');
         renderRekrutmenTable();
+        closeModal('modalSpreadsheetForm');
       });
+    }
+
+    function prosesImportSpreadsheet(e) {
+      e.preventDefault();
+      const raw = document.getElementById('inImportData').value;
+      if (!raw || !raw.trim()) {
+        showToast('Silakan masukkan data spreadsheet terlebih dahulu.', 'warning');
+        return;
+      }
+      const res = KaryawanDB.importFromSpreadsheetData(raw);
+      if (res.success) {
+        showToast(res.message, 'success');
+        renderRekrutmenTable();
+        closeModal('modalSpreadsheetForm');
+      } else {
+        showToast(res.message, 'danger');
+      }
+    }
+
+    function sinkronDriveForm() {
+      sinkronDriveFormOtomatis();
     }
 
     function openModalCalonBaru() {
@@ -3698,6 +3856,9 @@
 
     function renderRekontrakTable() {
       if (typeof KaryawanDB === 'undefined') return;
+      if (typeof KaryawanDB.syncRekontrakWithMaster === 'function' && typeof dbKaryawan !== 'undefined' && Array.isArray(dbKaryawan) && dbKaryawan.length > 0) {
+        KaryawanDB.syncRekontrakWithMaster(dbKaryawan);
+      }
       KaryawanDB.updateStatusRekontrakOtomatis();
       const list = KaryawanDB.getRekontrakList();
       const q = (document.getElementById('konSearch') && document.getElementById('konSearch').value || '').toLowerCase();
@@ -4184,6 +4345,9 @@
         .then(([dashRes, absenRes]) => {
           let tempKaryawan = dashRes.karyawan || [];
           dbKaryawan = filterDataByRole(tempKaryawan, tempKaryawan);
+          if (typeof KaryawanDB !== 'undefined' && typeof KaryawanDB.syncRekontrakWithMaster === 'function') {
+            KaryawanDB.syncRekontrakWithMaster(dbKaryawan);
+          }
           rawCutiData = filterDataByRole(dashRes.data || [], tempKaryawan);
           rawViolationsData = filterDataByRole(dashRes.violations || [], tempKaryawan);
           rawAbsenData = filterDataByRole(absenRes.data || [], tempKaryawan);
@@ -5451,7 +5615,7 @@
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
           
           <!-- Background Kop Surat -->
-          <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
+          <img src="${kopImg}" onerror="this.onerror=null; this.src='../' + '${kopImg}';" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
 
           <!-- Konten Slip -->
           <div style="position: relative; z-index: 1; padding: 170px 70px 100px 70px; text-align: left; font-size: 15px; line-height: 1.6;">
@@ -5612,7 +5776,7 @@
         
         allSlipsHtml += `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif; color: #000; box-sizing: border-box; overflow: hidden; background: #fff; ${pageBreak}">
-          <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
+          <img src="${kopImg}" onerror="this.onerror=null; this.src='../' + '${kopImg}';" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
 
           <div style="position: relative; z-index: 1; padding: 170px 70px 100px 70px; text-align: left; font-size: 15px; line-height: 1.6;">
             <div style="font-weight: bold; font-size: 16px; text-decoration: underline; text-align: center;">SURAT KETERANGAN GAJI</div>
@@ -5769,7 +5933,7 @@
       const spHtml = `
         <div style="position: relative; width: 215mm; height: 330mm; margin: 0 auto; font-family: 'Times New Roman', Times, serif !important; color: #000; box-sizing: border-box; overflow: hidden; background: #fff;">
           <!-- Background Kop Surat -->
-          <img src="${kopImg}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
+          <img src="${kopImg}" onerror="this.onerror=null; this.src='../' + '${kopImg}';" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; object-fit: cover;" alt="Kop Surat">
 
           <!-- Konten SP -->
           <div style="position: relative; z-index: 1; padding: 170px 70px 100px 70px; text-align: left; font-size: 15px; line-height: 1.6; font-family: 'Times New Roman', Times, serif !important;">

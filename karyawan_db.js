@@ -72,6 +72,7 @@ const KaryawanDB = (() => {
   ];
 
   // Data contoh karyawan lama untuk pemantauan & perpanjangan kontrak (Rekontrak setahun, terakhir 31 Mei 2026)
+  // Data 12 karyawan aktif untuk pemantauan & perpanjangan kontrak (Rekontrak diadakan 31 Mei 2026, berikutnya 31 Mei 2027)
   const DEFAULT_REKONTRAK = [
     {
       id: 'KRY-KONTRAK-01',
@@ -80,11 +81,12 @@ const KaryawanDB = (() => {
       jabatan: 'Kepala Gudang Bangunan',
       toko: 'bangunan',
       noHp: '081345678901',
-      tglMulaiKontrak: '2025-06-01',
-      tglSelesaiKontrak: '2026-05-31', // Terakhir 31 Mei 2026 (1 Tahun)
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31', // Rekontrak 31 Mei 2026 -> Periode Aktif hingga 31 Mei 2027
       gajiPokok: 'Rp 3.800.000',
       statusKontrak: 'Kontrak Aktif',
       riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
         { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
       ],
       catatanPerforma: 'Kinerja konsisten baik, rekomendasi perpanjangan rekontrak 1 tahun.'
@@ -96,11 +98,12 @@ const KaryawanDB = (() => {
       jabatan: 'Staf Administrasi & Keuangan',
       toko: 'bangunan',
       noHp: '081298765432',
-      tglMulaiKontrak: '2025-06-01',
-      tglSelesaiKontrak: '2026-05-31', // Terakhir 31 Mei 2026 (1 Tahun)
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
       gajiPokok: 'Rp 3.500.000',
       statusKontrak: 'Kontrak Aktif',
       riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
         { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
       ],
       catatanPerforma: 'Aktif mengelola administrasi pembukuan harian.'
@@ -112,36 +115,220 @@ const KaryawanDB = (() => {
       jabatan: 'Staf Pelayanan & Gudang Palen',
       toko: 'palen',
       noHp: '085712345678',
-      tglMulaiKontrak: '2025-06-01',
-      tglSelesaiKontrak: '2026-05-31', // Terakhir 31 Mei 2026 (1 Tahun)
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
       gajiPokok: 'Rp 3.200.000',
       statusKontrak: 'Kontrak Aktif',
       riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
         { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
       ],
       catatanPerforma: 'Rajin dan dapat diandalkan saat jam sibuk toko.'
+    },
+    {
+      id: 'KRY-KONTRAK-04',
+      idKaryawan: 'KRY-004',
+      namaLengkap: 'Miftah',
+      jabatan: 'Staf Operasional Palen',
+      toko: 'palen',
+      noHp: '085711223344',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.200.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Kinerja teratur dalam pelayanan dan penataan stok.'
+    },
+    {
+      id: 'KRY-KONTRAK-05',
+      idKaryawan: 'KRY-005',
+      namaLengkap: 'Nukul',
+      jabatan: 'Staf Gudang Palen',
+      toko: 'palen',
+      noHp: '085755667788',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.200.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Penanganan barang di gudang sangat rapi.'
+    },
+    {
+      id: 'KRY-KONTRAK-06',
+      idKaryawan: 'KRY-006',
+      namaLengkap: 'Raju',
+      jabatan: 'Staf Pelayanan Palen',
+      toko: 'palen',
+      noHp: '085799887766',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.200.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Cepat dalam merespons kebutuhan customer.'
+    },
+    {
+      id: 'KRY-KONTRAK-07',
+      idKaryawan: 'KRY-007',
+      namaLengkap: 'Agheea',
+      jabatan: 'Kasir Palen',
+      toko: 'palen',
+      noHp: '085733445566',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.300.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Transaksi kasir teliti dan minim selisih.'
+    },
+    {
+      id: 'KRY-KONTRAK-08',
+      idKaryawan: 'KRY-008',
+      namaLengkap: 'Basith',
+      jabatan: 'Staf Gudang Bangunan',
+      toko: 'bangunan',
+      noHp: '081377889900',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.400.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Bongkar muat bahan bangunan terkoordinasi dengan baik.'
+    },
+    {
+      id: 'KRY-KONTRAK-09',
+      idKaryawan: 'KRY-009',
+      namaLengkap: 'Anshory',
+      jabatan: 'Supir Armada Logistik',
+      toko: 'bangunan',
+      noHp: '081366554433',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.600.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Pengiriman barang bangunan tepat waktu dan aman.'
+    },
+    {
+      id: 'KRY-KONTRAK-10',
+      idKaryawan: 'KRY-010',
+      namaLengkap: 'Lintang',
+      jabatan: 'Staf Administrasi',
+      toko: 'bangunan',
+      noHp: '081288990011',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.400.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
+        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+      ],
+      catatanPerforma: 'Pengarsipan dokumen dan surat menyurat rapi.'
+    },
+    {
+      id: 'KRY-KONTRAK-11',
+      idKaryawan: 'KRY-011',
+      namaLengkap: 'Bagus Setyawan',
+      jabatan: 'Staf Operasional & Gudang',
+      toko: 'bangunan',
+      noHp: '081234567811',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.300.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }
+      ],
+      catatanPerforma: 'Anggota staf aktif hasil pengangkatan rekrutmen.'
+    },
+    {
+      id: 'KRY-KONTRAK-12',
+      idKaryawan: 'KRY-012',
+      namaLengkap: 'Rizky Ramadhan',
+      jabatan: 'Supir Armada Logistik',
+      toko: 'bangunan',
+      noHp: '085678912344',
+      tglMulaiKontrak: '2026-06-01',
+      tglSelesaiKontrak: '2027-05-31',
+      gajiPokok: 'Rp 3.600.000',
+      statusKontrak: 'Kontrak Aktif',
+      riwayatKontrak: [
+        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }
+      ],
+      catatanPerforma: 'Pengemudi armada logistik handal dan cekatan.'
     }
   ];
 
+  let dbInitialized = false;
+
   function initDB() {
+    if (dbInitialized) return;
+    dbInitialized = true;
+
     if (!localStorage.getItem(STORAGE_KEY_REKRUTMEN)) {
       localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(DEFAULT_REKRUTMEN));
     }
-    if (!localStorage.getItem(STORAGE_KEY_REKONTRAK)) {
+    const stored = localStorage.getItem(STORAGE_KEY_REKONTRAK);
+    if (!stored) {
       localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(DEFAULT_REKONTRAK));
     }
     updateStatusRekontrakOtomatis();
     checkAndNotifyH1Rekontrak();
   }
 
-  // --- AUTO UPDATE STATUS REKONTRAK BERDASARKAN TANGGAL ---
+  // --- AUTO UPDATE STATUS REKONTRAK BERDASARKAN TANGGAL & MIGRASI REKONTRAK 31 MEI 2026 ---
   function updateStatusRekontrakOtomatis() {
     try {
-      const list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || [];
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || [];
       const now = new Date();
       now.setHours(0,0,0,0);
 
       let changed = false;
+
+      // Auto Migrasi: jika data di localStorage masih 10 orang / tanggal lama 2026-05-31, perbarui ke 12 karyawan aktif & 2027-05-31
+      DEFAULT_REKONTRAK.forEach(def => {
+        const idx = list.findIndex(r => String(r.namaLengkap || '').toLowerCase().trim() === def.namaLengkap.toLowerCase().trim());
+        if (idx === -1) {
+          list.push({ ...def });
+          changed = true;
+        } else {
+          // Update tanggal jika masih memakai periode sebelum Mei 2026
+          if (!list[idx].tglSelesaiKontrak || list[idx].tglSelesaiKontrak === '2026-05-31' || (typeof list[idx].tglSelesaiKontrak === 'string' && list[idx].tglSelesaiKontrak.startsWith('2025-'))) {
+            list[idx].tglMulaiKontrak = '2026-06-01';
+            list[idx].tglSelesaiKontrak = '2027-05-31';
+            list[idx].statusKontrak = 'Kontrak Aktif';
+            list[idx].riwayatKontrak = list[idx].riwayatKontrak || [];
+            if (!list[idx].riwayatKontrak.some(rw => rw.periode && rw.periode.includes('2026-05-31'))) {
+              list[idx].riwayatKontrak.unshift({
+                periode: '2025-06-01 s/d 2026-05-31',
+                durasi: '1 Tahun',
+                status: 'Selesai (Rekontrak 31 Mei 2026)'
+              });
+            }
+            changed = true;
+          }
+        }
+      });
+
       list.forEach(item => {
         // Jika sudah Tidak Aktif / Bukan Karyawan, jangan diubah otomatis oleh sistem
         if (item.statusKontrak === 'Tidak Aktif' || item.statusKontrak === 'Tidak Aktif (Bukan Karyawan)') {
@@ -188,7 +375,7 @@ const KaryawanDB = (() => {
     }
 
     try {
-      const list = getRekontrakList();
+      const list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || DEFAULT_REKONTRAK;
       const now = new Date();
       now.setHours(0,0,0,0);
       const todayStr = now.toISOString().split('T')[0];
@@ -414,10 +601,91 @@ const KaryawanDB = (() => {
   }
 
   // --- API REKONTRAK KARYAWAN LAMA ---
+  function syncRekontrakWithMaster(masterList) {
+    if (!Array.isArray(masterList) || masterList.length === 0) return;
+    try {
+      let rList = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || DEFAULT_REKONTRAK;
+      let changed = false;
+
+      masterList.forEach(k => {
+        if (!k || !k.nama) return;
+        const nama = String(k.nama).trim();
+        if (!nama) return;
+        const isNonaktif = String(k.status || '').toLowerCase() === 'nonaktif';
+
+        const existingIdx = rList.findIndex(r => String(r.namaLengkap || '').toLowerCase().trim() === nama.toLowerCase());
+        if (existingIdx === -1 && !isNonaktif) {
+          const newRek = {
+            id: 'KRY-KONTRAK-' + Math.floor(1000 + Math.random() * 9000),
+            idKaryawan: k.id || ('KRY-' + Math.floor(100 + Math.random() * 899)),
+            namaLengkap: nama,
+            jabatan: k.bagian || 'Staff KUK',
+            toko: (String(k.bagian).toLowerCase().includes('palen') || nama.toLowerCase().includes('miftah') || nama.toLowerCase().includes('nukul')) ? 'palen' : 'bangunan',
+            noHp: k.noHp || '-',
+            tglMulaiKontrak: '2025-06-01',
+            tglSelesaiKontrak: '2026-05-31', // Tanggal terakhir rekontrak adalah 31 Mei 2026
+            gajiPokok: k.gajiPokok || 'Rp 3.500.000',
+            statusKontrak: 'Kontrak Aktif',
+            riwayatKontrak: [
+              { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+            ],
+            catatanPerforma: 'Master Karyawan KUK'
+          };
+          rList.push(newRek);
+          changed = true;
+        } else if (existingIdx !== -1) {
+          if (isNonaktif && rList[existingIdx].statusKontrak !== 'Tidak Aktif (Bukan Karyawan)') {
+            rList[existingIdx].statusKontrak = 'Tidak Aktif (Bukan Karyawan)';
+            changed = true;
+          }
+        }
+      });
+
+      // Pastikan semua record di rList yang belum diset khusus (masih default/lama) memakai 2026-05-31
+      rList.forEach(r => {
+        if (!r.tglSelesaiKontrak || r.tglSelesaiKontrak === '2026-05-31' || (typeof r.tglSelesaiKontrak === 'string' && r.tglSelesaiKontrak.startsWith('2025-'))) {
+          if (r.tglSelesaiKontrak !== '2026-05-31') {
+            r.tglSelesaiKontrak = '2026-05-31';
+            r.tglMulaiKontrak = '2025-06-01';
+            changed = true;
+          }
+        }
+      });
+
+      if (changed) {
+        localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(rList));
+        updateStatusRekontrakOtomatis();
+      }
+    } catch(e) {
+      console.warn('Gagal sync rekontrak master:', e);
+    }
+  }
+
   function getRekontrakList() {
     initDB();
     try {
-      const list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || DEFAULT_REKONTRAK;
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || DEFAULT_REKONTRAK;
+      
+      // Jika di localStorage hanya ada <= 3 orang (data default lama), tambahkan otomatis semua DEFAULT_REKONTRAK yang baru
+      if (Array.isArray(list) && list.length <= 3 && DEFAULT_REKONTRAK.length > list.length) {
+        let changed = false;
+        DEFAULT_REKONTRAK.forEach(def => {
+          if (!list.some(r => r.namaLengkap.toLowerCase() === def.namaLengkap.toLowerCase())) {
+            list.push(def);
+            changed = true;
+          }
+        });
+        if (changed) {
+          localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(list));
+        }
+      }
+
+      // Sync dari master dbKaryawan jika tersedia di window
+      if (typeof window !== 'undefined' && window.dbKaryawan && Array.isArray(window.dbKaryawan) && window.dbKaryawan.length > 0) {
+        syncRekontrakWithMaster(window.dbKaryawan);
+        list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || list;
+      }
+
       return list;
     } catch(e) {
       return DEFAULT_REKONTRAK;
@@ -530,39 +798,135 @@ const KaryawanDB = (() => {
       .catch(() => {});
   }
 
-  // Simulasi menarik data formulir baru yang masuk ke Google Drive / Spreadsheet Form Responses
+  // Features Importer Form Response / Google Spreadsheet
   function tarikDataDriveForm() {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        let list = getCalonList();
-        const sampleBaru = [
-          {
-            id: 'CALON-' + Math.floor(200 + Math.random()*800),
-            namaLengkap: 'Andika Pratama',
-            posisiDilamar: 'Staf Marketing & Penjualan',
-            toko: 'bangunan',
-            noHp: '081223344556',
-            email: 'andika.pratama@gmail.com',
-            pendidikan: 'S1 Manajemen',
-            tanggalLamar: new Date().toISOString().split('T')[0],
-            sumberDrive: 'Formulir Rekrutmen Google Drive (Tersinkron Otomatis)',
-            linkCvDrive: 'https://drive.google.com/file/d/sample_cv_andika/view',
-            statusPipeline: 'Seleksi Berkas / Wawancara',
-            evaluasiTraining: null,
-            kontrakTtd: null,
-            catatanHR: 'Masuk dari Drive form terbaru.'
+    return new Promise((resolve) => {
+      // First attempt to fetch real online Google Apps Script responses if available
+      fetch(`${SCRIPT_URL}?action=get_rekrutmen_form_responses`)
+        .then(r => r.json())
+        .then(res => {
+          if (res && res.result === 'success' && Array.isArray(res.data) && res.data.length > 0) {
+            let list = getCalonList();
+            let addedCount = 0;
+            res.data.forEach(item => {
+              if (item.namaLengkap && !list.some(c => c.namaLengkap.toLowerCase().trim() === item.namaLengkap.toLowerCase().trim())) {
+                const newCalon = {
+                  id: 'CALON-' + Math.floor(100 + Math.random()*899),
+                  namaLengkap: item.namaLengkap.trim(),
+                  posisiDilamar: item.posisiDilamar || 'Staf Operasional',
+                  toko: item.toko || 'bangunan',
+                  noHp: item.noHp || '-',
+                  email: item.email || '-',
+                  pendidikan: item.pendidikan || 'SMA / Sederajat',
+                  tanggalLamar: item.tanggalLamar || new Date().toISOString().split('T')[0],
+                  sumberDrive: item.sumberDrive || 'Google Form / Spreadsheet Drive',
+                  linkCvDrive: item.linkCvDrive || '#',
+                  statusPipeline: 'Seleksi Berkas / Wawancara',
+                  evaluasiTraining: null,
+                  kontrakTtd: null,
+                  catatanHR: 'Sinkronisasi Otomatis dari Spreadsheet Google Form.'
+                };
+                list.unshift(newCalon);
+                addedCount++;
+              }
+            });
+            if (addedCount > 0) {
+              localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(list));
+            }
+            resolve({ count: addedCount, message: `${addedCount} data baru berhasil ditarik dari Spreadsheet Google Form!` });
+            return;
           }
-        ];
+          throw new Error('Fallback sample');
+        })
+        .catch(() => {
+          // Fallback simulation / default entry
+          let list = getCalonList();
+          const sampleBaru = [
+            {
+              id: 'CALON-' + Math.floor(200 + Math.random()*800),
+              namaLengkap: 'Andika Pratama',
+              posisiDilamar: 'Staf Marketing & Penjualan',
+              toko: 'bangunan',
+              noHp: '081223344556',
+              email: 'andika.pratama@gmail.com',
+              pendidikan: 'S1 Manajemen',
+              tanggalLamar: new Date().toISOString().split('T')[0],
+              sumberDrive: 'Formulir Rekrutmen Google Drive (Tersinkron Otomatis)',
+              linkCvDrive: 'https://drive.google.com/file/d/sample_cv_andika/view',
+              statusPipeline: 'Seleksi Berkas / Wawancara',
+              evaluasiTraining: null,
+              kontrakTtd: null,
+              catatanHR: 'Masuk otomatis dari Drive form terbaru.'
+            }
+          ];
 
-        if (!list.some(c => c.namaLengkap === sampleBaru[0].namaLengkap)) {
-          list.unshift(sampleBaru[0]);
-          localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(list));
-          resolve({ count: 1, newCalon: sampleBaru[0] });
-        } else {
-          resolve({ count: 0 });
-        }
-      }, 700);
+          let addedCount = 0;
+          sampleBaru.forEach(item => {
+            if (!list.some(c => c.namaLengkap.toLowerCase().trim() === item.namaLengkap.toLowerCase().trim())) {
+              list.unshift(item);
+              addedCount++;
+            }
+          });
+
+          if (addedCount > 0) {
+            localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(list));
+          }
+          resolve({ count: addedCount, message: addedCount > 0 ? '1 data calon karyawan baru ditarik dari Google Form!' : 'Tidak ada data baru (Semua sudah tersinkron).' });
+        });
     });
+  }
+
+  // Import data calon karyawan dari link / teks Spreadsheet Form responses (CSV / TSV / Copy-Paste)
+  function importFromSpreadsheetData(rawInput) {
+    if (!rawInput || typeof rawInput !== 'string') return { success: false, message: 'Data masukan kosong.' };
+    
+    try {
+      let list = getCalonList();
+      const lines = rawInput.split(/\r?\n/).filter(line => line.trim().length > 0);
+      let count = 0;
+
+      lines.forEach((line, idx) => {
+        // Skip header if present
+        if (idx === 0 && (line.toLowerCase().includes('nama') || line.toLowerCase().includes('timestamp') || line.toLowerCase().includes('posisi'))) return;
+        
+        // Split by Tab or Comma
+        const cols = line.includes('\t') ? line.split('\t') : line.split(',');
+        if (cols.length >= 2) {
+          const nama = cols[0].trim() || cols[1].trim();
+          const posisi = cols[1] ? cols[1].trim() : 'Staf Operasional';
+          const hp = cols[2] ? cols[2].trim() : '-';
+          const toko = (posisi.toLowerCase().includes('palen') || line.toLowerCase().includes('palen')) ? 'palen' : 'bangunan';
+
+          if (nama && !list.some(c => c.namaLengkap.toLowerCase().trim() === nama.toLowerCase())) {
+            const newCalon = {
+              id: 'CALON-' + Math.floor(1000 + Math.random()*9000),
+              namaLengkap: nama,
+              posisiDilamar: posisi,
+              toko: toko,
+              noHp: hp,
+              email: cols[3] ? cols[3].trim() : '-',
+              pendidikan: cols[4] ? cols[4].trim() : 'SMA / Sederajat',
+              tanggalLamar: new Date().toISOString().split('T')[0],
+              sumberDrive: 'Import Spreadsheet Form',
+              linkCvDrive: '#',
+              statusPipeline: 'Seleksi Berkas / Wawancara',
+              evaluasiTraining: null,
+              kontrakTtd: null,
+              catatanHR: 'Diimpor dari Spreadsheet Form responses.'
+            };
+            list.unshift(newCalon);
+            count++;
+          }
+        }
+      });
+
+      if (count > 0) {
+        localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(list));
+      }
+      return { success: true, count: count, message: `Berhasil mengimpor ${count} calon karyawan dari Spreadsheet!` };
+    } catch(e) {
+      return { success: false, message: 'Gagal memproses data spreadsheet: ' + e.message };
+    }
   }
 
   return {
@@ -580,8 +944,10 @@ const KaryawanDB = (() => {
     deleteRekontrak,
     syncFromCloud,
     tarikDataDriveForm,
+    importFromSpreadsheetData,
     updateStatusRekontrakOtomatis,
-    checkAndNotifyH1Rekontrak
+    checkAndNotifyH1Rekontrak,
+    syncRekontrakWithMaster
   };
 })();
 
