@@ -2006,6 +2006,7 @@
           <div class="sub-tabs">
             <div class="sub-tab active" id="subTabKaryawanHire" onclick="switchKaryawanSubTab('hire', this)">📋 Rekrutmen & Training Baru</div>
             <div class="sub-tab" id="subTabKaryawanRekontrak" onclick="switchKaryawanSubTab('rekontrak', this)">🔄 Monitoring & Perpanjangan Kontrak (Rekontrak)</div>
+            <div class="sub-tab" id="subTabKaryawanDb" onclick="switchKaryawanSubTab('db', this)">🗃️ Database Karyawan (Gaji & Cuti)</div>
           </div>
 
           <!-- SUB CONTENT: HIRE & TRAINING -->
@@ -2116,6 +2117,42 @@
                   </tr>
                 </thead>
                 <tbody id="konTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- SUB CONTENT: DATABASE KARYAWAN (GAJI & CUTI) -->
+          <div id="subContent-karyawan-db" class="sub-tab-content">
+            <div style="background:var(--primary-light); border:1px solid var(--primary); border-radius:12px; padding:14px 20px; margin-bottom:20px; font-size:13px; color:var(--primary); display:flex; align-items:center; gap:12px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4"/>
+                <path d="M12 8h.01"/>
+              </svg>
+              <span><strong>Info Database Terintegrasi:</strong> Master data karyawan di bawah ini bersumber dari dan terhubung langsung dengan modul <strong>Kalkulasi Gaji (Payroll)</strong> dan <strong>Rekapan Cuti</strong>. Setiap penambahan, edit detail, atau penghapusan karyawan di sini akan langsung sinkron otomatis ke kedua modul tersebut.</span>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom: 16px;">
+              <button class="btn btn-primary btn-sm" onclick="openKaryawanModal()">➕ Tambah Karyawan Baru</button>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <input type="text" id="searchKaryawanMaster" placeholder="🔍 Cari nama atau divisi..." oninput="renderKaryawan()" style="width: 240px; padding: 8px 12px; font-size: 13px;">
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID Karyawan</th>
+                    <th>Nama Lengkap</th>
+                    <th>Divisi / Bagian</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="karyawanTableMaster">
+                  <!-- JS Injected -->
+                </tbody>
               </table>
             </div>
           </div>
@@ -2307,6 +2344,7 @@
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="gaji"> Gaji/Payroll</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="peminjaman"> Pinjam Kendaraan</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="peminjaman_admin"> Rekap Kendaraan</label>
+            <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="karyawan"> Karyawan & Kontrak</label>
             <label style="display:flex; align-items:center; gap:8px;"><input type="checkbox" value="users"> User Admin</label>
           </div>
         </div>
@@ -3435,6 +3473,8 @@
             // Admin only menus
             if (tabId === 'users' && !perms.includes('users')) {
               el.style.display = 'none';
+            } else if (tabId === 'karyawan' && !perms.includes('karyawan')) {
+              el.style.display = 'none';
             } else {
               el.style.display = 'flex';
             }
@@ -3442,14 +3482,14 @@
         }
       });
 
-      // Update mobile nav for 'users'
+      // Update mobile nav for 'users' and 'karyawan'
       const mobileNavUsers = document.getElementById('mn-users');
       if (mobileNavUsers) {
-        if (!perms.includes('users')) {
-          mobileNavUsers.style.display = 'none';
-        } else {
-          mobileNavUsers.style.display = 'flex';
-        }
+        mobileNavUsers.style.display = perms.includes('users') ? 'flex' : 'none';
+      }
+      const mobileNavKaryawan = document.getElementById('mn-karyawan');
+      if (mobileNavKaryawan) {
+        mobileNavKaryawan.style.display = perms.includes('karyawan') ? 'flex' : 'none';
       }
 
       syncDataAll();
@@ -3467,7 +3507,8 @@
       const targetContent = document.getElementById('subContent-karyawan-' + tab);
       if (targetContent) targetContent.classList.add('active');
       if (tab === 'hire') renderRekrutmenTable();
-      else renderRekontrakTable();
+      else if (tab === 'rekontrak') renderRekontrakTable();
+      else if (tab === 'db') renderKaryawan();
     }
 
     function renderRekrutmenTable() {
@@ -6086,26 +6127,52 @@
     }
 
     function renderKaryawan() {
-      const q = document.getElementById('searchKaryawan').value.toLowerCase();
-      const filtered = dbKaryawan.filter(k => k.nama.toLowerCase().includes(q) || k.bagian.toLowerCase().includes(q));
+      const qCut = (document.getElementById('searchKaryawan') ? document.getElementById('searchKaryawan').value : '').toLowerCase();
+      const qMas = (document.getElementById('searchKaryawanMaster') ? document.getElementById('searchKaryawanMaster').value : '').toLowerCase();
 
-      let html = '';
-      filtered.forEach(k => {
-        const isNonaktif = k.status.toLowerCase() === 'nonaktif';
-        html += `
-          <tr>
-            <td><strong>${k.id}</strong></td>
-            <td>${k.nama}</td>
-            <td><span style="font-size:12px; background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-weight:600;">${k.bagian}</span></td>
-            <td><span style="font-size:12px; background:${isNonaktif ? 'var(--danger-light)' : 'var(--success-light)'}; color:${isNonaktif ? 'var(--danger)' : 'var(--success)'}; padding:4px 8px; border-radius:6px; font-weight:600;">${k.status}</span></td>
-            <td style="text-align:right;">
-              <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; margin-right:6px;" onclick="openKaryawanModal({id:'${k.id}', nama:'${k.nama}', bagian:'${k.bagian}', status:'${k.status}'})">Edit</button>
-              <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:#fecaca;" onclick="deleteKaryawan('${k.id}')">Hapus</button>
-            </td>
-          </tr>
-        `;
-      });
-      document.getElementById('karyawanTable').innerHTML = html;
+      // Render untuk tabel di Cuti
+      if (document.getElementById('karyawanTable')) {
+        const filteredCut = dbKaryawan.filter(k => k.nama.toLowerCase().includes(qCut) || k.bagian.toLowerCase().includes(qCut));
+        let htmlCut = '';
+        filteredCut.forEach(k => {
+          const isNonaktif = k.status.toLowerCase() === 'nonaktif';
+          htmlCut += `
+            <tr>
+              <td><strong>${k.id}</strong></td>
+              <td>${k.nama}</td>
+              <td><span style="font-size:12px; background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-weight:600;">${k.bagian}</span></td>
+              <td><span style="font-size:12px; background:${isNonaktif ? 'var(--danger-light)' : 'var(--success-light)'}; color:${isNonaktif ? 'var(--danger)' : 'var(--success)'}; padding:4px 8px; border-radius:6px; font-weight:600;">${k.status}</span></td>
+              <td style="text-align:right;">
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; margin-right:6px;" onclick="openKaryawanModal({id:'${k.id}', nama:'${k.nama}', bagian:'${k.bagian}', status:'${k.status}'})">Edit</button>
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:#fecaca;" onclick="deleteKaryawan('${k.id}')">Hapus</button>
+              </td>
+            </tr>
+          `;
+        });
+        document.getElementById('karyawanTable').innerHTML = htmlCut;
+      }
+
+      // Render untuk tabel di Karyawan & Kontrak (Master)
+      if (document.getElementById('karyawanTableMaster')) {
+        const filteredMas = dbKaryawan.filter(k => k.nama.toLowerCase().includes(qMas) || k.bagian.toLowerCase().includes(qMas));
+        let htmlMas = '';
+        filteredMas.forEach(k => {
+          const isNonaktif = k.status.toLowerCase() === 'nonaktif';
+          htmlMas += `
+            <tr>
+              <td><strong>${k.id}</strong></td>
+              <td>${k.nama}</td>
+              <td><span style="font-size:12px; background:var(--primary-light); color:var(--primary); padding:4px 8px; border-radius:6px; font-weight:600;">${k.bagian}</span></td>
+              <td><span style="font-size:12px; background:${isNonaktif ? 'var(--danger-light)' : 'var(--success-light)'}; color:${isNonaktif ? 'var(--danger)' : 'var(--success)'}; padding:4px 8px; border-radius:6px; font-weight:600;">${k.status}</span></td>
+              <td style="text-align:right;">
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; margin-right:6px;" onclick="openKaryawanModal({id:'${k.id}', nama:'${k.nama}', bagian:'${k.bagian}', status:'${k.status}'})">Edit</button>
+                <button class="btn btn-outline" style="padding:6px 12px; font-size:12px; color:var(--danger); border-color:#fecaca;" onclick="deleteKaryawan('${k.id}')">Hapus</button>
+              </td>
+            </tr>
+          `;
+        });
+        document.getElementById('karyawanTableMaster').innerHTML = htmlMas;
+      }
     }
 
     // --- CHANGE PASSWORD LOGIC ---
