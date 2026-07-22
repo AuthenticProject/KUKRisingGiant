@@ -488,14 +488,6 @@
         <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
       </a>
 
-      <!-- Rekrutmen & Kontrak Karyawan -->
-      <a href="karyawan.html" id="menu-karyawan" class="menu-card purple" style="display:none;">
-        <div class="menu-icon">👥</div>
-        <div class="menu-card-label">Karyawan & Kontrak</div>
-        <div class="menu-card-desc">Hire baru & rekontrak</div>
-        <svg class="menu-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m9 18 6-6-6-6"/></svg>
-      </a>
-
     </div>
 
     <div class="footer-note">KUK &copy; 2025 &mdash; Internal Use Only</div>
@@ -635,14 +627,13 @@
         'pelanggaran': 'menu-pelanggaran',
         'dashboard': 'menu-dashboard',
         'tip': 'menu-tip',
-        'peminjaman': 'menu-peminjaman',
-        'karyawan': 'menu-karyawan'
+        'peminjaman': 'menu-peminjaman'
       };
 
       for (let key in menuMap) {
         const el = document.getElementById(menuMap[key]);
         if (el) {
-          const alwaysShow = (key === 'peminjaman' || key === 'peminjaman_admin' || key === 'karyawan');
+          const alwaysShow = (key === 'peminjaman' || key === 'peminjaman_admin');
           el.style.display = (alwaysShow || perms.includes(key)) ? 'flex' : 'none';
         }
       }
