@@ -304,14 +304,6 @@ const KaryawanDB = (() => {
 
       let changed = false;
 
-      DEFAULT_REKONTRAK.forEach(def => {
-        const idx = list.findIndex(r => String(r.namaLengkap || '').toLowerCase().trim() === def.namaLengkap.toLowerCase().trim());
-        if (idx === -1) {
-          list.push({ ...def });
-          changed = true;
-        }
-      });
-
       // Auto Migrasi: pastikan semua karyawan (baik default maupun dari master dbKaryawan) yang masih memakai tanggal lama (2026-05-31 / 2025-xx) diperbarui ke rekontrak aktif 2026-06-01 s/d 2027-05-31
       list.forEach(item => {
         if (!item.tglSelesaiKontrak || item.tglSelesaiKontrak === '2026-05-31' || (typeof item.tglSelesaiKontrak === 'string' && item.tglSelesaiKontrak.startsWith('2025-'))) {
@@ -676,21 +668,7 @@ const KaryawanDB = (() => {
   function getRekontrakList() {
     initDB();
     try {
-      let list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || DEFAULT_REKONTRAK;
-      
-      // Jika di localStorage hanya ada <= 3 orang (data default lama), tambahkan otomatis semua DEFAULT_REKONTRAK yang baru
-      if (Array.isArray(list) && list.length <= 3 && DEFAULT_REKONTRAK.length > list.length) {
-        let changed = false;
-        DEFAULT_REKONTRAK.forEach(def => {
-          if (!list.some(r => r.namaLengkap.toLowerCase() === def.namaLengkap.toLowerCase())) {
-            list.push(def);
-            changed = true;
-          }
-        });
-        if (changed) {
-          localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(list));
-        }
-      }
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || [];
 
       // Sync dari master dbKaryawan jika tersedia di window
       if (typeof window !== 'undefined' && window.dbKaryawan && Array.isArray(window.dbKaryawan) && window.dbKaryawan.length > 0) {
@@ -784,10 +762,15 @@ const KaryawanDB = (() => {
   }
 
   function deleteRekontrak(id) {
-    let list = getRekontrakList();
-    list = list.filter(r => r.id !== id);
+    let list = JSON.parse(localStorage.getItem(STORAGE_KEY_REKONTRAK)) || [];
+    list = list.filter(r => r.id !== id && r.idKaryawan !== id);
     localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(list));
     return list;
+  }
+
+  function clearAllRekontrak() {
+    localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify([]));
+    return [];
   }
 
   // --- SINKRONISASI DARI CLOUD DAN SIMULASI TARIK DRIVE FORM ---
@@ -954,6 +937,7 @@ const KaryawanDB = (() => {
     updateStatusRekontrak,
     deleteCalon,
     deleteRekontrak,
+    clearAllRekontrak,
     syncFromCloud,
     tarikDataDriveForm,
     importFromSpreadsheetData,

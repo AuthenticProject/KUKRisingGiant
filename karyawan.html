@@ -532,6 +532,9 @@
             <button class="btn btn-primary" onclick="openModalRekontrakBaru()">
               <span>➕ Tambah Karyawan Kontrak</span>
             </button>
+            <button class="btn btn-outline" onclick="hapusSemuaDataKaryawan()" style="border-color: rgba(239, 68, 68, 0.4); color: #f87171;" title="Hapus semua data karyawan">
+              <span>🗑️ Hapus Semua</span>
+            </button>
             <input type="text" id="konSearch" placeholder="🔍 Cari nama / jabatan..." oninput="renderRekontrakTable()" style="width: 180px;">
             <select id="konFilterToko" onchange="renderRekontrakTable()">
               <option value="ALL">Semua Toko</option>
@@ -1276,6 +1279,13 @@
       KaryawanDB.deleteRekontrak(id);
       renderRekontrakTable();
       showToast('Data kontrak karyawan dihapus.', 'success');
+    }
+
+    function hapusSemuaDataKaryawan() {
+      if (!confirm('Apakah Anda yakin ingin MENGHAPUS SEMUA data karyawan dari sistem? Tindakan ini tidak dapat dibatalkan.')) return;
+      KaryawanDB.clearAllRekontrak();
+      renderRekontrakTable();
+      showToast('Semua data karyawan berhasil dihapus!', 'success');
     }
 
     function nonAktifkanKaryawan(id, newStatus) {

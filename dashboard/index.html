@@ -4005,6 +4005,13 @@
       showToast('Data kontrak karyawan dihapus.', 'success');
     }
 
+    function hapusSemuaDataKaryawan() {
+      if (!confirm('Apakah Anda yakin ingin MENGHAPUS SEMUA data karyawan dari sistem? Tindakan ini tidak dapat dibatalkan.')) return;
+      KaryawanDB.clearAllRekontrak();
+      renderRekontrakTable();
+      showToast('Semua data karyawan berhasil dihapus!', 'success');
+    }
+
     function nonAktifkanKaryawan(id, newStatus) {
       const r = KaryawanDB.getRekontrakById(id);
       if (!r) return;
