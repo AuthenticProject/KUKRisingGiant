@@ -431,7 +431,13 @@
         <span>🎯 Hire Karyawan Baru (Pipeline Rekrutmen Drive Form)</span>
       </button>
       <button type="button" class="tab-btn" id="tabBtnRekontrak" onclick="switchTab('rekontrak')">
-        <span>🔄 Rekontrak Karyawan Lama (Perpanjangan Kontrak)</span>
+        <span>🔄 Rekontrak Karyawan (Perpanjangan Kontrak)</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnGaji" onclick="switchTab('gaji')">
+        <span>💵 Rekapan Gaji Bulan-Bulan Sebelumnya</span>
+      </button>
+      <button type="button" class="tab-btn" id="tabBtnSurat" onclick="switchTab('surat')">
+        <span>📜 Arsip Surat & Korespondensi</span>
       </button>
     </div>
 
@@ -565,6 +571,130 @@
               </tr>
             </thead>
             <tbody id="konTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: REKAPAN GAJI BULAN-BULAN SEBELUMNYA ==================== -->
+    <div id="tabContentGaji" style="display: none;">
+      <!-- KPI Stats Gaji -->
+      <div class="stats-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <span class="stat-label">Total Penggajian Terbayar</span>
+          <span class="stat-value" style="color: #34d399;" id="statGajiTotalRp">Rp 0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Total Slip Terbit</span>
+          <span class="stat-value" style="color: #60a5fa;" id="statGajiTotalSlip">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Rata-Rata Gaji / Karyawan</span>
+          <span class="stat-value" style="color: #fbbf24;" id="statGajiRataRata">Rp 0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Status Pembayaran</span>
+          <span class="stat-value" style="color: #a78bfa;" id="statGajiStatus">100% Lunas</span>
+        </div>
+      </div>
+
+      <!-- Main Panel Gaji -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>💵 Rekapan Gaji Bulan-Bulan Sebelumnya (Riwayat Penggajian)</h2>
+          <div class="panel-actions">
+            <button class="btn btn-primary" onclick="openModalGajiInput()">
+              <span>➕ Input Slip / Gaji Bulan Ini</span>
+            </button>
+            <input type="text" id="gajiSearch" placeholder="🔍 Cari nama / nomor slip..." oninput="renderGajiTable()" style="width: 180px;">
+            <select id="gajiFilterBulan" onchange="renderGajiTable()">
+              <option value="ALL">Semua Bulan</option>
+              <option value="2026-06">Juni 2026</option>
+              <option value="2026-05">Mei 2026</option>
+              <option value="2026-04">April 2026</option>
+            </select>
+            <select id="gajiFilterToko" onchange="renderGajiTable()">
+              <option value="ALL">Semua Toko</option>
+              <option value="bangunan">KUK Bangunan</option>
+              <option value="palen">KUK Palen</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>ID & Nama Karyawan</th>
+                <th>Periode & Nomor Slip</th>
+                <th>Gaji Pokok & Tunjangan</th>
+                <th>Potongan</th>
+                <th>Total Diterima</th>
+                <th>Status & Tanggal</th>
+                <th style="text-align: right;">Aksi Slip Gaji</th>
+              </tr>
+            </thead>
+            <tbody id="gajiTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: ARSIP SURAT & KORESPONDENSI ==================== -->
+    <div id="tabContentSurat" style="display: none;">
+      <!-- KPI Stats Surat -->
+      <div class="stats-grid" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <span class="stat-label">Total Arsip Dokumen</span>
+          <span class="stat-value" id="statSuratTotal">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Surat Rekontrak (PKWT)</span>
+          <span class="stat-value" style="color: #60a5fa;" id="statSuratRekontrak">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Surat PKWT Karyawan Baru</span>
+          <span class="stat-value" style="color: #34d399;" id="statSuratBaru">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Slip Gaji Terbit</span>
+          <span class="stat-value" style="color: #fbbf24;" id="statSuratSlip">0</span>
+        </div>
+      </div>
+
+      <!-- Main Panel Surat -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>📜 Arsip Surat & Korespondensi (Riwayat Dokumen Resmi)</h2>
+          <div class="panel-actions">
+            <input type="text" id="suratSearch" placeholder="🔍 Cari nomor / nama..." oninput="renderSuratTable()" style="width: 200px;">
+            <select id="suratFilterJenis" onchange="renderSuratTable()">
+              <option value="ALL">Semua Jenis Dokumen</option>
+              <option value="Surat Rekontrak (PKWT)">Surat Rekontrak (PKWT)</option>
+              <option value="Surat PKWT Baru">Surat PKWT Karyawan Baru</option>
+              <option value="Slip Gaji Bulanan">Slip Gaji Bulanan</option>
+            </select>
+            <select id="suratFilterToko" onchange="renderSuratTable()">
+              <option value="ALL">Semua Toko</option>
+              <option value="bangunan">KUK Bangunan</option>
+              <option value="palen">KUK Palen</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Nomor Surat / Dokumen</th>
+                <th>Jenis Surat</th>
+                <th>Nama Karyawan & Toko</th>
+                <th>Tanggal Cetak & Periode</th>
+                <th>Status Signature / TTD</th>
+                <th style="text-align: right;">Pratinjau & Cetak Ulang</th>
+              </tr>
+            </thead>
+            <tbody id="suratTableBody"></tbody>
           </table>
         </div>
       </div>
@@ -887,6 +1017,130 @@
           <button type="button" class="btn btn-primary" onclick="simpanDanTtdKontrak()">Simpan & Sahkan Kontrak</button>
         </div>
       </div>
+  <!-- Modal Input / Edit Gaji Karyawan -->
+  <div class="modal-overlay" id="modalGajiInput">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalGajiTitle">➕ Input Slip / Gaji Karyawan Bulanan</h3>
+        <button class="btn-close" onclick="closeModal('modalGajiInput')">×</button>
+      </div>
+      <form id="formGaji" onsubmit="simpanGajiInput(event)">
+        <input type="hidden" id="inGajiId">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Pilih Karyawan *</label>
+            <select id="inGajiKaryawan" required onchange="onGajiKaryawanSelectChange()">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Periode Bulan-Tahun *</label>
+            <input type="month" id="inGajiBulanTahun" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Gaji Pokok (Rp) *</label>
+            <input type="number" id="inGajiPokok" required min="0" step="50000" placeholder="3500000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tunjangan / Bonus (Rp)</label>
+            <input type="number" id="inGajiTunjangan" min="0" step="10000" value="0" placeholder="300000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Potongan / BPJS (Rp)</label>
+            <input type="number" id="inGajiPotongan" min="0" step="5000" value="0" placeholder="50000">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tanggal Transfer / Bayar *</label>
+            <input type="date" id="inGajiTglBayar" required>
+          </div>
+          <div class="form-group" style="grid-column: span 2;">
+            <label class="form-label">Catatan / Rincian Slip</label>
+            <input type="text" id="inGajiCatatan" placeholder="Contoh: Gaji Pokok + Tunjangan Jabatan & Kehadiran">
+          </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeModal('modalGajiInput')">Batal</button>
+          <button type="submit" class="btn btn-primary">💾 Simpan Data Gaji</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Pratinjau & Cetak Slip Gaji Resmi -->
+  <div class="modal-overlay" id="modalSlipGajiView">
+    <div class="modal-card" style="max-width: 700px; background: #ffffff; color: #0f172a; padding: 32px;">
+      <div class="modal-header" style="border-bottom: 2px solid #e2e8f0; padding-bottom: 16px; margin-bottom: 20px;">
+        <div>
+          <h2 style="color: #1e3a8a; font-size: 22px; font-weight: 800; margin: 0;" id="slipHeaderToko">BUILDING MATERIAL & PALEN CENTRE "KUK"</h2>
+          <div style="font-size: 12px; color: #64748b;" id="slipHeaderSub">Kolelet Wetan, Rangkasbitung, Lebak - Banten • Telp: (0252) 201234</div>
+        </div>
+        <button class="btn-close" onclick="closeModal('modalSlipGajiView')" style="color: #64748b;">×</button>
+      </div>
+
+      <div style="text-align: center; margin-bottom: 24px;">
+        <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;">SLIP GAJI KARYAWAN</h3>
+        <div style="font-size: 13px; color: #475569;" id="slipPeriodeLabel">Periode: Juni 2026 • Nomor: SLIP-KUK-202606-001</div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; background: #f8fafc; padding: 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div>
+          <div><strong>Nama:</strong> <span id="slipNama">-</span></div>
+          <div style="margin-top: 4px;"><strong>Jabatan:</strong> <span id="slipJabatan">-</span></div>
+        </div>
+        <div style="text-align: right;">
+          <div><strong>ID Karyawan:</strong> <span id="slipIdKry">-</span></div>
+          <div style="margin-top: 4px;"><strong>Tanggal Transfer:</strong> <span id="slipTglBayar">-</span></div>
+        </div>
+      </div>
+
+      <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 13px; color: #0f172a;">
+        <thead>
+          <tr style="background: #e2e8f0;">
+            <th style="padding: 10px; text-align: left;">Rincian Penerimaan</th>
+            <th style="padding: 10px; text-align: right;">Jumlah (Rp)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">Gaji Pokok Bulanan</td>
+            <td style="padding: 10px; text-align: right; border-bottom: 1px solid #f1f5f9;" id="slipGajiPokok">Rp 0</td>
+          </tr>
+          <tr>
+            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9;">Tunjangan / Bonus Kehadiran</td>
+            <td style="padding: 10px; text-align: right; border-bottom: 1px solid #f1f5f9;" id="slipTunjangan">Rp 0</td>
+          </tr>
+          <tr style="background: #fff1f2;">
+            <td style="padding: 10px; border-bottom: 1px solid #f1f5f9; color: #e11d48;">Potongan / Kasbon / BPJS</td>
+            <td style="padding: 10px; text-align: right; border-bottom: 1px solid #f1f5f9; color: #e11d48;" id="slipPotongan">- Rp 0</td>
+          </tr>
+          <tr style="background: #f0fdf4; font-weight: 800; font-size: 15px;">
+            <td style="padding: 12px; border-top: 2px solid #cbd5e1; color: #166534;">TOTAL GAJI DITERIMA (NETTO)</td>
+            <td style="padding: 12px; text-align: right; border-top: 2px solid #cbd5e1; color: #166534;" id="slipTotalGaji">Rp 0</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="font-size: 12px; color: #64748b; font-style: italic; margin-bottom: 24px;" id="slipCatatan">
+        Catatan: Pembayaran dilakukan via Transfer Bank / Cash Resmi HRD KUK.
+      </div>
+
+      <div style="display: flex; justify-content: space-between; text-align: center; margin-top: 30px; font-size: 12px; color: #334155;">
+        <div>
+          <div>Penerima (Karyawan),</div>
+          <div style="height: 50px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #2563eb;" id="slipTtdNamaKry">(Hendra Saputra)</div>
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 4px;">Tanda Tangan</div>
+        </div>
+        <div>
+          <div>Finance / Management KUK,</div>
+          <div style="height: 50px; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #059669;">( HRD & Keuangan KUK )</div>
+          <div style="border-top: 1px solid #cbd5e1; padding-top: 4px;">Cap & TTD Sah</div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <button type="button" class="btn btn-outline" onclick="closeModal('modalSlipGajiView')" style="color: #475569; border-color: #cbd5e1;">Tutup</button>
+        <button type="button" class="btn btn-primary" onclick="window.print()">🖨️ Cetak Slip Gaji / Download PDF</button>
+      </div>
     </div>
   </div>
 
@@ -905,17 +1159,29 @@
     function switchTab(tab) {
       const bRek = document.getElementById('tabBtnRekrutmen');
       const bKon = document.getElementById('tabBtnRekontrak');
+      const bGaj = document.getElementById('tabBtnGaji');
+      const bSur = document.getElementById('tabBtnSurat');
+
       const cRek = document.getElementById('tabContentRekrutmen');
       const cKon = document.getElementById('tabContentRekontrak');
+      const cGaj = document.getElementById('tabContentGaji');
+      const cSur = document.getElementById('tabContentSurat');
+
+      [bRek, bKon, bGaj, bSur].forEach(b => b && b.classList.remove('active'));
+      [cRek, cKon, cGaj, cSur].forEach(c => c && (c.style.display = 'none'));
 
       if (tab === 'rekrutmen') {
-        bRek.classList.add('active'); bKon.classList.remove('active');
-        cRek.style.display = 'block'; cKon.style.display = 'none';
+        bRek.classList.add('active'); cRek.style.display = 'block';
         renderRekrutmenTable();
-      } else {
-        bKon.classList.add('active'); bRek.classList.remove('active');
-        cKon.style.display = 'block'; cRek.style.display = 'none';
+      } else if (tab === 'rekontrak') {
+        bKon.classList.add('active'); cKon.style.display = 'block';
         renderRekontrakTable();
+      } else if (tab === 'gaji') {
+        bGaj.classList.add('active'); cGaj.style.display = 'block';
+        renderGajiTable();
+      } else if (tab === 'surat') {
+        bSur.classList.add('active'); cSur.style.display = 'block';
+        renderSuratTable();
       }
     }
 
@@ -1301,6 +1567,286 @@
       showToast(`Status karyawan diubah menjadi: ${newStatus}`, newStatus.includes('Tidak Aktif') ? 'error' : 'success');
     }
 
+    // ==================== TAB 3: REKAPAN GAJI LOGIC ====================
+    function renderGajiTable() {
+      const list = KaryawanDB.getGajiHistoriList();
+      const q = (document.getElementById('gajiSearch').value || '').toLowerCase();
+      const fBulan = document.getElementById('gajiFilterBulan').value;
+      const fToko = document.getElementById('gajiFilterToko').value;
+
+      let totalRp = 0;
+      let totalSlip = list.length;
+      list.forEach(g => { totalRp += Number(g.totalGaji || 0); });
+      let rataRata = totalSlip > 0 ? Math.round(totalRp / totalSlip) : 0;
+
+      document.getElementById('statGajiTotalRp').textContent = 'Rp ' + totalRp.toLocaleString('id-ID');
+      document.getElementById('statGajiTotalSlip').textContent = totalSlip;
+      document.getElementById('statGajiRataRata').textContent = 'Rp ' + rataRata.toLocaleString('id-ID');
+
+      const filtered = list.filter(g => {
+        const matchQ = !q || g.namaLengkap.toLowerCase().includes(q) || (g.nomorSlip && g.nomorSlip.toLowerCase().includes(q)) || (g.jabatan && g.jabatan.toLowerCase().includes(q));
+        const matchB = fBulan === 'ALL' || g.bulanTahun === fBulan;
+        const matchT = fToko === 'ALL' || g.toko === fToko;
+        return matchQ && matchB && matchT;
+      });
+
+      const tbody = document.getElementById('gajiTableBody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data rekapan gaji.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(g => {
+        const tokoLabel = g.toko === 'palen' ? '🏬 KUK Palen' : '🏗️ KUK Bangunan';
+        const gp = Number(g.gajiPokok || 0);
+        const tj = Number(g.tunjangan || 0);
+        const pt = Number(g.potongan || 0);
+        const tot = Number(g.totalGaji || (gp + tj - pt));
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <strong style="color: #fff; font-size: 15px;">${g.namaLengkap}</strong>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">${g.jabatan} &bull; ${tokoLabel}</div>
+            </td>
+            <td>
+              <span class="badge badge-blue">${g.periodeLabel || g.bulanTahun}</span>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">${g.nomorSlip || '-'}</div>
+            </td>
+            <td>
+              <div style="font-size: 13px; font-weight: 600; color: #f8fafc;">Rp ${gp.toLocaleString('id-ID')}</div>
+              <div style="font-size: 11px; color: #34d399;">+ Tunjangan: Rp ${tj.toLocaleString('id-ID')}</div>
+            </td>
+            <td>
+              <div style="font-size: 13px; color: ${pt > 0 ? '#f87171' : '#94a3b8'};">- Rp ${pt.toLocaleString('id-ID')}</div>
+            </td>
+            <td>
+              <strong style="color: #34d399; font-size: 15px;">Rp ${tot.toLocaleString('id-ID')}</strong>
+            </td>
+            <td>
+              <span class="badge badge-green">${g.statusPembayaran || 'Lunas'}</span>
+              <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">📅 ${g.tglDibayar || '-'}</div>
+            </td>
+            <td style="text-align: right;">
+              <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                <button class="btn btn-primary btn-sm" onclick="cetakSlipGaji('${g.id}')" title="Cetak Slip Gaji">📄 Slip Gaji</button>
+                <button class="btn btn-outline btn-sm" onclick="hapusGajiHistori('${g.id}')" title="Hapus">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function openModalGajiInput(id = null) {
+      document.getElementById('formGaji').reset();
+      document.getElementById('inGajiId').value = '';
+      
+      const selectKry = document.getElementById('inGajiKaryawan');
+      selectKry.innerHTML = '<option value="">-- Pilih Karyawan --</option>';
+      const kryList = KaryawanDB.getRekontrakList();
+      kryList.forEach(k => {
+        selectKry.innerHTML += `<option value="${k.id}" data-nama="${k.namaLengkap}" data-jabatan="${k.jabatan}" data-toko="${k.toko}" data-gaji="${k.gajiPokok}">${k.namaLengkap} - ${k.jabatan} (${k.toko === 'palen' ? 'Palen' : 'Bangunan'})</option>`;
+      });
+
+      const today = new Date();
+      const monthStr = today.toISOString().slice(0, 7);
+      document.getElementById('inGajiBulanTahun').value = monthStr;
+      document.getElementById('inGajiTglBayar').value = today.toISOString().split('T')[0];
+
+      if (id) {
+        const g = KaryawanDB.getGajiHistoriById(id);
+        if (g) {
+          document.getElementById('inGajiId').value = g.id;
+          document.getElementById('inGajiBulanTahun').value = g.bulanTahun;
+          document.getElementById('inGajiPokok').value = g.gajiPokok;
+          document.getElementById('inGajiTunjangan').value = g.tunjangan;
+          document.getElementById('inGajiPotongan').value = g.potongan;
+          document.getElementById('inGajiTglBayar').value = g.tglDibayar;
+          document.getElementById('inGajiCatatan').value = g.catatan || '';
+        }
+      }
+
+      openModal('modalGajiInput');
+    }
+
+    function onGajiKaryawanSelectChange() {
+      const select = document.getElementById('inGajiKaryawan');
+      const opt = select.options[select.selectedIndex];
+      if (opt && opt.dataset.gaji) {
+        const cleanGaji = String(opt.dataset.gaji).replace(/[^0-9]/g, '');
+        if (cleanGaji) {
+          document.getElementById('inGajiPokok').value = cleanGaji;
+        }
+      }
+    }
+
+    function simpanGajiInput(e) {
+      e.preventDefault();
+      const select = document.getElementById('inGajiKaryawan');
+      const opt = select.options[select.selectedIndex];
+      if (!opt || !opt.value) {
+        showToast('Pilih karyawan terlebih dahulu!', 'warning');
+        return;
+      }
+
+      const bulanTahun = document.getElementById('inGajiBulanTahun').value;
+      const [year, month] = bulanTahun.split('-');
+      const dateObj = new Date(year, month - 1, 1);
+      const bulanName = dateObj.toLocaleString('id-ID', { month: 'long' });
+      const periodeLabel = `${bulanName} ${year}`;
+
+      const payload = {
+        id: document.getElementById('inGajiId').value || undefined,
+        idKaryawan: opt.value,
+        namaLengkap: opt.dataset.nama,
+        jabatan: opt.dataset.jabatan,
+        toko: opt.dataset.toko,
+        bulanTahun: bulanTahun,
+        periodeLabel: periodeLabel,
+        gajiPokok: document.getElementById('inGajiPokok').value,
+        tunjangan: document.getElementById('inGajiTunjangan').value || 0,
+        potongan: document.getElementById('inGajiPotongan').value || 0,
+        tglDibayar: document.getElementById('inGajiTglBayar').value,
+        catatan: document.getElementById('inGajiCatatan').value || `Gaji Pokok Periode ${periodeLabel}`,
+        nomorSlip: `SLIP-KUK-${year}${month}-${Math.floor(100 + Math.random() * 899)}`
+      };
+
+      KaryawanDB.saveGajiHistori(payload);
+      closeModal('modalGajiInput');
+      renderGajiTable();
+      renderSuratTable();
+      showToast(`Slip gaji ${payload.namaLengkap} (${periodeLabel}) berhasil disimpan!`, 'success');
+    }
+
+    function cetakSlipGaji(id) {
+      const g = KaryawanDB.getGajiHistoriById(id);
+      if (!g) return;
+
+      const tokoTitle = g.toko === 'palen' ? 'PALEN CENTRE & RETAIL "KUK"' : 'BUILDING MATERIAL CENTRE "KUK"';
+      document.getElementById('slipHeaderToko').textContent = tokoTitle;
+      document.getElementById('slipPeriodeLabel').textContent = `Periode: ${g.periodeLabel || g.bulanTahun} • Nomor Slip: ${g.nomorSlip || '-'}`;
+      document.getElementById('slipNama').textContent = g.namaLengkap;
+      document.getElementById('slipJabatan').textContent = g.jabatan;
+      document.getElementById('slipIdKry').textContent = g.idKaryawan || '-';
+      document.getElementById('slipTglBayar').textContent = g.tglDibayar || '-';
+
+      const gp = Number(g.gajiPokok || 0);
+      const tj = Number(g.tunjangan || 0);
+      const pt = Number(g.potongan || 0);
+      const tot = Number(g.totalGaji || (gp + tj - pt));
+
+      document.getElementById('slipGajiPokok').textContent = `Rp ${gp.toLocaleString('id-ID')}`;
+      document.getElementById('slipTunjangan').textContent = `Rp ${tj.toLocaleString('id-ID')}`;
+      document.getElementById('slipPotongan').textContent = `- Rp ${pt.toLocaleString('id-ID')}`;
+      document.getElementById('slipTotalGaji').textContent = `Rp ${tot.toLocaleString('id-ID')}`;
+      document.getElementById('slipCatatan').textContent = `Catatan: ${g.catatan || 'Pembayaran gaji telah diproses via transfer bank / tunai.'}`;
+      document.getElementById('slipTtdNamaKry').textContent = `(${g.namaLengkap})`;
+
+      openModal('modalSlipGajiView');
+    }
+
+    function hapusGajiHistori(id) {
+      if (!confirm('Yakin ingin menghapus data rekapan gaji ini?')) return;
+      KaryawanDB.deleteGajiHistori(id);
+      renderGajiTable();
+      showToast('Data rekapan gaji berhasil dihapus.', 'success');
+    }
+
+    // ==================== TAB 4: ARSIP SURAT LOGIC ====================
+    function renderSuratTable() {
+      const list = KaryawanDB.getSuratHistoriList();
+      const q = (document.getElementById('suratSearch').value || '').toLowerCase();
+      const fJenis = document.getElementById('suratFilterJenis').value;
+      const fToko = document.getElementById('suratFilterToko').value;
+
+      let total = list.length;
+      let rekontrak = list.filter(s => s.jenisSurat && s.jenisSurat.includes('Rekontrak')).length;
+      let baru = list.filter(s => s.jenisSurat && (s.jenisSurat.includes('Baru') || s.jenisSurat.includes('HIRE'))).length;
+      let slip = list.filter(s => s.jenisSurat && s.jenisSurat.includes('Slip')).length;
+
+      document.getElementById('statSuratTotal').textContent = total;
+      document.getElementById('statSuratRekontrak').textContent = rekontrak;
+      document.getElementById('statSuratBaru').textContent = baru;
+      document.getElementById('statSuratSlip').textContent = slip;
+
+      const filtered = list.filter(s => {
+        const matchQ = !q || s.namaLengkap.toLowerCase().includes(q) || (s.nomorSurat && s.nomorSurat.toLowerCase().includes(q));
+        const matchJ = fJenis === 'ALL' || s.jenisSurat === fJenis;
+        const matchT = fToko === 'ALL' || s.toko === fToko;
+        return matchQ && matchJ && matchT;
+      });
+
+      const tbody = document.getElementById('suratTableBody');
+      tbody.innerHTML = '';
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">Tidak ada data arsip surat / dokumen.</td></tr>';
+        return;
+      }
+
+      filtered.forEach(s => {
+        const tokoLabel = s.toko === 'palen' ? '🏬 KUK Palen' : '🏗️ KUK Bangunan';
+        let badgeClass = 'badge-blue';
+        if (s.jenisSurat.includes('Slip')) badgeClass = 'badge-amber';
+        else if (s.jenisSurat.includes('Rekontrak')) badgeClass = 'badge-green';
+
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <strong style="color: #fff; font-size: 14px;">${s.nomorSurat}</strong>
+              <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">ID Dokumen: ${s.id}</div>
+            </td>
+            <td>
+              <span class="badge ${badgeClass}">${s.jenisSurat}</span>
+            </td>
+            <td>
+              <strong>${s.namaLengkap}</strong>
+              <div style="font-size: 12px; color: var(--text-muted);">${tokoLabel}</div>
+            </td>
+            <td>
+              <div style="font-size: 13px;">📅 Tanggal: ${s.tglCetak || '-'}</div>
+              <div style="font-size: 12px; color: var(--text-muted);">${s.periodeKontrak || '-'}</div>
+            </td>
+            <td>
+              <span class="badge badge-green">✍️ ${s.status || 'TTD Sah'}</span>
+            </td>
+            <td style="text-align: right;">
+              <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                <button class="btn btn-outline btn-sm" onclick="previewArsipSurat('${s.id}')" title="Lihat & Cetak Dokumen">🖨️ Pratinjau / Cetak</button>
+                <button class="btn btn-outline btn-sm" onclick="hapusSuratHistori('${s.id}')" title="Hapus">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function previewArsipSurat(id) {
+      const s = KaryawanDB.getSuratHistoriById(id);
+      if (!s) return;
+
+      if (s.jenisSurat.includes('Slip')) {
+        const gList = KaryawanDB.getGajiHistoriList();
+        const g = gList.find(item => item.nomorSlip === s.nomorSurat || item.namaLengkap === s.namaLengkap);
+        if (g) {
+          cetakSlipGaji(g.id);
+          return;
+        }
+      }
+
+      openSuratKontrakModal('REKONTRAK', s.idKaryawan);
+    }
+
+    function hapusSuratHistori(id) {
+      if (!confirm('Yakin ingin menghapus dokumen dari arsip korespondensi ini?')) return;
+      KaryawanDB.deleteSuratHistori(id);
+      renderSuratTable();
+      showToast('Dokumen berhasil dihapus dari arsip.', 'success');
+    }
+
     // ==================== SURAT KONTRAK & DIGITAL SIGNATURE (PKWT) ====================
     let canvasPimpinan, ctxPimpinan, canvasCalon, ctxCalon;
     let isDrawingP = false, isDrawingC = false;
@@ -1522,10 +2068,15 @@
       initCanvases();
       KaryawanDB.initDB();
       renderRekrutmenTable();
+      renderRekontrakTable();
+      renderGajiTable();
+      renderSuratTable();
       KaryawanDB.checkAndNotifyH1Rekontrak();
       KaryawanDB.syncFromCloud().then(() => {
         renderRekrutmenTable();
         renderRekontrakTable();
+        renderGajiTable();
+        renderSuratTable();
       });
     });
   </script>

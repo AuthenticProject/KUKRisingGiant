@@ -8,6 +8,163 @@ const KaryawanDB = (() => {
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby5sEI1iGmVG28508s9QumeFm19-Zc9cnzoNMOSWtap4pm-ktnWRABDGOTCHNL0rwfS/exec";
   const STORAGE_KEY_REKRUTMEN = 'kuk_db_rekrutmen_v1';
   const STORAGE_KEY_REKONTRAK = 'kuk_db_rekontrak_v1';
+  const STORAGE_KEY_GAJI_HISTORI = 'kuk_db_gaji_v1';
+  const STORAGE_KEY_SURAT_HISTORI = 'kuk_db_surat_v1';
+
+  // Data contoh rekapan gaji bulan-bulan sebelumnya
+  const DEFAULT_GAJI_HISTORI = [
+    {
+      id: 'PAY-2026-06-001',
+      idKaryawan: 'KRY-001',
+      namaLengkap: 'Hendra Saputra',
+      jabatan: 'Kepala Gudang Bangunan',
+      toko: 'bangunan',
+      bulanTahun: '2026-06',
+      periodeLabel: 'Juni 2026',
+      gajiPokok: 3800000,
+      tunjangan: 350000,
+      potongan: 50000,
+      totalGaji: 4100000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-06-28',
+      catatan: 'Gaji Pokok + Tunjangan Jabatan',
+      nomorSlip: 'SLIP-KUK-202606-001'
+    },
+    {
+      id: 'PAY-2026-06-002',
+      idKaryawan: 'KRY-002',
+      namaLengkap: 'Dewi Lestari',
+      jabatan: 'Staf Administrasi & Keuangan',
+      toko: 'bangunan',
+      bulanTahun: '2026-06',
+      periodeLabel: 'Juni 2026',
+      gajiPokok: 3500000,
+      tunjangan: 300000,
+      potongan: 0,
+      totalGaji: 3800000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-06-28',
+      catatan: 'Gaji Pokok + Tunjangan Kehadiran',
+      nomorSlip: 'SLIP-KUK-202606-002'
+    },
+    {
+      id: 'PAY-2026-06-003',
+      idKaryawan: 'KRY-003',
+      namaLengkap: 'Fajar Nugroho',
+      jabatan: 'Staf Pelayanan & Gudang Palen',
+      toko: 'palen',
+      bulanTahun: '2026-06',
+      periodeLabel: 'Juni 2026',
+      gajiPokok: 3200000,
+      tunjangan: 250000,
+      potongan: 25000,
+      totalGaji: 3425000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-06-28',
+      catatan: 'Gaji Pokok + Bonus Lembur',
+      nomorSlip: 'SLIP-KUK-202606-003'
+    },
+    {
+      id: 'PAY-2026-05-001',
+      idKaryawan: 'KRY-001',
+      namaLengkap: 'Hendra Saputra',
+      jabatan: 'Kepala Gudang Bangunan',
+      toko: 'bangunan',
+      bulanTahun: '2026-05',
+      periodeLabel: 'Mei 2026',
+      gajiPokok: 3800000,
+      tunjangan: 350000,
+      potongan: 0,
+      totalGaji: 4150000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-05-28',
+      catatan: 'Gaji Pokok Periode Mei 2026',
+      nomorSlip: 'SLIP-KUK-202605-001'
+    },
+    {
+      id: 'PAY-2026-05-002',
+      idKaryawan: 'KRY-002',
+      namaLengkap: 'Dewi Lestari',
+      jabatan: 'Staf Administrasi & Keuangan',
+      toko: 'bangunan',
+      bulanTahun: '2026-05',
+      periodeLabel: 'Mei 2026',
+      gajiPokok: 3500000,
+      tunjangan: 300000,
+      potongan: 50000,
+      totalGaji: 3750000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-05-28',
+      catatan: 'Gaji Pokok Periode Mei 2026',
+      nomorSlip: 'SLIP-KUK-202605-002'
+    },
+    {
+      id: 'PAY-2026-04-001',
+      idKaryawan: 'KRY-001',
+      namaLengkap: 'Hendra Saputra',
+      jabatan: 'Kepala Gudang Bangunan',
+      toko: 'bangunan',
+      bulanTahun: '2026-04',
+      periodeLabel: 'April 2026',
+      gajiPokok: 3800000,
+      tunjangan: 400000,
+      potongan: 0,
+      totalGaji: 4200000,
+      statusPembayaran: 'Lunas / Ditransfer',
+      tglDibayar: '2026-04-28',
+      catatan: 'Gaji Pokok + Bonus Hari Raya 2026',
+      nomorSlip: 'SLIP-KUK-202604-001'
+    }
+  ];
+
+  // Data contoh arsip surat & korespondensi yang pernah dicetak
+  const DEFAULT_SURAT_HISTORI = [
+    {
+      id: 'DOC-2026-001',
+      nomorSurat: '012/PKWT-REKONTRAK/KUK/V/2026',
+      jenisSurat: 'Surat Rekontrak (PKWT)',
+      idKaryawan: 'KRY-001',
+      namaLengkap: 'Hendra Saputra',
+      toko: 'bangunan',
+      tglCetak: '2026-05-31',
+      periodeKontrak: '2026-06-01 s/d 2027-05-31',
+      gajiPokok: 'Rp 3.800.000',
+      status: 'Diarsipkan & TTD Lengkap',
+      ttdCalon: 'Hendra S.',
+      ttdPimpinan: 'Pimpinan KUK',
+      catatan: 'Perpanjangan kontrak tahunan KUK Bangunan'
+    },
+    {
+      id: 'DOC-2026-002',
+      nomorSurat: '013/PKWT-REKONTRAK/KUK/V/2026',
+      jenisSurat: 'Surat Rekontrak (PKWT)',
+      idKaryawan: 'KRY-002',
+      namaLengkap: 'Dewi Lestari',
+      toko: 'bangunan',
+      tglCetak: '2026-05-31',
+      periodeKontrak: '2026-06-01 s/d 2027-05-31',
+      gajiPokok: 'Rp 3.500.000',
+      status: 'Diarsipkan & TTD Lengkap',
+      ttdCalon: 'Dewi L.',
+      ttdPimpinan: 'Pimpinan KUK',
+      catatan: 'Perpanjangan kontrak tahunan KUK Bangunan'
+    },
+    {
+      id: 'DOC-2026-003',
+      nomorSurat: 'SLIP-KUK-202606-001',
+      jenisSurat: 'Slip Gaji Bulanan',
+      idKaryawan: 'KRY-001',
+      namaLengkap: 'Hendra Saputra',
+      toko: 'bangunan',
+      tglCetak: '2026-06-28',
+      periodeKontrak: 'Periode Juni 2026',
+      gajiPokok: 'Rp 4.100.000',
+      status: 'Terbit / Diserahkan',
+      ttdCalon: 'Hendra S.',
+      ttdPimpinan: 'Finance KUK',
+      catatan: 'Slip Gaji Juni 2026'
+    }
+  ];
 
   // Data contoh pelamar awal dari Drive Formulir Rekrutmen KUK
   const DEFAULT_REKRUTMEN = [
@@ -290,6 +447,12 @@ const KaryawanDB = (() => {
     const stored = localStorage.getItem(STORAGE_KEY_REKONTRAK);
     if (!stored) {
       localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(DEFAULT_REKONTRAK));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_GAJI_HISTORI)) {
+      localStorage.setItem(STORAGE_KEY_GAJI_HISTORI, JSON.stringify(DEFAULT_GAJI_HISTORI));
+    }
+    if (!localStorage.getItem(STORAGE_KEY_SURAT_HISTORI)) {
+      localStorage.setItem(STORAGE_KEY_SURAT_HISTORI, JSON.stringify(DEFAULT_SURAT_HISTORI));
     }
     updateStatusRekontrakOtomatis();
     checkAndNotifyH1Rekontrak();
@@ -584,6 +747,25 @@ const KaryawanDB = (() => {
       }
     }
 
+    // Otomatis catat ke Arsip Surat & Korespondensi
+    const targetNama = payload.tipe === 'HIRE_BARU' 
+      ? (getCalonById(payload.idObj) ? getCalonById(payload.idObj).namaLengkap : 'Karyawan Baru')
+      : (getRekontrakById(payload.idObj) ? getRekontrakById(payload.idObj).namaLengkap : 'Karyawan');
+
+    catatArsipSurat({
+      nomorSurat: payload.nomorKontrak,
+      jenisSurat: payload.tipe === 'REKONTRAK' ? 'Surat Rekontrak (PKWT)' : 'Surat PKWT Baru',
+      idKaryawan: payload.idObj,
+      namaLengkap: targetNama,
+      toko: payload.toko || 'bangunan',
+      tglCetak: new Date().toISOString().split('T')[0],
+      periodeKontrak: `${payload.tglMulai} s/d ${payload.tglSelesai}`,
+      gajiPokok: payload.gajiPokok || 'Rp 3.500.000',
+      status: 'Diarsipkan & TTD Lengkap',
+      ttdCalon: payload.ttdCalon ? 'Ada Signature' : '-',
+      ttdPimpinan: payload.ttdPimpinan ? 'Pimpinan KUK' : '-'
+    });
+
     updateStatusRekontrakOtomatis();
     checkAndNotifyH1Rekontrak();
 
@@ -593,6 +775,151 @@ const KaryawanDB = (() => {
     }).catch(() => {});
 
     return { success: true };
+  }
+
+  // --- API GAJI HISTORI (REKAPAN GAJI BULANAN) ---
+  function getGajiHistoriList() {
+    initDB();
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_GAJI_HISTORI)) || [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function getGajiHistoriById(id) {
+    const list = getGajiHistoriList();
+    return list.find(g => g.id === id) || null;
+  }
+
+  function saveGajiHistori(data) {
+    let list = getGajiHistoriList();
+    const idx = list.findIndex(g => g.id === data.id);
+    let updated = null;
+
+    const gajiPokok = Number(data.gajiPokok || 0);
+    const tunjangan = Number(data.tunjangan || 0);
+    const potongan = Number(data.potongan || 0);
+    const totalGaji = gajiPokok + tunjangan - potongan;
+
+    if (idx >= 0) {
+      updated = {
+        ...list[idx],
+        ...data,
+        gajiPokok,
+        tunjangan,
+        potongan,
+        totalGaji
+      };
+      list[idx] = updated;
+    } else {
+      updated = {
+        id: data.id || ('PAY-' + Date.now().toString().slice(-6)),
+        idKaryawan: data.idKaryawan || 'KRY-000',
+        namaLengkap: data.namaLengkap || 'Tanpa Nama',
+        jabatan: data.jabatan || 'Staf',
+        toko: data.toko || 'bangunan',
+        bulanTahun: data.bulanTahun || new Date().toISOString().slice(0,7),
+        periodeLabel: data.periodeLabel || 'Bulan Ini',
+        gajiPokok,
+        tunjangan,
+        potongan,
+        totalGaji,
+        statusPembayaran: data.statusPembayaran || 'Lunas / Ditransfer',
+        tglDibayar: data.tglDibayar || new Date().toISOString().split('T')[0],
+        catatan: data.catatan || 'Slip Gaji Bulanan',
+        nomorSlip: data.nomorSlip || ('SLIP-KUK-' + Date.now().toString().slice(-6))
+      };
+      list.unshift(updated);
+    }
+
+    localStorage.setItem(STORAGE_KEY_GAJI_HISTORI, JSON.stringify(list));
+
+    // Otomatis catat ke arsip surat
+    catatArsipSurat({
+      nomorSurat: updated.nomorSlip,
+      jenisSurat: 'Slip Gaji Bulanan',
+      idKaryawan: updated.idKaryawan,
+      namaLengkap: updated.namaLengkap,
+      toko: updated.toko,
+      tglCetak: updated.tglDibayar,
+      periodeKontrak: `Periode ${updated.periodeLabel}`,
+      gajiPokok: `Rp ${totalGaji.toLocaleString('id-ID')}`,
+      status: 'Terbit / Diserahkan',
+      catatan: updated.catatan
+    });
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save_gaji_histori', record: updated })
+    }).catch(() => {});
+
+    return updated;
+  }
+
+  function deleteGajiHistori(id) {
+    let list = getGajiHistoriList();
+    list = list.filter(g => g.id !== id);
+    localStorage.setItem(STORAGE_KEY_GAJI_HISTORI, JSON.stringify(list));
+    return list;
+  }
+
+  // --- API ARSIP SURAT & KORESPONDENSI ---
+  function getSuratHistoriList() {
+    initDB();
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY_SURAT_HISTORI)) || [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function getSuratHistoriById(id) {
+    const list = getSuratHistoriList();
+    return list.find(s => s.id === id) || null;
+  }
+
+  function catatArsipSurat(payload) {
+    let list = getSuratHistoriList();
+    const existingIdx = list.findIndex(s => s.nomorSurat === payload.nomorSurat && payload.nomorSurat);
+
+    const docItem = {
+      id: (existingIdx >= 0 ? list[existingIdx].id : 'DOC-' + Date.now().toString().slice(-6)),
+      nomorSurat: payload.nomorSurat || (`SURAT/KUK/${Date.now().toString().slice(-4)}`),
+      jenisSurat: payload.jenisSurat || 'Surat Perjanjian Kerja (PKWT)',
+      idKaryawan: payload.idKaryawan || '-',
+      namaLengkap: payload.namaLengkap || 'Karyawan',
+      toko: payload.toko || 'bangunan',
+      tglCetak: payload.tglCetak || new Date().toISOString().split('T')[0],
+      periodeKontrak: payload.periodeKontrak || '1 Tahun',
+      gajiPokok: payload.gajiPokok || '-',
+      status: payload.status || 'Diarsipkan & TTD Lengkap',
+      ttdCalon: payload.ttdCalon || 'Ada Signature',
+      ttdPimpinan: payload.ttdPimpinan || 'Pimpinan KUK',
+      catatan: payload.catatan || ''
+    };
+
+    if (existingIdx >= 0) {
+      list[existingIdx] = docItem;
+    } else {
+      list.unshift(docItem);
+    }
+
+    localStorage.setItem(STORAGE_KEY_SURAT_HISTORI, JSON.stringify(list));
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'save_arsip_surat', record: docItem })
+    }).catch(() => {});
+
+    return docItem;
+  }
+
+  function deleteSuratHistori(id) {
+    let list = getSuratHistoriList();
+    list = list.filter(s => s.id !== id);
+    localStorage.setItem(STORAGE_KEY_SURAT_HISTORI, JSON.stringify(list));
+    return list;
   }
 
   // --- API REKONTRAK KARYAWAN LAMA ---
@@ -938,6 +1265,14 @@ const KaryawanDB = (() => {
     deleteCalon,
     deleteRekontrak,
     clearAllRekontrak,
+    getGajiHistoriList,
+    getGajiHistoriById,
+    saveGajiHistori,
+    deleteGajiHistori,
+    getSuratHistoriList,
+    getSuratHistoriById,
+    catatArsipSurat,
+    deleteSuratHistori,
     syncFromCloud,
     tarikDataDriveForm,
     importFromSpreadsheetData,
