@@ -11,428 +11,46 @@ const KaryawanDB = (() => {
   const STORAGE_KEY_GAJI_HISTORI = 'kuk_db_gaji_v1';
   const STORAGE_KEY_SURAT_HISTORI = 'kuk_db_surat_v1';
 
-  // Data contoh rekapan gaji bulan-bulan sebelumnya
+  // Data contoh rekapan gaji bulan-bulan sebelumnya (12 Karyawan Resmi KUK)
   const DEFAULT_GAJI_HISTORI = [
-    {
-      id: 'PAY-2026-06-001',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      jabatan: 'Kepala Gudang Bangunan',
-      toko: 'bangunan',
-      bulanTahun: '2026-06',
-      periodeLabel: 'Juni 2026',
-      gajiPokok: 3800000,
-      tunjangan: 350000,
-      potongan: 50000,
-      totalGaji: 4100000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-06-28',
-      catatan: 'Gaji Pokok + Tunjangan Jabatan',
-      nomorSlip: 'SLIP-KUK-202606-001'
-    },
-    {
-      id: 'PAY-2026-06-002',
-      idKaryawan: 'KRY-002',
-      namaLengkap: 'Dewi Lestari',
-      jabatan: 'Staf Administrasi & Keuangan',
-      toko: 'bangunan',
-      bulanTahun: '2026-06',
-      periodeLabel: 'Juni 2026',
-      gajiPokok: 3500000,
-      tunjangan: 300000,
-      potongan: 0,
-      totalGaji: 3800000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-06-28',
-      catatan: 'Gaji Pokok + Tunjangan Kehadiran',
-      nomorSlip: 'SLIP-KUK-202606-002'
-    },
-    {
-      id: 'PAY-2026-06-003',
-      idKaryawan: 'KRY-003',
-      namaLengkap: 'Fajar Nugroho',
-      jabatan: 'Staf Pelayanan & Gudang Palen',
-      toko: 'palen',
-      bulanTahun: '2026-06',
-      periodeLabel: 'Juni 2026',
-      gajiPokok: 3200000,
-      tunjangan: 250000,
-      potongan: 25000,
-      totalGaji: 3425000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-06-28',
-      catatan: 'Gaji Pokok + Bonus Lembur',
-      nomorSlip: 'SLIP-KUK-202606-003'
-    },
-    {
-      id: 'PAY-2026-05-001',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      jabatan: 'Kepala Gudang Bangunan',
-      toko: 'bangunan',
-      bulanTahun: '2026-05',
-      periodeLabel: 'Mei 2026',
-      gajiPokok: 3800000,
-      tunjangan: 350000,
-      potongan: 0,
-      totalGaji: 4150000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-05-28',
-      catatan: 'Gaji Pokok Periode Mei 2026',
-      nomorSlip: 'SLIP-KUK-202605-001'
-    },
-    {
-      id: 'PAY-2026-05-002',
-      idKaryawan: 'KRY-002',
-      namaLengkap: 'Dewi Lestari',
-      jabatan: 'Staf Administrasi & Keuangan',
-      toko: 'bangunan',
-      bulanTahun: '2026-05',
-      periodeLabel: 'Mei 2026',
-      gajiPokok: 3500000,
-      tunjangan: 300000,
-      potongan: 50000,
-      totalGaji: 3750000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-05-28',
-      catatan: 'Gaji Pokok Periode Mei 2026',
-      nomorSlip: 'SLIP-KUK-202605-002'
-    },
-    {
-      id: 'PAY-2026-04-001',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      jabatan: 'Kepala Gudang Bangunan',
-      toko: 'bangunan',
-      bulanTahun: '2026-04',
-      periodeLabel: 'April 2026',
-      gajiPokok: 3800000,
-      tunjangan: 400000,
-      potongan: 0,
-      totalGaji: 4200000,
-      statusPembayaran: 'Lunas / Ditransfer',
-      tglDibayar: '2026-04-28',
-      catatan: 'Gaji Pokok + Bonus Hari Raya 2026',
-      nomorSlip: 'SLIP-KUK-202604-001'
-    }
+    { id: 'PAY-2026-06-001', idKaryawan: 'KRY-001', namaLengkap: 'Nurhadi', jabatan: 'Kepala Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3800000, tunjangan: 350000, potongan: 50000, totalGaji: 4100000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Tunjangan Jabatan', nomorSlip: 'SLIP-KUK-202606-001' },
+    { id: 'PAY-2026-06-002', idKaryawan: 'KRY-002', namaLengkap: 'Agus', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3300000, tunjangan: 250000, potongan: 0, totalGaji: 3550000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-002' },
+    { id: 'PAY-2026-06-003', idKaryawan: 'KRY-003', namaLengkap: 'Wiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3350000, tunjangan: 250000, potongan: 0, totalGaji: 3600000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-003' },
+    { id: 'PAY-2026-06-004', idKaryawan: 'KRY-004', namaLengkap: 'Ariyan', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3150000, tunjangan: 200000, potongan: 0, totalGaji: 3350000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-004' },
+    { id: 'PAY-2026-06-005', idKaryawan: 'KRY-005', namaLengkap: 'Irfan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3500000, tunjangan: 300000, potongan: 0, totalGaji: 3800000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Bonus Logistik', nomorSlip: 'SLIP-KUK-202606-005' },
+    { id: 'PAY-2026-06-006', idKaryawan: 'KRY-006', namaLengkap: 'Hiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3050000, tunjangan: 200000, potongan: 0, totalGaji: 3250000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-006' },
+    { id: 'PAY-2026-06-007', idKaryawan: 'KRY-007', namaLengkap: 'Alip', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3250000, tunjangan: 200000, potongan: 0, totalGaji: 3450000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-007' },
+    { id: 'PAY-2026-06-008', idKaryawan: 'KRY-008', namaLengkap: 'Kahfi', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3150000, tunjangan: 200000, potongan: 0, totalGaji: 3350000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-008' },
+    { id: 'PAY-2026-06-009', idKaryawan: 'KRY-009', namaLengkap: 'Irvan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3500000, tunjangan: 300000, potongan: 50000, totalGaji: 3750000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok + Bonus Logistik', nomorSlip: 'SLIP-KUK-202606-009' },
+    { id: 'PAY-2026-06-010', idKaryawan: 'KRY-010', namaLengkap: 'Lailurrohman', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3050000, tunjangan: 200000, potongan: 0, totalGaji: 3250000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-010' },
+    { id: 'PAY-2026-06-011', idKaryawan: 'KRY-011', namaLengkap: 'Miftah', jabatan: 'Staf Operasional Palen', toko: 'palen', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3200000, tunjangan: 200000, potongan: 0, totalGaji: 3400000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-011' },
+    { id: 'PAY-2026-06-012', idKaryawan: 'KRY-012', namaLengkap: 'Nukul', jabatan: 'Staf Gudang Palen', toko: 'palen', bulanTahun: '2026-06', periodeLabel: 'Juni 2026', gajiPokok: 3200000, tunjangan: 200000, potongan: 0, totalGaji: 3400000, statusPembayaran: 'Lunas / Ditransfer', tglDibayar: '2026-06-28', catatan: 'Gaji Pokok Periode Juni 2026', nomorSlip: 'SLIP-KUK-202606-012' }
   ];
 
   // Data contoh arsip surat & korespondensi yang pernah dicetak
   const DEFAULT_SURAT_HISTORI = [
-    {
-      id: 'DOC-2026-001',
-      nomorSurat: '012/PKWT-REKONTRAK/KUK/V/2026',
-      jenisSurat: 'Surat Rekontrak (PKWT)',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      toko: 'bangunan',
-      tglCetak: '2026-05-31',
-      periodeKontrak: '2026-06-01 s/d 2027-05-31',
-      gajiPokok: 'Rp 3.800.000',
-      status: 'Diarsipkan & TTD Lengkap',
-      ttdCalon: 'Hendra S.',
-      ttdPimpinan: 'Pimpinan KUK',
-      catatan: 'Perpanjangan kontrak tahunan KUK Bangunan'
-    },
-    {
-      id: 'DOC-2026-002',
-      nomorSurat: '013/PKWT-REKONTRAK/KUK/V/2026',
-      jenisSurat: 'Surat Rekontrak (PKWT)',
-      idKaryawan: 'KRY-002',
-      namaLengkap: 'Dewi Lestari',
-      toko: 'bangunan',
-      tglCetak: '2026-05-31',
-      periodeKontrak: '2026-06-01 s/d 2027-05-31',
-      gajiPokok: 'Rp 3.500.000',
-      status: 'Diarsipkan & TTD Lengkap',
-      ttdCalon: 'Dewi L.',
-      ttdPimpinan: 'Pimpinan KUK',
-      catatan: 'Perpanjangan kontrak tahunan KUK Bangunan'
-    },
-    {
-      id: 'DOC-2026-003',
-      nomorSurat: 'SLIP-KUK-202606-001',
-      jenisSurat: 'Slip Gaji Bulanan',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      toko: 'bangunan',
-      tglCetak: '2026-06-28',
-      periodeKontrak: 'Periode Juni 2026',
-      gajiPokok: 'Rp 4.100.000',
-      status: 'Terbit / Diserahkan',
-      ttdCalon: 'Hendra S.',
-      ttdPimpinan: 'Finance KUK',
-      catatan: 'Slip Gaji Juni 2026'
-    }
+    { id: 'DOC-2026-001', nomorSurat: '001/PKWT-REKONTRAK/KUK/V/2026', jenisSurat: 'Surat Rekontrak (PKWT)', idKaryawan: 'KRY-001', namaLengkap: 'Nurhadi', toko: 'bangunan', tglCetak: '2026-05-31', periodeKontrak: '2026-06-01 s/d 2027-05-31', gajiPokok: 'Rp 3.800.000', status: 'Diarsipkan & TTD Lengkap', ttdCalon: 'Nurhadi', ttdPimpinan: 'Pimpinan KUK', catatan: 'Rekontrak 1 Tahun' },
+    { id: 'DOC-2026-002', nomorSurat: '002/PKWT-REKONTRAK/KUK/V/2026', jenisSurat: 'Surat Rekontrak (PKWT)', idKaryawan: 'KRY-011', namaLengkap: 'Miftah', toko: 'palen', tglCetak: '2026-05-31', periodeKontrak: '2026-06-01 s/d 2027-05-31', gajiPokok: 'Rp 3.200.000', status: 'Diarsipkan & TTD Lengkap', ttdCalon: 'Miftah', ttdPimpinan: 'Pimpinan KUK', catatan: 'Rekontrak 1 Tahun KUK Palen' },
+    { id: 'DOC-2026-003', nomorSurat: 'SLIP-KUK-202606-001', jenisSurat: 'Slip Gaji Bulanan', idKaryawan: 'KRY-001', namaLengkap: 'Nurhadi', toko: 'bangunan', tglCetak: '2026-06-28', periodeKontrak: 'Periode Juni 2026', gajiPokok: 'Rp 4.100.000', status: 'Terbit / Diserahkan', ttdCalon: 'Nurhadi', ttdPimpinan: 'Finance KUK', catatan: 'Slip Gaji Juni 2026' }
   ];
 
   // Data contoh pelamar awal dari Drive Formulir Rekrutmen KUK
-  const DEFAULT_REKRUTMEN = [
-    {
-      id: 'CALON-101',
-      namaLengkap: 'Bagus Setyawan',
-      posisiDilamar: 'Staf Operasional & Gudang',
-      toko: 'bangunan',
-      noHp: '081234567811',
-      email: 'bagus.setyawan@gmail.com',
-      pendidikan: 'SMA / SMK Sederajat',
-      tanggalLamar: '2026-07-15',
-      sumberDrive: 'Formulir Rekrutmen Google Drive (ID: Resp-8821)',
-      linkCvDrive: 'https://drive.google.com/file/d/sample_cv_bagus/view',
-      statusPipeline: 'Seleksi Berkas / Wawancara',
-      evaluasiTraining: null,
-      kontrakTtd: null,
-      catatanHR: 'Berkas lengkap, pengalaman 2 tahun di bidang logistik.'
-    },
-    {
-      id: 'CALON-102',
-      namaLengkap: 'Siti Nurhaliza',
-      posisiDilamar: 'Kasir & Admin Palen',
-      toko: 'palen',
-      noHp: '081987654322',
-      email: 'siti.nurhaliza22@gmail.com',
-      pendidikan: 'D3 Akuntansi',
-      tanggalLamar: '2026-07-10',
-      sumberDrive: 'Formulir Rekrutmen Google Drive (ID: Resp-8815)',
-      linkCvDrive: 'https://drive.google.com/file/d/sample_cv_siti/view',
-      statusPipeline: 'Masa Training (3 Bulan)',
-      evaluasiTraining: {
-        nilaiDisiplin: 88,
-        nilaiKeterampilan: 90,
-        nilaiSikap: 92,
-        catatan: 'sangat cekatan dalam mengoperasikan sistem kasir dan ramah kepada pelanggan.'
-      },
-      kontrakTtd: null,
-      catatanHR: 'Sedang menjalani training bulan ke-2 di KUK Palen.'
-    },
-    {
-      id: 'CALON-103',
-      namaLengkap: 'Rizky Ramadhan',
-      posisiDilamar: 'Supir Armada Logistik (L300/Engkel)',
-      toko: 'bangunan',
-      noHp: '085678912344',
-      email: 'rizky.rama@gmail.com',
-      pendidikan: 'SMA / SMK Sederajat',
-      tanggalLamar: '2026-07-02',
-      sumberDrive: 'Formulir Rekrutmen Google Drive (ID: Resp-8790)',
-      linkCvDrive: 'https://drive.google.com/file/d/sample_cv_rizky/view',
-      statusPipeline: 'Diangkat Karyawan (Menunggu Kontrak)',
-      evaluasiTraining: {
-        nilaiDisiplin: 95,
-        nilaiKeterampilan: 90,
-        nilaiSikap: 90,
-        catatan: 'Rapi dalam merawat armada dan pengiriman tepat waktu.'
-      },
-      kontrakTtd: null,
-      catatanHR: 'Lolos masa training dengan memuaskan. Siap penandatanganan PKWT.'
-    }
-  ];
+  const DEFAULT_REKRUTMEN = [];
 
-  // Data contoh karyawan lama untuk pemantauan & perpanjangan kontrak (Rekontrak setahun, terakhir 31 Mei 2026)
-  // Data 12 karyawan aktif untuk pemantauan & perpanjangan kontrak (Rekontrak diadakan 31 Mei 2026, berikutnya 31 Mei 2027)
+  // Data 12 karyawan aktif resmi KUK untuk penggajian & cuti
   const DEFAULT_REKONTRAK = [
-    {
-      id: 'KRY-KONTRAK-01',
-      idKaryawan: 'KRY-001',
-      namaLengkap: 'Hendra Saputra',
-      jabatan: 'Kepala Gudang Bangunan',
-      toko: 'bangunan',
-      noHp: '081345678901',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31', // Rekontrak 31 Mei 2026 -> Periode Aktif hingga 31 Mei 2027
-      gajiPokok: 'Rp 3.800.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Kinerja konsisten baik, rekomendasi perpanjangan rekontrak 1 tahun.'
-    },
-    {
-      id: 'KRY-KONTRAK-02',
-      idKaryawan: 'KRY-002',
-      namaLengkap: 'Dewi Lestari',
-      jabatan: 'Staf Administrasi & Keuangan',
-      toko: 'bangunan',
-      noHp: '081298765432',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.500.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Aktif mengelola administrasi pembukuan harian.'
-    },
-    {
-      id: 'KRY-KONTRAK-03',
-      idKaryawan: 'KRY-003',
-      namaLengkap: 'Fajar Nugroho',
-      jabatan: 'Staf Pelayanan & Gudang Palen',
-      toko: 'palen',
-      noHp: '085712345678',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.200.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Rajin dan dapat diandalkan saat jam sibuk toko.'
-    },
-    {
-      id: 'KRY-KONTRAK-04',
-      idKaryawan: 'KRY-004',
-      namaLengkap: 'Miftah',
-      jabatan: 'Staf Operasional Palen',
-      toko: 'palen',
-      noHp: '085711223344',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.200.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Kinerja teratur dalam pelayanan dan penataan stok.'
-    },
-    {
-      id: 'KRY-KONTRAK-05',
-      idKaryawan: 'KRY-005',
-      namaLengkap: 'Nukul',
-      jabatan: 'Staf Gudang Palen',
-      toko: 'palen',
-      noHp: '085755667788',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.200.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Penanganan barang di gudang sangat rapi.'
-    },
-    {
-      id: 'KRY-KONTRAK-06',
-      idKaryawan: 'KRY-006',
-      namaLengkap: 'Raju',
-      jabatan: 'Staf Pelayanan Palen',
-      toko: 'palen',
-      noHp: '085799887766',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.200.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Cepat dalam merespons kebutuhan customer.'
-    },
-    {
-      id: 'KRY-KONTRAK-07',
-      idKaryawan: 'KRY-007',
-      namaLengkap: 'Agheea',
-      jabatan: 'Kasir Palen',
-      toko: 'palen',
-      noHp: '085733445566',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.300.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Transaksi kasir teliti dan minim selisih.'
-    },
-    {
-      id: 'KRY-KONTRAK-08',
-      idKaryawan: 'KRY-008',
-      namaLengkap: 'Basith',
-      jabatan: 'Staf Gudang Bangunan',
-      toko: 'bangunan',
-      noHp: '081377889900',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.400.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Bongkar muat bahan bangunan terkoordinasi dengan baik.'
-    },
-    {
-      id: 'KRY-KONTRAK-09',
-      idKaryawan: 'KRY-009',
-      namaLengkap: 'Anshory',
-      jabatan: 'Supir Armada Logistik',
-      toko: 'bangunan',
-      noHp: '081366554433',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.600.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Pengiriman barang bangunan tepat waktu dan aman.'
-    },
-    {
-      id: 'KRY-KONTRAK-10',
-      idKaryawan: 'KRY-010',
-      namaLengkap: 'Lintang',
-      jabatan: 'Staf Administrasi',
-      toko: 'bangunan',
-      noHp: '081288990011',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.400.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' },
-        { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
-      ],
-      catatanPerforma: 'Pengarsipan dokumen dan surat menyurat rapi.'
-    },
-    {
-      id: 'KRY-KONTRAK-11',
-      idKaryawan: 'KRY-011',
-      namaLengkap: 'Bagus Setyawan',
-      jabatan: 'Staf Operasional & Gudang',
-      toko: 'bangunan',
-      noHp: '081234567811',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.300.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }
-      ],
-      catatanPerforma: 'Anggota staf aktif hasil pengangkatan rekrutmen.'
-    },
-    {
-      id: 'KRY-KONTRAK-12',
-      idKaryawan: 'KRY-012',
-      namaLengkap: 'Rizky Ramadhan',
-      jabatan: 'Supir Armada Logistik',
-      toko: 'bangunan',
-      noHp: '085678912344',
-      tglMulaiKontrak: '2026-06-01',
-      tglSelesaiKontrak: '2027-05-31',
-      gajiPokok: 'Rp 3.600.000',
-      statusKontrak: 'Kontrak Aktif',
-      riwayatKontrak: [
-        { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }
-      ],
-      catatanPerforma: 'Pengemudi armada logistik handal dan cekatan.'
-    }
+    { id: 'KRY-KONTRAK-01', idKaryawan: 'KRY-001', namaLengkap: 'Nurhadi', jabatan: 'Kepala Gudang Bangunan', toko: 'bangunan', noHp: '081345678901', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.800.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Kepala gudang KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-02', idKaryawan: 'KRY-002', namaLengkap: 'Agus', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', noHp: '081298765432', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.300.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Staf operasional KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-03', idKaryawan: 'KRY-003', namaLengkap: 'Wiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', noHp: '085712345678', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.350.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Penataan stok bahan bangunan rapi.' },
+    { id: 'KRY-KONTRAK-04', idKaryawan: 'KRY-004', namaLengkap: 'Ariyan', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', noHp: '085711223344', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.150.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Pelayanan pelanggan toko bangunan.' },
+    { id: 'KRY-KONTRAK-05', idKaryawan: 'KRY-005', namaLengkap: 'Irfan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', noHp: '085755667788', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.500.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Supir logistik KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-06', idKaryawan: 'KRY-006', namaLengkap: 'Hiba', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', noHp: '085799887766', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.050.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Pengelolaan gudang KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-07', idKaryawan: 'KRY-007', namaLengkap: 'Alip', jabatan: 'Staf Operasional Bangunan', toko: 'bangunan', noHp: '085733445566', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.250.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Operasional KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-08', idKaryawan: 'KRY-008', namaLengkap: 'Kahfi', jabatan: 'Staf Pelayanan Bangunan', toko: 'bangunan', noHp: '081377889900', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.150.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Pelayanan KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-09', idKaryawan: 'KRY-009', namaLengkap: 'Irvan', jabatan: 'Supir Armada Logistik', toko: 'bangunan', noHp: '081366554433', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.500.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Supir armada KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-10', idKaryawan: 'KRY-010', namaLengkap: 'Lailurrohman', jabatan: 'Staf Gudang Bangunan', toko: 'bangunan', noHp: '081288990011', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.050.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Staf gudang KUK Bangunan.' },
+    { id: 'KRY-KONTRAK-11', idKaryawan: 'KRY-011', namaLengkap: 'Miftah', jabatan: 'Staf Operasional Palen', toko: 'palen', noHp: '081234567811', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.200.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Operasional KUK Palen.' },
+    { id: 'KRY-KONTRAK-12', idKaryawan: 'KRY-012', namaLengkap: 'Nukul', jabatan: 'Staf Gudang Palen', toko: 'palen', noHp: '085678912344', tglMulaiKontrak: '2026-06-01', tglSelesaiKontrak: '2027-05-31', gajiPokok: 'Rp 3.200.000', statusKontrak: 'Kontrak Aktif', riwayatKontrak: [{ periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }], catatanPerforma: 'Pengelolaan gudang KUK Palen.' }
   ];
 
   let dbInitialized = false;
@@ -445,13 +63,15 @@ const KaryawanDB = (() => {
       localStorage.setItem(STORAGE_KEY_REKRUTMEN, JSON.stringify(DEFAULT_REKRUTMEN));
     }
     const stored = localStorage.getItem(STORAGE_KEY_REKONTRAK);
-    if (!stored) {
+    if (!stored || stored.includes('Hendra') || stored.includes('Dewi') || stored.includes('Fajar') || stored.includes('Bagus Setyawan')) {
       localStorage.setItem(STORAGE_KEY_REKONTRAK, JSON.stringify(DEFAULT_REKONTRAK));
     }
-    if (!localStorage.getItem(STORAGE_KEY_GAJI_HISTORI)) {
+    const storedGaji = localStorage.getItem(STORAGE_KEY_GAJI_HISTORI);
+    if (!storedGaji || storedGaji.includes('Hendra') || storedGaji.includes('Dewi') || storedGaji.includes('Fajar') || storedGaji.includes('Bagus Setyawan')) {
       localStorage.setItem(STORAGE_KEY_GAJI_HISTORI, JSON.stringify(DEFAULT_GAJI_HISTORI));
     }
-    if (!localStorage.getItem(STORAGE_KEY_SURAT_HISTORI)) {
+    const storedSurat = localStorage.getItem(STORAGE_KEY_SURAT_HISTORI);
+    if (!storedSurat || storedSurat.includes('Hendra') || storedSurat.includes('Dewi') || storedSurat.includes('Fajar') || storedSurat.includes('Bagus Setyawan')) {
       localStorage.setItem(STORAGE_KEY_SURAT_HISTORI, JSON.stringify(DEFAULT_SURAT_HISTORI));
     }
     updateStatusRekontrakOtomatis();
@@ -781,9 +401,23 @@ const KaryawanDB = (() => {
   function getGajiHistoriList() {
     initDB();
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY_GAJI_HISTORI)) || [];
+      let list = JSON.parse(localStorage.getItem(STORAGE_KEY_GAJI_HISTORI)) || DEFAULT_GAJI_HISTORI;
+      let changed = false;
+
+      DEFAULT_GAJI_HISTORI.forEach(def => {
+        if (!list.some(g => g.id === def.id || (String(g.namaLengkap || '').toLowerCase().trim() === def.namaLengkap.toLowerCase().trim() && g.bulanTahun === def.bulanTahun))) {
+          list.push({ ...def });
+          changed = true;
+        }
+      });
+
+      if (changed) {
+        localStorage.setItem(STORAGE_KEY_GAJI_HISTORI, JSON.stringify(list));
+      }
+
+      return list;
     } catch(e) {
-      return [];
+      return DEFAULT_GAJI_HISTORI;
     }
   }
 
