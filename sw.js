@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kuk-hr-cache-v25';
+const CACHE_NAME = 'kuk-hr-cache-v26';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -16,6 +16,9 @@ const STATIC_ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './apple-touch-icon.png',
+  './favicon-32x32.png',
+  './favicon-16x16.png',
   './kop_palen.png',
   './kop_bangunan.png'
 ];
