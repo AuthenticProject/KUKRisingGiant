@@ -99,6 +99,7 @@
       letter-spacing: -0.5px;
       background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     .top-nav p {
@@ -1237,8 +1238,8 @@
 
     function openModalRekontrakBaru() {
       document.getElementById('formRekontrakInput').reset();
-      document.getElementById('inKonMulai').value = '2025-06-01';
-      document.getElementById('inKonSelesai').value = '2026-05-31'; // Default karyawan lama berakhir 31 Mei 2026 (1 Tahun)
+      document.getElementById('inKonMulai').value = '2026-06-01';
+      document.getElementById('inKonSelesai').value = '2027-05-31'; // Default rekontrak selanjutnya 31 Mei 2027
       openModal('modalRekontrakInput');
     }
 

@@ -304,28 +304,31 @@ const KaryawanDB = (() => {
 
       let changed = false;
 
-      // Auto Migrasi: jika data di localStorage masih 10 orang / tanggal lama 2026-05-31, perbarui ke 12 karyawan aktif & 2027-05-31
       DEFAULT_REKONTRAK.forEach(def => {
         const idx = list.findIndex(r => String(r.namaLengkap || '').toLowerCase().trim() === def.namaLengkap.toLowerCase().trim());
         if (idx === -1) {
           list.push({ ...def });
           changed = true;
-        } else {
-          // Update tanggal jika masih memakai periode sebelum Mei 2026
-          if (!list[idx].tglSelesaiKontrak || list[idx].tglSelesaiKontrak === '2026-05-31' || (typeof list[idx].tglSelesaiKontrak === 'string' && list[idx].tglSelesaiKontrak.startsWith('2025-'))) {
-            list[idx].tglMulaiKontrak = '2026-06-01';
-            list[idx].tglSelesaiKontrak = '2027-05-31';
-            list[idx].statusKontrak = 'Kontrak Aktif';
-            list[idx].riwayatKontrak = list[idx].riwayatKontrak || [];
-            if (!list[idx].riwayatKontrak.some(rw => rw.periode && rw.periode.includes('2026-05-31'))) {
-              list[idx].riwayatKontrak.unshift({
-                periode: '2025-06-01 s/d 2026-05-31',
-                durasi: '1 Tahun',
-                status: 'Selesai (Rekontrak 31 Mei 2026)'
-              });
-            }
-            changed = true;
+        }
+      });
+
+      // Auto Migrasi: pastikan semua karyawan (baik default maupun dari master dbKaryawan) yang masih memakai tanggal lama (2026-05-31 / 2025-xx) diperbarui ke rekontrak aktif 2026-06-01 s/d 2027-05-31
+      list.forEach(item => {
+        if (!item.tglSelesaiKontrak || item.tglSelesaiKontrak === '2026-05-31' || (typeof item.tglSelesaiKontrak === 'string' && item.tglSelesaiKontrak.startsWith('2025-'))) {
+          item.tglMulaiKontrak = '2026-06-01';
+          item.tglSelesaiKontrak = '2027-05-31';
+          if (item.statusKontrak !== 'Tidak Aktif (Bukan Karyawan)' && item.statusKontrak !== 'Tidak Aktif' && item.statusKontrak !== 'Karyawan Tetap') {
+            item.statusKontrak = 'Kontrak Aktif';
           }
+          item.riwayatKontrak = item.riwayatKontrak || [];
+          if (!item.riwayatKontrak.some(rw => rw.periode && rw.periode.includes('2026-05-31'))) {
+            item.riwayatKontrak.unshift({
+              periode: '2025-06-01 s/d 2026-05-31',
+              durasi: '1 Tahun',
+              status: 'Selesai (Rekontrak 31 Mei 2026)'
+            });
+          }
+          changed = true;
         }
       });
 
@@ -622,12 +625,12 @@ const KaryawanDB = (() => {
             jabatan: k.bagian || 'Staff KUK',
             toko: (String(k.bagian).toLowerCase().includes('palen') || nama.toLowerCase().includes('miftah') || nama.toLowerCase().includes('nukul')) ? 'palen' : 'bangunan',
             noHp: k.noHp || '-',
-            tglMulaiKontrak: '2025-06-01',
-            tglSelesaiKontrak: '2026-05-31', // Tanggal terakhir rekontrak adalah 31 Mei 2026
+            tglMulaiKontrak: '2026-06-01',
+            tglSelesaiKontrak: '2027-05-31', // Rekontrak diadakan 31 Mei 2026 -> Periode Aktif hingga 31 Mei 2027
             gajiPokok: k.gajiPokok || 'Rp 3.500.000',
             statusKontrak: 'Kontrak Aktif',
             riwayatKontrak: [
-              { periode: '2024-06-01 s/d 2025-05-31', durasi: '1 Tahun', status: 'Selesai' }
+              { periode: '2025-06-01 s/d 2026-05-31', durasi: '1 Tahun', status: 'Selesai (Rekontrak 31 Mei 2026)' }
             ],
             catatanPerforma: 'Master Karyawan KUK'
           };
@@ -641,14 +644,23 @@ const KaryawanDB = (() => {
         }
       });
 
-      // Pastikan semua record di rList yang belum diset khusus (masih default/lama) memakai 2026-05-31
+      // Pastikan semua record di rList yang masih memakai 2026-05-31 diperbarui ke 2027-05-31
       rList.forEach(r => {
         if (!r.tglSelesaiKontrak || r.tglSelesaiKontrak === '2026-05-31' || (typeof r.tglSelesaiKontrak === 'string' && r.tglSelesaiKontrak.startsWith('2025-'))) {
-          if (r.tglSelesaiKontrak !== '2026-05-31') {
-            r.tglSelesaiKontrak = '2026-05-31';
-            r.tglMulaiKontrak = '2025-06-01';
-            changed = true;
+          r.tglMulaiKontrak = '2026-06-01';
+          r.tglSelesaiKontrak = '2027-05-31';
+          if (r.statusKontrak !== 'Tidak Aktif (Bukan Karyawan)' && r.statusKontrak !== 'Tidak Aktif' && r.statusKontrak !== 'Karyawan Tetap') {
+            r.statusKontrak = 'Kontrak Aktif';
           }
+          r.riwayatKontrak = r.riwayatKontrak || [];
+          if (!r.riwayatKontrak.some(rw => rw.periode && rw.periode.includes('2026-05-31'))) {
+            r.riwayatKontrak.unshift({
+              periode: '2025-06-01 s/d 2026-05-31',
+              durasi: '1 Tahun',
+              status: 'Selesai (Rekontrak 31 Mei 2026)'
+            });
+          }
+          changed = true;
         }
       });
 
@@ -713,8 +725,8 @@ const KaryawanDB = (() => {
         jabatan: data.jabatan.trim(),
         toko: data.toko || 'bangunan',
         noHp: data.noHp || '-',
-        tglMulaiKontrak: data.tglMulaiKontrak || '2025-06-01',
-        tglSelesaiKontrak: data.tglSelesaiKontrak || '2026-05-31', // Default karyawan lama berakhir 31 Mei 2026
+        tglMulaiKontrak: data.tglMulaiKontrak || '2026-06-01',
+        tglSelesaiKontrak: data.tglSelesaiKontrak || '2027-05-31', // Default rekontrak berakhir 31 Mei 2027
         gajiPokok: data.gajiPokok || 'Rp 3.500.000',
         statusKontrak: 'Kontrak Aktif',
         riwayatKontrak: [],
